@@ -22,6 +22,7 @@ endif()
 
 set(destinationBundleDirectory "${DESTINATION_VST3_ROOT}/${bundleName}")
 set(sourceResourceIrDirectory "${sourceContentsDirectory}/Resources/Spring IRs")
+set(sourceLegacyIrDirectory "${sourceArchDirectory}/Spring IRs")
 set(sourcePlaybackResourceDirectory "${sourceContentsDirectory}/Resources/Playback Audio")
 
 file(MAKE_DIRECTORY "${DESTINATION_VST3_ROOT}")
@@ -32,6 +33,10 @@ endif()
 
 if (EXISTS "${sourceResourceIrDirectory}")
     file(REMOVE_RECURSE "${sourceResourceIrDirectory}")
+endif()
+
+if (EXISTS "${sourceLegacyIrDirectory}")
+    file(REMOVE_RECURSE "${sourceLegacyIrDirectory}")
 endif()
 
 if (EXISTS "${sourcePlaybackResourceDirectory}")

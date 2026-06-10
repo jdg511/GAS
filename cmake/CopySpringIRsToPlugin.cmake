@@ -15,10 +15,14 @@ get_filename_component(binaryDirectory "${sourceBinary}" DIRECTORY)
 get_filename_component(binaryParentDirectory "${binaryDirectory}" DIRECTORY)
 get_filename_component(binaryParentName "${binaryParentDirectory}" NAME)
 
-set(destinationDirectories "${binaryDirectory}/Spring IRs")
-
 if (binaryParentName STREQUAL "Contents")
-    list(APPEND destinationDirectories "${binaryParentDirectory}/Resources/Spring IRs")
+    if (EXISTS "${binaryDirectory}/Spring IRs")
+        file(REMOVE_RECURSE "${binaryDirectory}/Spring IRs")
+    endif()
+
+    set(destinationDirectories "${binaryParentDirectory}/Resources/Spring IRs")
+else()
+    set(destinationDirectories "${binaryDirectory}/Spring IRs")
 endif()
 
 list(REMOVE_DUPLICATES destinationDirectories)
