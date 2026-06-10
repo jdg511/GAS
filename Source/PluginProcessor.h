@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 #include <JuceHeader.h>
 
 #include "DSP/ModularFxChain.h"
@@ -118,6 +120,7 @@ private:
     bool loadSelectedPlaybackSource();
     int getPlaybackSourceIndexForPath (const juce::String& sourcePath) const;
     bool isMonoSourceWithoutStereoConversion() const;
+    bool detectMonoExternalInput (int numSamples) const;
     void updatePredelayModulation (int numSamples);
     void applyWetPredelay (int numSamples);
     void sanitizeBuffer (juce::AudioBuffer<float>& buffer, int numSamples) const;
@@ -171,6 +174,7 @@ private:
     juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> wetPredelayMillisecondsSmoothed;
     juce::Random predelayRandom;
     Ir2RoutingMode lastIr2RoutingMode = Ir2RoutingMode::off;
+    std::atomic<bool> lastMonoSourceWithoutStereoConversion { false };
     bool playbackActive = false;
     bool isPrepared = false;
 

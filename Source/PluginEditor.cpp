@@ -247,7 +247,7 @@ struct ArtDirectedLookAndFeel final : juce::LookAndFeel_V4
     void drawButtonText (juce::Graphics& g, juce::TextButton& button, bool, bool) override
     {
         const auto style = getThemeStyle (theme);
-        auto font = makeFont (13.5f, juce::Font::bold, style.bodyTypeface);
+        auto font = makeFont (12.5f, juce::Font::bold, style.bodyTypeface);
         g.setColour (style.textPrimary);
         g.setFont (font);
         g.drawFittedText (button.getButtonText(), button.getLocalBounds(), juce::Justification::centred, 1);
@@ -281,7 +281,8 @@ struct ArtDirectedLookAndFeel final : juce::LookAndFeel_V4
             return;
         }
 
-        auto bounds = button.getLocalBounds().toFloat().reduced (0.5f);
+        auto area = button.getLocalBounds();
+        auto switchBounds = area.removeFromLeft (38).toFloat().reduced (0.5f, 5.0f);
         auto fill = button.getToggleState() ? style.buttonOn : style.buttonOff;
 
         if (shouldDrawButtonAsDown)
@@ -289,29 +290,29 @@ struct ArtDirectedLookAndFeel final : juce::LookAndFeel_V4
         else if (shouldDrawButtonAsHighlighted)
             fill = fill.brighter (0.12f);
 
-        juce::ColourGradient gradient (fill.brighter (0.26f), bounds.getCentreX(), bounds.getY(),
-                                       fill.darker (0.4f), bounds.getCentreX(), bounds.getBottom(), false);
+        juce::ColourGradient gradient (fill.brighter (0.26f), switchBounds.getCentreX(), switchBounds.getY(),
+                                       fill.darker (0.4f), switchBounds.getCentreX(), switchBounds.getBottom(), false);
         g.setGradientFill (gradient);
-        g.fillRoundedRectangle (bounds, bounds.getHeight() * 0.5f);
+        g.fillRoundedRectangle (switchBounds, switchBounds.getHeight() * 0.5f);
 
         g.setColour (style.buttonOutline);
-        g.drawRoundedRectangle (bounds, bounds.getHeight() * 0.5f, 1.6f);
+        g.drawRoundedRectangle (switchBounds, switchBounds.getHeight() * 0.5f, 1.6f);
 
-        const auto knobDiameter = bounds.getHeight() - 6.0f;
+        const auto knobDiameter = switchBounds.getHeight() - 6.0f;
         auto knobBounds = juce::Rectangle<float> (knobDiameter, knobDiameter).withCentre (
             button.getToggleState()
-                ? juce::Point<float> (bounds.getRight() - knobDiameter * 0.65f, bounds.getCentreY())
-                : juce::Point<float> (bounds.getX() + knobDiameter * 0.65f, bounds.getCentreY()));
+                ? juce::Point<float> (switchBounds.getRight() - knobDiameter * 0.65f, switchBounds.getCentreY())
+                : juce::Point<float> (switchBounds.getX() + knobDiameter * 0.65f, switchBounds.getCentreY()));
 
         juce::ColourGradient knobFill (style.textPrimary, knobBounds.getCentreX(), knobBounds.getY(),
                                        style.knobEnd, knobBounds.getCentreX(), knobBounds.getBottom(), false);
         g.setGradientFill (knobFill);
         g.fillEllipse (knobBounds);
 
-        auto font = makeFont (11.0f, juce::Font::bold, style.bodyTypeface);
+        auto font = makeFont (12.0f, juce::Font::bold, style.bodyTypeface);
         g.setColour (style.textPrimary);
         g.setFont (font);
-        g.drawFittedText (button.getButtonText(), button.getLocalBounds(), juce::Justification::centred, 1);
+        g.drawFittedText (button.getButtonText(), area.withTrimmedLeft (4), juce::Justification::centredLeft, 1);
     }
 
     void drawComboBox (juce::Graphics& g, int width, int height, bool, int, int, int, int, juce::ComboBox&) override
@@ -414,9 +415,9 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     addAndMakeVisible (feedbackPhaseNormalButton);
     addAndMakeVisible (feedbackPhaseInvertButton);
 
-    solarThemeButton.onClick = [this] { stopTimer(); applyTheme (Theme::solar); };
-    petalThemeButton.onClick = [this] { stopTimer(); applyTheme (Theme::petal); };
-    cosmicThemeButton.onClick = [this] { stopTimer(); applyTheme (Theme::cosmic); };
+    solarThemeButton.onClick = [this] { introThemeStep = 3; applyTheme (Theme::solar); };
+    petalThemeButton.onClick = [this] { introThemeStep = 3; applyTheme (Theme::petal); };
+    cosmicThemeButton.onClick = [this] { introThemeStep = 3; applyTheme (Theme::cosmic); };
 
     addAndMakeVisible (solarThemeButton);
     addAndMakeVisible (petalThemeButton);
@@ -541,7 +542,7 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     showUnavailableTankControlsButton.setButtonText ("Will not be available in real life");
     showUnavailableTankControlsButton.onClick = [this]
     {
-        targetEditorHeight = showUnavailableTankControlsButton.getToggleState() ? 700 : 560;
+        targetEditorHeight = showUnavailableTankControlsButton.getToggleState() ? 760 : 620;
         refreshOptionControls();
         startTimerHz (30);
     };
@@ -549,9 +550,9 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     showUnavailableTankControlsAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (
         audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::showUnavailableTankControlsParameterID, showUnavailableTankControlsButton);
 
-    animatedEditorHeight = audioProcessor.shouldShowUnavailableTankControls() ? 700 : 560;
+    animatedEditorHeight = audioProcessor.shouldShowUnavailableTankControls() ? 760 : 620;
     targetEditorHeight = animatedEditorHeight;
-    setSize (780, animatedEditorHeight);
+    setSize (1180, animatedEditorHeight);
     refreshTankLabels();
     refreshPlaybackLabel();
     refreshOptionControls();
@@ -616,7 +617,7 @@ void TheGreatAmericanSpringAudioProcessorEditor::paint (juce::Graphics& graphics
 
 void TheGreatAmericanSpringAudioProcessorEditor::resized()
 {
-    auto area = getLocalBounds().reduced (14);
+    auto area = getLocalBounds().reduced (18);
     const auto centreRow = [] (juce::Rectangle<int> rowArea, int contentWidth)
     {
         return rowArea.withWidth (juce::jmin (contentWidth, rowArea.getWidth()))
@@ -629,38 +630,38 @@ void TheGreatAmericanSpringAudioProcessorEditor::resized()
     subtitleLabel.setBounds ({});
     area.removeFromTop (8);
 
-    auto topRow = area.removeFromTop (30);
-    auto leftTop = topRow.removeFromLeft (360);
-    auto rightTop = topRow.removeFromRight (390);
+    auto topRow = centreRow (area.removeFromTop (32), 1080);
+    auto leftTop = topRow.removeFromLeft (500);
+    auto rightTop = topRow;
 
     modeLabel.setBounds (leftTop.removeFromLeft (52));
-    modeComboBox.setBounds (leftTop.removeFromLeft (126));
-    leftTop.removeFromLeft (12);
-    ir2RoutingLabel.setBounds (leftTop.removeFromLeft (116));
+    modeComboBox.setBounds (leftTop.removeFromLeft (150));
+    leftTop.removeFromLeft (18);
+    ir2RoutingLabel.setBounds (leftTop.removeFromLeft (130));
     ir2RoutingComboBox.setBounds (leftTop.removeFromLeft (150));
 
     feedbackPhaseLabel.setBounds (rightTop.removeFromLeft (104));
-    feedbackPhaseNormalButton.setBounds (rightTop.removeFromLeft (72));
-    feedbackPhaseInvertButton.setBounds (rightTop.removeFromLeft (66));
-    rightTop.removeFromLeft (10);
+    feedbackPhaseNormalButton.setBounds (rightTop.removeFromLeft (92));
+    feedbackPhaseInvertButton.setBounds (rightTop.removeFromLeft (82));
+    rightTop.removeFromLeft (14);
     themeLabel.setBounds (rightTop.removeFromLeft (28));
-    solarThemeButton.setBounds (rightTop.removeFromLeft (66));
-    petalThemeButton.setBounds (rightTop.removeFromLeft (66));
-    cosmicThemeButton.setBounds (rightTop.removeFromLeft (78));
+    solarThemeButton.setBounds (rightTop.removeFromLeft (68));
+    petalThemeButton.setBounds (rightTop.removeFromLeft (68));
+    cosmicThemeButton.setBounds (rightTop.removeFromLeft (84));
 
     area.removeFromTop (8);
 
-    auto optionsRow = centreRow (area.removeFromTop (28), 650);
-    monoSourceToStereoButton.setBounds (optionsRow.removeFromLeft (210));
-    optionsRow.removeFromLeft (16);
-    showUnavailableTankControlsButton.setBounds (optionsRow.removeFromLeft (260));
+    auto optionsRow = centreRow (area.removeFromTop (30), 930);
+    monoSourceToStereoButton.setBounds (optionsRow.removeFromLeft (240));
+    optionsRow.removeFromLeft (22);
+    showUnavailableTankControlsButton.setBounds (optionsRow.removeFromLeft (350));
 
     area.removeFromTop (8);
 
     auto knobArea = area.removeFromTop (214);
-    const int knobWidth = 72;
-    const int knobGap = 16;
-    const int knobHeight = 84;
+    const int knobWidth = 104;
+    const int knobGap = 22;
+    const int knobHeight = 92;
     const int firstKnobRowWidth = (knobWidth * 5) + (knobGap * 4);
     const int secondKnobRowWidth = (knobWidth * 4) + (knobGap * 3);
 
@@ -694,17 +695,17 @@ void TheGreatAmericanSpringAudioProcessorEditor::resized()
     area.removeFromTop (10);
 
     const auto showTankControls = showUnavailableTankControlsButton.getToggleState();
-    auto TankArea = centreRow (area.removeFromTop (showTankControls ? 154 : 0), 650);
-    auto topTankRow = TankArea.removeFromTop (72);
+    auto TankArea = centreRow (area.removeFromTop (showTankControls ? 166 : 0), 980);
+    auto topTankRow = TankArea.removeFromTop (78);
     TankArea.removeFromTop (10);
     auto bottomTankRow = TankArea;
 
-    auto leftArea = topTankRow.removeFromLeft ((topTankRow.getWidth() - 12) / 2);
-    topTankRow.removeFromLeft (12);
+    auto leftArea = topTankRow.removeFromLeft ((topTankRow.getWidth() - 18) / 2);
+    topTankRow.removeFromLeft (18);
     auto rightArea = topTankRow;
 
-    auto left2Area = bottomTankRow.removeFromLeft ((bottomTankRow.getWidth() - 12) / 2);
-    bottomTankRow.removeFromLeft (12);
+    auto left2Area = bottomTankRow.removeFromLeft ((bottomTankRow.getWidth() - 18) / 2);
+    bottomTankRow.removeFromLeft (18);
     auto right2Area = bottomTankRow;
 
     const auto layoutTankGroup = [] (juce::Rectangle<int> groupArea,
@@ -728,12 +729,12 @@ void TheGreatAmericanSpringAudioProcessorEditor::resized()
     playbackLabel.setBounds (area.removeFromTop (20));
     area.removeFromTop (4);
 
-    auto playbackControls = centreRow (area.removeFromTop (28), 650);
-    playbackSourceComboBox.setBounds (playbackControls.removeFromLeft (470));
-    playbackControls.removeFromLeft (8);
-    loadPlaybackButton.setBounds (playbackControls.removeFromLeft (100));
-    playbackControls.removeFromLeft (8);
-    playbackToggleButton.setBounds (playbackControls.removeFromLeft (64));
+    auto playbackControls = centreRow (area.removeFromTop (30), 980);
+    playbackSourceComboBox.setBounds (playbackControls.removeFromLeft (720));
+    playbackControls.removeFromLeft (12);
+    loadPlaybackButton.setBounds (playbackControls.removeFromLeft (120));
+    playbackControls.removeFromLeft (12);
+    playbackToggleButton.setBounds (playbackControls.removeFromLeft (80));
 }
 
 void TheGreatAmericanSpringAudioProcessorEditor::configureRotarySlider (juce::Slider& slider,
@@ -746,7 +747,7 @@ void TheGreatAmericanSpringAudioProcessorEditor::configureRotarySlider (juce::Sl
     addAndMakeVisible (label);
 
     slider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
-    slider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 64, 18);
+    slider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 84, 20);
     slider.setTextValueSuffix (suffix);
     addAndMakeVisible (slider);
 }
@@ -873,7 +874,12 @@ void TheGreatAmericanSpringAudioProcessorEditor::refreshOptionControls()
     crossfadeAmountSlider.setAlpha (crossfadeAvailable ? 1.0f : 0.45f);
 
     if (! crossfadeAvailable)
+    {
+        if (std::abs (crossfadeAmountSlider.getValue()) > 0.0001)
+            audioProcessor.setParameterPlainValue (TheGreatAmericanSpringAudioProcessor::crossfadeAmountParameterID, 0.0f);
+
         crossfadeAmountSlider.setValue (0.0, juce::dontSendNotification);
+    }
 
     const auto showTankControls = showUnavailableTankControlsButton.getToggleState();
 
@@ -886,7 +892,7 @@ void TheGreatAmericanSpringAudioProcessorEditor::refreshOptionControls()
         component->setVisible (showTankControls);
     }
 
-    targetEditorHeight = showTankControls ? 700 : 560;
+    targetEditorHeight = showTankControls ? 760 : 620;
 }
 
 void TheGreatAmericanSpringAudioProcessorEditor::updateExpandedTankControlsAnimation()
@@ -929,9 +935,7 @@ void TheGreatAmericanSpringAudioProcessorEditor::timerCallback()
     }
 
     updateExpandedTankControlsAnimation();
-
-    if (introThemeStep >= 3 && animatedEditorHeight == targetEditorHeight)
-        stopTimer();
+    refreshOptionControls();
 }
 
 void TheGreatAmericanSpringAudioProcessorEditor::chooseTankImpulseResponseFile (TankSlot slot)

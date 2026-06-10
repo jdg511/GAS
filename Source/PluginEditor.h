@@ -121,8 +121,8 @@ private:
     Theme currentTheme = Theme::solar;
     int introThemeStep = 0;
     int introElapsedMs = 0;
-    int animatedEditorHeight = 560;
-    int targetEditorHeight = 560;
+    int animatedEditorHeight = 620;
+    int targetEditorHeight = 620;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TheGreatAmericanSpringAudioProcessorEditor)
 };

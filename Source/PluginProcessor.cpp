@@ -205,7 +205,14 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
         buffer.clear (channel, 0, numSamples);
 
     buildExternalInput (buffer, numSamples);
-    const auto forceMonoLeftOnly = isMonoSourceWithoutStereoConversion();
+    const auto forceMonoLeftOnly = detectMonoExternalInput (numSamples);
+    lastMonoSourceWithoutStereoConversion.store (forceMonoLeftOnly, std::memory_order_relaxed);
+
+    if (forceMonoLeftOnly)
+    {
+        externalInputBuffer.clear (1, 0, numSamples);
+        feedbackReturnBuffer.clear (1, 0, numSamples);
+    }
 
     dryTapBuffer.copyFrom (0, 0, externalInputBuffer, 0, 0, numSamples);
     dryTapBuffer.copyFrom (1, 0, externalInputBuffer, 1, 0, numSamples);
@@ -1102,7 +1109,31 @@ void TheGreatAmericanSpringAudioProcessor::buildExternalInput (juce::AudioBuffer
 
 bool TheGreatAmericanSpringAudioProcessor::isMonoSourceWithoutStereoConversion() const
 {
-    return getTotalNumInputChannels() == 1 && ! shouldConvertMonoSourceToStereo();
+    return ! shouldConvertMonoSourceToStereo()
+        && (getTotalNumInputChannels() == 1
+            || lastMonoSourceWithoutStereoConversion.load (std::memory_order_relaxed));
+}
+
+bool TheGreatAmericanSpringAudioProcessor::detectMonoExternalInput (int numSamples) const
+{
+    if (shouldConvertMonoSourceToStereo())
+        return false;
+
+    if (getTotalNumInputChannels() == 1)
+        return true;
+
+    const auto* left = externalInputBuffer.getReadPointer (0);
+    const auto* right = externalInputBuffer.getReadPointer (1);
+    auto maximumDifference = 0.0f;
+    auto maximumRightMagnitude = 0.0f;
+
+    for (int sample = 0; sample < numSamples; ++sample)
+    {
+        maximumDifference = juce::jmax (maximumDifference, std::abs (left[sample] - right[sample]));
+        maximumRightMagnitude = juce::jmax (maximumRightMagnitude, std::abs (right[sample]));
+    }
+
+    return maximumRightMagnitude <= 1.0e-7f || maximumDifference <= 1.0e-6f;
 }
 
 void TheGreatAmericanSpringAudioProcessor::applyWetPredelay (int numSamples)
