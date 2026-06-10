@@ -1,0 +1,14 @@
+build*/
+out/
+.vs/
+*.user
+*.suo
+*.VC.db
+*.VC.opendb
+*.ilk
+*.pdb
+*.obj
+*.lib
+*.exp
+*.log
+*_artefacts/
