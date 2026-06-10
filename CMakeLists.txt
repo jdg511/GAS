@@ -2,7 +2,22 @@ cmake_minimum_required(VERSION 3.22)
 
 project(TheGreatAmericanSpring VERSION 2.5.0)
 
-add_subdirectory(C:/Users/Jason/.juce/JUCE JUCE-build)
+include(FetchContent)
+
+set(JUCE_SOURCE_DIR "C:/Users/Jason/.juce/JUCE" CACHE PATH "Path to a local JUCE checkout. If missing, JUCE is fetched automatically.")
+set(GAS_JUCE_GIT_TAG "8.0.12" CACHE STRING "JUCE git tag to fetch when JUCE_SOURCE_DIR is unavailable.")
+
+if (EXISTS "${JUCE_SOURCE_DIR}/CMakeLists.txt")
+    add_subdirectory("${JUCE_SOURCE_DIR}" JUCE-build)
+else()
+    message(STATUS "JUCE_SOURCE_DIR was not found; fetching JUCE ${GAS_JUCE_GIT_TAG}.")
+    FetchContent_Declare(
+        juce
+        GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
+        GIT_TAG ${GAS_JUCE_GIT_TAG}
+        GIT_SHALLOW TRUE)
+    FetchContent_MakeAvailable(juce)
+endif()
 
 set(SCC_ASSET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Assets")
 set(SCC_BASE_PLUGIN_FORMATS AAX AU AUv3 LV2 Standalone Unity VST3 CACHE STRING "JUCE plugin formats to request. Platform-incompatible formats are ignored by JUCE.")
@@ -13,8 +28,8 @@ set(SPRING_IR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Spring IRs")
 
 if (MSVC)
     set_source_files_properties(
-        ${CMAKE_CURRENT_SOURCE_DIR}/../JUCE/modules/juce_graphics/juce_graphics.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/../JUCE/modules/juce_graphics/juce_graphics_Harfbuzz.cpp
+        ${JUCE_SOURCE_DIR}/modules/juce_graphics/juce_graphics.cpp
+        ${JUCE_SOURCE_DIR}/modules/juce_graphics/juce_graphics_Harfbuzz.cpp
         PROPERTIES
             COMPILE_OPTIONS "/Od;/bigobj")
 endif()
