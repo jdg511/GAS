@@ -68,7 +68,7 @@ ThemeStyle getThemeStyle (Theme theme)
                 juce::Colour::fromRGB (246, 222, 160),
                 juce::Colour::fromRGB (245, 235, 194),
                 juce::Colour::fromRGB (130, 151, 166),
-                "Segoe UI",
+                "Felix Titling",
                 "Georgia"
             };
 
@@ -95,7 +95,7 @@ ThemeStyle getThemeStyle (Theme theme)
                 juce::Colour::fromRGB (244, 226, 170),
                 juce::Colour::fromRGB (251, 239, 213),
                 juce::Colour::fromRGB (110, 142, 134),
-                "Segoe UI",
+                "Felix Titling",
                 "Palatino Linotype"
             };
 
@@ -122,7 +122,7 @@ ThemeStyle getThemeStyle (Theme theme)
                 juce::Colour::fromRGB (246, 175, 93),
                 juce::Colour::fromRGB (247, 217, 123),
                 juce::Colour::fromRGB (124, 151, 214),
-                "Segoe UI",
+                "Felix Titling",
                 "Georgia"
             };
     }
@@ -228,15 +228,15 @@ struct ArtDirectedLookAndFeel final : juce::LookAndFeel_V4
         {
             const auto style = getThemeStyle (theme);
             const auto bounds = button.getLocalBounds().toFloat().reduced (0.5f);
-            auto base = style.panelBottom.brighter (0.18f);
-            if (shouldDrawButtonAsDown)   base = base.darker (0.18f);
-            else if (shouldDrawButtonAsHighlighted) base = base.brighter (0.14f);
-            juce::ColourGradient fill (base.brighter (0.28f), bounds.getCentreX(), bounds.getY(),
-                                       base.darker (0.28f), bounds.getCentreX(), bounds.getBottom(), false);
+            auto base = button.getToggleState() ? style.panelTop.brighter (0.22f) : style.panelTop.brighter (0.12f);
+            if (shouldDrawButtonAsDown)        base = base.darker (0.16f);
+            else if (shouldDrawButtonAsHighlighted) base = base.brighter (0.12f);
+            juce::ColourGradient fill (base, bounds.getCentreX(), bounds.getY(),
+                                       style.panelBottom.darker (0.08f), bounds.getCentreX(), bounds.getBottom(), false);
             g.setGradientFill (fill);
-            g.fillRoundedRectangle (bounds, 7.0f);
-            g.setColour (style.accentA.withAlpha (0.85f));
-            g.drawRoundedRectangle (bounds, 7.0f, 1.4f);
+            g.fillRoundedRectangle (bounds, 8.0f);
+            g.setColour (style.buttonOutline);
+            g.drawRoundedRectangle (bounds, 8.0f, 1.4f);
             return;
         }
 
@@ -267,8 +267,8 @@ struct ArtDirectedLookAndFeel final : juce::LookAndFeel_V4
         if (gasInverted)
         {
             const auto style = getThemeStyle (theme);
-            auto font = makeFont (12.0f, juce::Font::bold, style.bodyTypeface);
-            g.setColour (style.accentA);
+            auto font = makeFont (12.5f, juce::Font::bold, style.bodyTypeface);
+            g.setColour (style.textPrimary);
             g.setFont (font);
             g.drawFittedText (button.getButtonText(), button.getLocalBounds(), juce::Justification::centred, 1);
             return;
@@ -568,10 +568,18 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
         btn->getProperties().set ("gasInverted", true);
     }
 
-    monoLeftRightSwapButton.setButtonText ("Mono L/R Swap");
-    addAndMakeVisible (monoLeftRightSwapButton);
-    monoLeftRightSwapAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (
-        audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::monoLeftRightSwapParameterID, monoLeftRightSwapButton);
+    inputModeLabel.setText ("Input", juce::dontSendNotification);
+    inputModeLabel.setJustificationType (juce::Justification::centredRight);
+    addAndMakeVisible (inputModeLabel);
+
+    inputModeComboBox.addItem ("Stereo",  1);
+    inputModeComboBox.addItem ("Mono L",  2);
+    inputModeComboBox.addItem ("Mono R",  3);
+    inputModeComboBox.onChange = [this] { refreshOptionControls(); };
+    addAndMakeVisible (inputModeComboBox);
+
+    inputModeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (
+        audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::inputModeParameterID, inputModeComboBox);
 
     monoSourceToStereoButton.setButtonText ("Mono Source To Stereo");
     monoSourceToStereoButton.onClick = [this] { refreshOptionControls(); };
@@ -582,7 +590,7 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     showUnavailableTankControlsButton.setButtonText ("Options not available in real life");
     showUnavailableTankControlsButton.onClick = [this]
     {
-        targetEditorHeight = showUnavailableTankControlsButton.getToggleState() ? 800 : 640;
+        targetEditorHeight = showUnavailableTankControlsButton.getToggleState() ? 810 : 660;
         refreshOptionControls();
         startTimerHz (30);
     };
@@ -590,7 +598,7 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     showUnavailableTankControlsAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (
         audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::showUnavailableTankControlsParameterID, showUnavailableTankControlsButton);
 
-    animatedEditorHeight = audioProcessor.shouldShowUnavailableTankControls() ? 800 : 640;
+    animatedEditorHeight = audioProcessor.shouldShowUnavailableTankControls() ? 810 : 660;
     targetEditorHeight = animatedEditorHeight;
     setSize (920, animatedEditorHeight);
     refreshTankLabels();
@@ -653,114 +661,181 @@ void TheGreatAmericanSpringAudioProcessorEditor::paint (juce::Graphics& graphics
     graphics.drawRoundedRectangle (panel, 24.0f, 1.8f);
     graphics.setColour (style.textPrimary.withAlpha (0.14f));
     graphics.drawRoundedRectangle (panel.reduced (7.0f), 18.0f, 1.0f);
+
+    // Art Nouveau corner flourishes
+    {
+        const auto accentColour = style.accentA.withAlpha (0.28f);
+        graphics.setColour (accentColour);
+        const float cx = panel.getX();
+        const float cy = panel.getY();
+        const float cr = panel.getRight();
+        const float cb = panel.getBottom();
+        const float fl = 38.0f; // flourish length
+
+        // Top-left
+        juce::Path tl;
+        tl.startNewSubPath (cx + 22, cy + 8);
+        tl.cubicTo (cx + 22, cy + fl, cx + 8, cy + fl, cx + 8, cy + 22);
+        graphics.strokePath (tl, juce::PathStrokeType (1.6f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+        // Top-right
+        juce::Path tr;
+        tr.startNewSubPath (cr - 22, cy + 8);
+        tr.cubicTo (cr - 22, cy + fl, cr - 8, cy + fl, cr - 8, cy + 22);
+        graphics.strokePath (tr, juce::PathStrokeType (1.6f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+        // Bottom-left
+        juce::Path bl;
+        bl.startNewSubPath (cx + 22, cb - 8);
+        bl.cubicTo (cx + 22, cb - fl, cx + 8, cb - fl, cx + 8, cb - 22);
+        graphics.strokePath (bl, juce::PathStrokeType (1.6f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+        // Bottom-right
+        juce::Path br;
+        br.startNewSubPath (cr - 22, cb - 8);
+        br.cubicTo (cr - 22, cb - fl, cr - 8, cb - fl, cr - 8, cb - 22);
+        graphics.strokePath (br, juce::PathStrokeType (1.6f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+        // Top centre diamond accent
+        const float mx = bounds.getCentreX();
+        juce::Path diamond;
+        diamond.startNewSubPath (mx, cy + 5);
+        diamond.lineTo (mx + 6, cy + 11);
+        diamond.lineTo (mx, cy + 17);
+        diamond.lineTo (mx - 6, cy + 11);
+        diamond.closeSubPath();
+        graphics.setColour (accentColour.withMultipliedAlpha (0.7f));
+        graphics.strokePath (diamond, juce::PathStrokeType (1.2f));
+    }
 }
 
 void TheGreatAmericanSpringAudioProcessorEditor::resized()
 {
-    auto area = getLocalBounds().reduced (18);
+    constexpr int pad     = 8;
+    constexpr int halfPad = pad / 2;
+    auto area = getLocalBounds().reduced (20);
 
-    const auto centreRow = [] (juce::Rectangle<int> rowArea, int contentWidth)
+    const auto centreRow = [] (juce::Rectangle<int> row, int w)
     {
-        return rowArea.withWidth (juce::jmin (contentWidth, rowArea.getWidth()))
-                      .withX (rowArea.getX() + juce::jmax (0, (rowArea.getWidth() - contentWidth) / 2));
+        return row.withWidth (juce::jmin (w, row.getWidth()))
+                  .withX (row.getX() + juce::jmax (0, (row.getWidth() - w) / 2));
     };
 
-    // --- Header: logo left | title + art + options stacked right ---
-    auto headerArea = area.removeFromTop (168);
-    logoButton.setBounds (headerArea.removeFromLeft (300).reduced (4, 2));
+    // ── Header ────────────────────────────────────────────────────────────────
+    auto header = area.removeFromTop (170);
+    logoButton.setBounds (header.removeFromLeft (280).reduced (4, 4));
 
-    titleLabel.setBounds (headerArea.removeFromTop (56));
-
-    headerArea.removeFromTop (4);
-    {
-        auto artRow = headerArea.removeFromTop (30);
-        const int artW = 28 + 6 + 68 + 68 + 84;
-        auto artCentred = centreRow (artRow, artW);
-        themeLabel.setBounds (artCentred.removeFromLeft (28));
-        artCentred.removeFromLeft (6);
-        solarThemeButton.setBounds (artCentred.removeFromLeft (68));
-        petalThemeButton.setBounds (artCentred.removeFromLeft (68));
-        cosmicThemeButton.setBounds (artCentred.removeFromLeft (84));
-    }
-
-    headerArea.removeFromTop (6);
-    showUnavailableTankControlsButton.setBounds (centreRow (headerArea.removeFromTop (28), 340));
-
+    // Title centred in remaining header width
+    titleLabel.setBounds (header.removeFromTop (60));
     subtitleLabel.setBounds ({});
-    area.removeFromTop (10);
 
-    // --- Control row: Mode | Ext Routing | Feedback Phase ---
+    header.removeFromTop (halfPad);
+
+    // Art row (theme selector)
     {
-        auto controlRow = centreRow (area.removeFromTop (32), 800);
-        auto leftCtrl = controlRow.removeFromLeft (420);
-        controlRow.removeFromLeft (20);
-        auto rightCtrl = controlRow;
-
-        modeLabel.setBounds (leftCtrl.removeFromLeft (48));
-        modeComboBox.setBounds (leftCtrl.removeFromLeft (130));
-        leftCtrl.removeFromLeft (16);
-        ir2RoutingLabel.setBounds (leftCtrl.removeFromLeft (116));
-        ir2RoutingComboBox.setBounds (leftCtrl.removeFromLeft (110));
-
-        feedbackPhaseLabel.setBounds (rightCtrl.removeFromLeft (104));
-        feedbackPhaseNormalButton.setBounds (rightCtrl.removeFromLeft (88));
-        feedbackPhaseInvertButton.setBounds (rightCtrl.removeFromLeft (78));
+        auto artRow = header.removeFromTop (30);
+        const int w = 28 + 6 + 68 + 68 + 84;
+        auto r = centreRow (artRow, w);
+        themeLabel.setBounds (r.removeFromLeft (28));
+        r.removeFromLeft (6);
+        solarThemeButton.setBounds (r.removeFromLeft (68));
+        petalThemeButton.setBounds  (r.removeFromLeft (68));
+        cosmicThemeButton.setBounds (r.removeFromLeft (84));
     }
 
-    area.removeFromTop (8);
+    header.removeFromTop (halfPad);
 
-    // --- Mono switches row ---
+    // "Options not available in real life" toggle
+    showUnavailableTankControlsButton.setBounds (centreRow (header.removeFromTop (26), 340));
+
+    area.removeFromTop (pad);
+
+    // ── Controls row: Mode | Ext Routing | Feedback Phase ───────────────────────────────
     {
-        auto monoRow = centreRow (area.removeFromTop (30), 500);
-        monoLeftRightSwapButton.setBounds (monoRow.removeFromLeft (160));
-        monoRow.removeFromLeft (22);
-        monoSourceToStereoButton.setBounds (monoRow.removeFromLeft (228));
+        // 3 logical groups, each left-aligned within their column
+        // col A: Mode label + combo (200px)
+        // col B: Ext Routing label + combo (260px)  gap 24
+        // col C: Feedback Phase label + Normal + Invert  gap 24
+        auto row = centreRow (area.removeFromTop (28), 860);
+
+        // Col A
+        modeLabel.setBounds (row.removeFromLeft (44));
+        modeComboBox.setBounds (row.removeFromLeft (130));
+        row.removeFromLeft (24);
+
+        // Col B
+        ir2RoutingLabel.setBounds (row.removeFromLeft (112));
+        ir2RoutingComboBox.setBounds (row.removeFromLeft (110));
+        row.removeFromLeft (24);
+
+        // Col C
+        feedbackPhaseLabel.setBounds (row.removeFromLeft (104));
+        feedbackPhaseNormalButton.setBounds (row.removeFromLeft (84));
+        feedbackPhaseInvertButton.setBounds (row.removeFromLeft (76));
     }
 
-    area.removeFromTop (10);
+    area.removeFromTop (pad);
 
-    // --- Knobs ---
+    // ── Input + Mono Source row ────────────────────────────────────────────
     {
-        auto knobArea = area.removeFromTop (214);
-        const int knobWidth = 104;
-        const int knobGap   = 22;
-        const int knobHeight = 92;
+        // "Input" label + 3-way combo | "Mono Source To Stereo" switch
+        // Align combo boxes to same column as Mode/Ext above
+        auto row = centreRow (area.removeFromTop (28), 860);
+
+        inputModeLabel.setBounds (row.removeFromLeft (44));
+        inputModeComboBox.setBounds (row.removeFromLeft (130));
+        row.removeFromLeft (24);
+
+        // monoSourceToStereo takes the col B + col C width area
+        monoSourceToStereoButton.setBounds (row.removeFromLeft (310));
+    }
+
+    area.removeFromTop (pad + 4);
+
+    // ── Knob rows ────────────────────────────────────────────────────────────
+    {
+        constexpr int kw = 100;
+        constexpr int kg = 20;
+        constexpr int kh = 88;
+
+        auto knobs = area.removeFromTop (kh * 2 + 22 * 2 + 4);
 
         auto layoutKnob = [&] (juce::Rectangle<int> b, juce::Label& lbl, juce::Slider& sl)
         {
             lbl.setBounds (b.removeFromTop (18));
-            sl.setBounds  (b.removeFromTop (knobHeight));
+            sl.setBounds  (b.removeFromTop (kh));
         };
 
-        auto row1 = centreRow (knobArea.removeFromTop (knobHeight + 24), knobWidth * 5 + knobGap * 4);
-        auto row2 = centreRow (knobArea.removeFromTop (knobHeight + 24), knobWidth * 4 + knobGap * 3);
+        auto row1 = centreRow (knobs.removeFromTop (kh + 22), kw * 5 + kg * 4);
+        knobs.removeFromTop (4);
+        auto row2 = centreRow (knobs.removeFromTop (kh + 22), kw * 4 + kg * 3);
 
-        layoutKnob (row1.removeFromLeft (knobWidth), driveLabel,           driveSlider);           row1.removeFromLeft (knobGap);
-        layoutKnob (row1.removeFromLeft (knobWidth), preHpfCutoffLabel,    preHpfCutoffSlider);    row1.removeFromLeft (knobGap);
-        layoutKnob (row1.removeFromLeft (knobWidth), preHpfResonanceLabel, preHpfResonanceSlider); row1.removeFromLeft (knobGap);
-        layoutKnob (row1.removeFromLeft (knobWidth), postLpfCutoffLabel,   postLpfCutoffSlider);   row1.removeFromLeft (knobGap);
-        layoutKnob (row1.removeFromLeft (knobWidth), postLpfResonanceLabel,postLpfResonanceSlider);
+        layoutKnob (row1.removeFromLeft (kw), driveLabel,            driveSlider);            row1.removeFromLeft (kg);
+        layoutKnob (row1.removeFromLeft (kw), preHpfCutoffLabel,     preHpfCutoffSlider);     row1.removeFromLeft (kg);
+        layoutKnob (row1.removeFromLeft (kw), preHpfResonanceLabel,  preHpfResonanceSlider);  row1.removeFromLeft (kg);
+        layoutKnob (row1.removeFromLeft (kw), postLpfCutoffLabel,    postLpfCutoffSlider);    row1.removeFromLeft (kg);
+        layoutKnob (row1.removeFromLeft (kw), postLpfResonanceLabel, postLpfResonanceSlider);
 
-        layoutKnob (row2.removeFromLeft (knobWidth), crossfadeAmountLabel, crossfadeAmountSlider); row2.removeFromLeft (knobGap);
-        layoutKnob (row2.removeFromLeft (knobWidth), extTankMixLabel,      extTankMixSlider);      row2.removeFromLeft (knobGap);
-        layoutKnob (row2.removeFromLeft (knobWidth), feedbackAmountLabel,  feedbackAmountSlider);  row2.removeFromLeft (knobGap);
-        layoutKnob (row2.removeFromLeft (knobWidth), wetDryLabel,          wetDrySlider);
+        layoutKnob (row2.removeFromLeft (kw), crossfadeAmountLabel,  crossfadeAmountSlider);  row2.removeFromLeft (kg);
+        layoutKnob (row2.removeFromLeft (kw), extTankMixLabel,       extTankMixSlider);       row2.removeFromLeft (kg);
+        layoutKnob (row2.removeFromLeft (kw), feedbackAmountLabel,   feedbackAmountSlider);   row2.removeFromLeft (kg);
+        layoutKnob (row2.removeFromLeft (kw), wetDryLabel,           wetDrySlider);
     }
 
-    area.removeFromTop (10);
+    area.removeFromTop (pad);
 
-    // --- Tank groups (expandable) ---
+    // ── Tank groups (expandable) ───────────────────────────────────────────────
     {
-        const auto showTanks = showUnavailableTankControlsButton.getToggleState();
-        auto tankArea = centreRow (area.removeFromTop (showTanks ? 152 : 0), 880);
-        auto topRow   = tankArea.removeFromTop (66);
-        tankArea.removeFromTop (10);
-        auto botRow   = tankArea;
+        const bool show = showUnavailableTankControlsButton.getToggleState();
+        auto ta = centreRow (area.removeFromTop (show ? 148 : 0), 880);
+        auto top = ta.removeFromTop (62);
+        ta.removeFromTop (pad);
+        auto bot = ta;
 
-        auto la  = topRow.removeFromLeft ((topRow.getWidth() - 14) / 2);  topRow.removeFromLeft (14);
-        auto ra  = topRow;
-        auto la2 = botRow.removeFromLeft ((botRow.getWidth() - 14) / 2);  botRow.removeFromLeft (14);
-        auto ra2 = botRow;
+        auto la  = top.removeFromLeft ((top.getWidth() - 12) / 2);  top.removeFromLeft (12);
+        auto ra  = top;
+        auto la2 = bot.removeFromLeft ((bot.getWidth() - 12) / 2);  bot.removeFromLeft (12);
+        auto ra2 = bot;
 
         const auto layoutGroup = [] (juce::Rectangle<int> g,
                                      juce::GroupComponent& grp,
@@ -768,10 +843,10 @@ void TheGreatAmericanSpringAudioProcessorEditor::resized()
                                      juce::TextButton& btn)
         {
             grp.setBounds (g);
-            auto inner = g.reduced (10, 12);
-            lbl.setBounds (inner.removeFromTop (18));
+            auto inner = g.reduced (10, 10);
+            lbl.setBounds (inner.removeFromTop (17));
             inner.removeFromTop (4);
-            btn.setBounds (inner.removeFromTop (22));
+            btn.setBounds (inner.removeFromTop (20));
         };
 
         layoutGroup (la,  leftTankGroup,   leftTankLabel,   leftTankLoadButton);
@@ -780,19 +855,19 @@ void TheGreatAmericanSpringAudioProcessorEditor::resized()
         layoutGroup (ra2, rightTank2Group, rightTank2Label, rightTank2LoadButton);
     }
 
-    area.removeFromTop (8);
+    area.removeFromTop (pad);
 
-    // --- Playback ---
-    playbackLabel.setBounds (area.removeFromTop (18));
-    area.removeFromTop (4);
+    // ── Playback ────────────────────────────────────────────────────────────
+    playbackLabel.setBounds (area.removeFromTop (17));
+    area.removeFromTop (halfPad);
 
     {
-        auto pb = centreRow (area.removeFromTop (28), 880);
-        playbackSourceComboBox.setBounds (pb.removeFromLeft (640));
-        pb.removeFromLeft (10);
-        loadPlaybackButton.setBounds (pb.removeFromLeft (108));
-        pb.removeFromLeft (10);
-        playbackToggleButton.setBounds (pb.removeFromLeft (72));
+        auto pb = centreRow (area.removeFromTop (26), 880);
+        playbackSourceComboBox.setBounds (pb.removeFromLeft (620));
+        pb.removeFromLeft (pad);
+        loadPlaybackButton.setBounds     (pb.removeFromLeft (110));
+        pb.removeFromLeft (pad);
+        playbackToggleButton.setBounds   (pb.removeFromLeft (80));
     }
 }
 void TheGreatAmericanSpringAudioProcessorEditor::configureRotarySlider (juce::Slider& slider,
@@ -821,7 +896,7 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
 
     const auto style = getThemeStyle (currentTheme);
 
-    titleLabel.setFont (makeFont (28.0f, juce::Font::bold, style.titleTypeface));
+    titleLabel.setFont (makeFont (34.0f, juce::Font::italic, style.titleTypeface));
     subtitleLabel.setFont (makeFont (12.0f, juce::Font::plain, style.bodyTypeface));
     modeLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
     ir2RoutingLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
@@ -845,6 +920,7 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
     styleComboBox (modeComboBox);
     styleComboBox (ir2RoutingComboBox);
     styleComboBox (playbackSourceComboBox);
+    styleComboBox (inputModeComboBox);
 
     const auto styleControlLabel = [&style] (juce::Label& label)
     {
@@ -858,6 +934,9 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
     {
         styleControlLabel (*label);
     }
+
+    inputModeLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
+    inputModeLabel.setColour (juce::Label::textColourId, style.textPrimary);
 
     playbackLabel.setFont (makeFont (12.0f, juce::Font::bold, style.bodyTypeface));
 
@@ -926,19 +1005,6 @@ void TheGreatAmericanSpringAudioProcessorEditor::refreshOptionControls()
     feedbackPhaseNormalButton.setToggleState (! feedbackInverted, juce::dontSendNotification);
     feedbackPhaseInvertButton.setToggleState (feedbackInverted, juce::dontSendNotification);
 
-    const auto crossfadeAvailable = audioProcessor.isCrossfadeAvailableForCurrentLayout();
-    crossfadeAmountSlider.setEnabled (crossfadeAvailable);
-    crossfadeAmountLabel.setAlpha (crossfadeAvailable ? 1.0f : 0.45f);
-    crossfadeAmountSlider.setAlpha (crossfadeAvailable ? 1.0f : 0.45f);
-
-    if (! crossfadeAvailable)
-    {
-        if (std::abs (crossfadeAmountSlider.getValue()) > 0.0001)
-            audioProcessor.setParameterPlainValue (TheGreatAmericanSpringAudioProcessor::crossfadeAmountParameterID, 0.0f);
-
-        crossfadeAmountSlider.setValue (0.0, juce::dontSendNotification);
-    }
-
     const auto showTankControls = showUnavailableTankControlsButton.getToggleState();
 
     juce::Component* tankControls[] = { &leftTankGroup, &rightTankGroup, &leftTank2Group, &rightTank2Group,
@@ -950,7 +1016,24 @@ void TheGreatAmericanSpringAudioProcessorEditor::refreshOptionControls()
         component->setVisible (showTankControls);
     }
 
-    targetEditorHeight = showTankControls ? 800 : 640;
+    targetEditorHeight = showTankControls ? 810 : 660;
+
+    // Input mode controls monoSourceToStereo availability
+    const bool isMono = inputModeComboBox.getSelectedItemIndex() > 0;
+    monoSourceToStereoButton.setEnabled (! isMono);
+    monoSourceToStereoButton.setAlpha (isMono ? 0.5f : 1.0f);
+    if (isMono)
+    {
+        audioProcessor.setParameterPlainValue (TheGreatAmericanSpringAudioProcessor::monoSourceToStereoParameterID, 1.0f);
+        monoSourceToStereoButton.setToggleState (true, juce::dontSendNotification);
+    }
+    // When stereo, grey out monoSourceToStereo (not applicable)
+    const bool isStereo = inputModeComboBox.getSelectedItemIndex() == 0;
+    if (isStereo)
+    {
+        monoSourceToStereoButton.setEnabled (false);
+        monoSourceToStereoButton.setAlpha (0.45f);
+    }
 }
 
 void TheGreatAmericanSpringAudioProcessorEditor::updateExpandedTankControlsAnimation()

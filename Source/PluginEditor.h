@@ -3,8 +3,8 @@
 #include "PluginProcessor.h"
 
 class TheGreatAmericanSpringAudioProcessorEditor final : public juce::AudioProcessorEditor,
-                                                           private juce::ChangeListener,
-                                                           private juce::Timer
+                                                          private juce::ChangeListener,
+                                                          private juce::Timer
 {
 public:
     enum class Theme
@@ -110,8 +110,9 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> extTankMixAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> feedbackAmountAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> wetDryAttachment;
-    juce::ToggleButton monoLeftRightSwapButton;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> monoLeftRightSwapAttachment;
+    juce::Label inputModeLabel;
+    juce::ComboBox inputModeComboBox;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> inputModeAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> monoSourceToStereoAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> showUnavailableTankControlsAttachment;
     std::unique_ptr<juce::LookAndFeel_V4> lookAndFeel;
@@ -123,8 +124,8 @@ private:
     Theme currentTheme = Theme::solar;
     int introThemeStep = 0;
     int introElapsedMs = 0;
-    int animatedEditorHeight = 640;
-    int targetEditorHeight = 640;
+    int animatedEditorHeight = 660;
+    int targetEditorHeight = 660;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TheGreatAmericanSpringAudioProcessorEditor)
 };

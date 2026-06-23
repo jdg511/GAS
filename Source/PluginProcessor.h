@@ -7,7 +7,7 @@
 #include "DSP/ModularFxChain.h"
 
 class TheGreatAmericanSpringAudioProcessor final : public juce::AudioProcessor,
-                                                     public juce::ChangeBroadcaster
+                                                    public juce::ChangeBroadcaster
 {
 public:
     enum class TankSlot
@@ -62,9 +62,13 @@ public:
     juce::String getIr2RoutingDisplayName() const;
     bool isFeedbackPhaseInverted() const;
     bool shouldConvertMonoSourceToStereo() const;
-    bool shouldSwapLeftRight() const;
     bool shouldShowUnavailableTankControls() const;
     bool isCrossfadeAvailableForCurrentLayout() const;
+
+    static constexpr auto inputModeParameterID = "inputMode";
+
+    enum class InputMode { stereo = 0, monoL, monoR };
+    InputMode getInputMode() const;
 
     bool loadPlaybackFile (const juce::File& file);
     void setPlaybackActive (bool shouldPlay);
@@ -93,7 +97,6 @@ public:
     static constexpr auto wetDryParameterID = "wetDry";
     static constexpr auto monoSourceToStereoParameterID = "monoSourceToStereo";
     static constexpr auto showUnavailableTankControlsParameterID = "showUnavailableTankControls";
-    static constexpr auto monoLeftRightSwapParameterID = "monoLeftRightSwap";
 
     void setParameterPlainValue (const juce::String& parameterID, float plainValue);
 
