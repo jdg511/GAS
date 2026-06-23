@@ -110,6 +110,8 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> extTankMixAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> feedbackAmountAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> wetDryAttachment;
+    juce::ToggleButton monoLeftRightSwapButton;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> monoLeftRightSwapAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> monoSourceToStereoAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> showUnavailableTankControlsAttachment;
     std::unique_ptr<juce::LookAndFeel_V4> lookAndFeel;
@@ -121,8 +123,8 @@ private:
     Theme currentTheme = Theme::solar;
     int introThemeStep = 0;
     int introElapsedMs = 0;
-    int animatedEditorHeight = 620;
-    int targetEditorHeight = 620;
+    int animatedEditorHeight = 640;
+    int targetEditorHeight = 640;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TheGreatAmericanSpringAudioProcessorEditor)
 };

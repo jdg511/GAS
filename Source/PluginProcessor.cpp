@@ -205,6 +205,15 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
         buffer.clear (channel, 0, numSamples);
 
     buildExternalInput (buffer, numSamples);
+
+    if (shouldSwapLeftRight() && externalInputBuffer.getNumChannels() >= 2)
+    {
+        juce::AudioBuffer<float> swapTemp (1, numSamples);
+        swapTemp.copyFrom (0, 0, externalInputBuffer, 0, 0, numSamples);
+        externalInputBuffer.copyFrom (0, 0, externalInputBuffer, 1, 0, numSamples);
+        externalInputBuffer.copyFrom (1, 0, swapTemp, 0, 0, numSamples);
+    }
+
     const auto forceMonoLeftOnly = detectMonoExternalInput (numSamples);
     lastMonoSourceWithoutStereoConversion.store (forceMonoLeftOnly, std::memory_order_relaxed);
 
@@ -458,6 +467,11 @@ bool TheGreatAmericanSpringAudioProcessor::shouldConvertMonoSourceToStereo() con
     return parameters.getRawParameterValue (monoSourceToStereoParameterID)->load() >= 0.5f;
 }
 
+bool TheGreatAmericanSpringAudioProcessor::shouldSwapLeftRight() const
+{
+    return parameters.getRawParameterValue (monoLeftRightSwapParameterID)->load() >= 0.5f;
+}
+
 bool TheGreatAmericanSpringAudioProcessor::shouldShowUnavailableTankControls() const
 {
     return parameters.getRawParameterValue (showUnavailableTankControlsParameterID)->load() >= 0.5f;
@@ -647,6 +661,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout TheGreatAmericanSpringAudioP
     layout.add (std::make_unique<juce::AudioParameterBool> (juce::ParameterID { showUnavailableTankControlsParameterID, 1 },
                                                             "Will not be available in real life",
                                                             false));
+
+    layout.add (std::make_unique<juce::AudioParameterBool> (juce::ParameterID { monoLeftRightSwapParameterID, 1 },
+                                                        "Mono L/R Swap",
+                                                        false));
 
     return layout;
 }

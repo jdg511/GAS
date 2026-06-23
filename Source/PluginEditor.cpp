@@ -68,7 +68,7 @@ ThemeStyle getThemeStyle (Theme theme)
                 juce::Colour::fromRGB (246, 222, 160),
                 juce::Colour::fromRGB (245, 235, 194),
                 juce::Colour::fromRGB (130, 151, 166),
-                "Palatino Linotype",
+                "Segoe UI",
                 "Georgia"
             };
 
@@ -95,7 +95,7 @@ ThemeStyle getThemeStyle (Theme theme)
                 juce::Colour::fromRGB (244, 226, 170),
                 juce::Colour::fromRGB (251, 239, 213),
                 juce::Colour::fromRGB (110, 142, 134),
-                "Book Antiqua",
+                "Segoe UI",
                 "Palatino Linotype"
             };
 
@@ -122,7 +122,7 @@ ThemeStyle getThemeStyle (Theme theme)
                 juce::Colour::fromRGB (246, 175, 93),
                 juce::Colour::fromRGB (247, 217, 123),
                 juce::Colour::fromRGB (124, 151, 214),
-                "Cambria",
+                "Segoe UI",
                 "Georgia"
             };
     }
@@ -223,6 +223,23 @@ struct ArtDirectedLookAndFeel final : juce::LookAndFeel_V4
                                bool shouldDrawButtonAsHighlighted,
                                bool shouldDrawButtonAsDown) override
     {
+        const bool gasInverted = button.getProperties()["gasInverted"];
+        if (gasInverted)
+        {
+            const auto style = getThemeStyle (theme);
+            const auto bounds = button.getLocalBounds().toFloat().reduced (0.5f);
+            auto base = style.panelBottom.brighter (0.18f);
+            if (shouldDrawButtonAsDown)   base = base.darker (0.18f);
+            else if (shouldDrawButtonAsHighlighted) base = base.brighter (0.14f);
+            juce::ColourGradient fill (base.brighter (0.28f), bounds.getCentreX(), bounds.getY(),
+                                       base.darker (0.28f), bounds.getCentreX(), bounds.getBottom(), false);
+            g.setGradientFill (fill);
+            g.fillRoundedRectangle (bounds, 7.0f);
+            g.setColour (style.accentA.withAlpha (0.85f));
+            g.drawRoundedRectangle (bounds, 7.0f, 1.4f);
+            return;
+        }
+
         if (button.getRadioGroupId() != 0)
             return;
 
@@ -246,6 +263,17 @@ struct ArtDirectedLookAndFeel final : juce::LookAndFeel_V4
 
     void drawButtonText (juce::Graphics& g, juce::TextButton& button, bool, bool) override
     {
+        const bool gasInverted = button.getProperties()["gasInverted"];
+        if (gasInverted)
+        {
+            const auto style = getThemeStyle (theme);
+            auto font = makeFont (12.0f, juce::Font::bold, style.bodyTypeface);
+            g.setColour (style.accentA);
+            g.setFont (font);
+            g.drawFittedText (button.getButtonText(), button.getLocalBounds(), juce::Justification::centred, 1);
+            return;
+        }
+
         const auto style = getThemeStyle (theme);
         auto font = makeFont (12.5f, juce::Font::bold, style.bodyTypeface);
         g.setColour (style.textPrimary);
@@ -533,16 +561,28 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     };
     addAndMakeVisible (playbackToggleButton);
 
+    for (auto* btn : std::initializer_list<juce::TextButton*> { &leftTankLoadButton, &rightTankLoadButton,
+                                                                 &leftTank2LoadButton, &rightTank2LoadButton,
+                                                                 &loadPlaybackButton, &playbackToggleButton })
+    {
+        btn->getProperties().set ("gasInverted", true);
+    }
+
+    monoLeftRightSwapButton.setButtonText ("Mono L/R Swap");
+    addAndMakeVisible (monoLeftRightSwapButton);
+    monoLeftRightSwapAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (
+        audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::monoLeftRightSwapParameterID, monoLeftRightSwapButton);
+
     monoSourceToStereoButton.setButtonText ("Mono Source To Stereo");
     monoSourceToStereoButton.onClick = [this] { refreshOptionControls(); };
     addAndMakeVisible (monoSourceToStereoButton);
     monoSourceToStereoAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (
         audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::monoSourceToStereoParameterID, monoSourceToStereoButton);
 
-    showUnavailableTankControlsButton.setButtonText ("Will not be available in real life");
+    showUnavailableTankControlsButton.setButtonText ("Options not available in real life");
     showUnavailableTankControlsButton.onClick = [this]
     {
-        targetEditorHeight = showUnavailableTankControlsButton.getToggleState() ? 760 : 620;
+        targetEditorHeight = showUnavailableTankControlsButton.getToggleState() ? 800 : 640;
         refreshOptionControls();
         startTimerHz (30);
     };
@@ -550,9 +590,9 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     showUnavailableTankControlsAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (
         audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::showUnavailableTankControlsParameterID, showUnavailableTankControlsButton);
 
-    animatedEditorHeight = audioProcessor.shouldShowUnavailableTankControls() ? 760 : 620;
+    animatedEditorHeight = audioProcessor.shouldShowUnavailableTankControls() ? 800 : 640;
     targetEditorHeight = animatedEditorHeight;
-    setSize (1180, animatedEditorHeight);
+    setSize (920, animatedEditorHeight);
     refreshTankLabels();
     refreshPlaybackLabel();
     refreshOptionControls();
@@ -618,125 +658,143 @@ void TheGreatAmericanSpringAudioProcessorEditor::paint (juce::Graphics& graphics
 void TheGreatAmericanSpringAudioProcessorEditor::resized()
 {
     auto area = getLocalBounds().reduced (18);
+
     const auto centreRow = [] (juce::Rectangle<int> rowArea, int contentWidth)
     {
         return rowArea.withWidth (juce::jmin (contentWidth, rowArea.getWidth()))
                       .withX (rowArea.getX() + juce::jmax (0, (rowArea.getWidth() - contentWidth) / 2));
     };
 
-    auto headerArea = area.removeFromTop (116);
-    logoButton.setBounds (headerArea.removeFromLeft (364).reduced (6, 2));
-    titleLabel.setBounds (headerArea.removeFromTop (52));
-    subtitleLabel.setBounds ({});
-    area.removeFromTop (8);
+    // --- Header: logo left | title + art + options stacked right ---
+    auto headerArea = area.removeFromTop (168);
+    logoButton.setBounds (headerArea.removeFromLeft (300).reduced (4, 2));
 
-    auto topRow = centreRow (area.removeFromTop (32), 1080);
-    auto leftTop = topRow.removeFromLeft (500);
-    auto rightTop = topRow;
+    titleLabel.setBounds (headerArea.removeFromTop (56));
 
-    modeLabel.setBounds (leftTop.removeFromLeft (52));
-    modeComboBox.setBounds (leftTop.removeFromLeft (150));
-    leftTop.removeFromLeft (18);
-    ir2RoutingLabel.setBounds (leftTop.removeFromLeft (130));
-    ir2RoutingComboBox.setBounds (leftTop.removeFromLeft (150));
-
-    feedbackPhaseLabel.setBounds (rightTop.removeFromLeft (104));
-    feedbackPhaseNormalButton.setBounds (rightTop.removeFromLeft (92));
-    feedbackPhaseInvertButton.setBounds (rightTop.removeFromLeft (82));
-    rightTop.removeFromLeft (14);
-    themeLabel.setBounds (rightTop.removeFromLeft (28));
-    solarThemeButton.setBounds (rightTop.removeFromLeft (68));
-    petalThemeButton.setBounds (rightTop.removeFromLeft (68));
-    cosmicThemeButton.setBounds (rightTop.removeFromLeft (84));
-
-    area.removeFromTop (8);
-
-    auto optionsRow = centreRow (area.removeFromTop (30), 930);
-    monoSourceToStereoButton.setBounds (optionsRow.removeFromLeft (240));
-    optionsRow.removeFromLeft (22);
-    showUnavailableTankControlsButton.setBounds (optionsRow.removeFromLeft (350));
-
-    area.removeFromTop (8);
-
-    auto knobArea = area.removeFromTop (214);
-    const int knobWidth = 104;
-    const int knobGap = 22;
-    const int knobHeight = 92;
-    const int firstKnobRowWidth = (knobWidth * 5) + (knobGap * 4);
-    const int secondKnobRowWidth = (knobWidth * 4) + (knobGap * 3);
-
-    auto layoutKnob = [&] (juce::Rectangle<int> bounds, juce::Label& label, juce::Slider& slider)
+    headerArea.removeFromTop (4);
     {
-        label.setBounds (bounds.removeFromTop (18));
-        slider.setBounds (bounds.removeFromTop (knobHeight));
-    };
+        auto artRow = headerArea.removeFromTop (30);
+        const int artW = 28 + 6 + 68 + 68 + 84;
+        auto artCentred = centreRow (artRow, artW);
+        themeLabel.setBounds (artCentred.removeFromLeft (28));
+        artCentred.removeFromLeft (6);
+        solarThemeButton.setBounds (artCentred.removeFromLeft (68));
+        petalThemeButton.setBounds (artCentred.removeFromLeft (68));
+        cosmicThemeButton.setBounds (artCentred.removeFromLeft (84));
+    }
 
-    auto firstKnobRow = centreRow (knobArea.removeFromTop (knobHeight + 24), firstKnobRowWidth);
-    auto secondKnobRow = centreRow (knobArea.removeFromTop (knobHeight + 24), secondKnobRowWidth);
+    headerArea.removeFromTop (6);
+    showUnavailableTankControlsButton.setBounds (centreRow (headerArea.removeFromTop (28), 340));
 
-    layoutKnob (firstKnobRow.removeFromLeft (knobWidth), driveLabel, driveSlider);
-    firstKnobRow.removeFromLeft (knobGap);
-    layoutKnob (firstKnobRow.removeFromLeft (knobWidth), preHpfCutoffLabel, preHpfCutoffSlider);
-    firstKnobRow.removeFromLeft (knobGap);
-    layoutKnob (firstKnobRow.removeFromLeft (knobWidth), preHpfResonanceLabel, preHpfResonanceSlider);
-    firstKnobRow.removeFromLeft (knobGap);
-    layoutKnob (firstKnobRow.removeFromLeft (knobWidth), postLpfCutoffLabel, postLpfCutoffSlider);
-    firstKnobRow.removeFromLeft (knobGap);
-    layoutKnob (firstKnobRow.removeFromLeft (knobWidth), postLpfResonanceLabel, postLpfResonanceSlider);
+    subtitleLabel.setBounds ({});
+    area.removeFromTop (10);
 
-    layoutKnob (secondKnobRow.removeFromLeft (knobWidth), crossfadeAmountLabel, crossfadeAmountSlider);
-    secondKnobRow.removeFromLeft (knobGap);
-    layoutKnob (secondKnobRow.removeFromLeft (knobWidth), extTankMixLabel, extTankMixSlider);
-    secondKnobRow.removeFromLeft (knobGap);
-    layoutKnob (secondKnobRow.removeFromLeft (knobWidth), feedbackAmountLabel, feedbackAmountSlider);
-    secondKnobRow.removeFromLeft (knobGap);
-    layoutKnob (secondKnobRow.removeFromLeft (knobWidth), wetDryLabel, wetDrySlider);
+    // --- Control row: Mode | Ext Routing | Feedback Phase ---
+    {
+        auto controlRow = centreRow (area.removeFromTop (32), 800);
+        auto leftCtrl = controlRow.removeFromLeft (420);
+        controlRow.removeFromLeft (20);
+        auto rightCtrl = controlRow;
+
+        modeLabel.setBounds (leftCtrl.removeFromLeft (48));
+        modeComboBox.setBounds (leftCtrl.removeFromLeft (130));
+        leftCtrl.removeFromLeft (16);
+        ir2RoutingLabel.setBounds (leftCtrl.removeFromLeft (116));
+        ir2RoutingComboBox.setBounds (leftCtrl.removeFromLeft (110));
+
+        feedbackPhaseLabel.setBounds (rightCtrl.removeFromLeft (104));
+        feedbackPhaseNormalButton.setBounds (rightCtrl.removeFromLeft (88));
+        feedbackPhaseInvertButton.setBounds (rightCtrl.removeFromLeft (78));
+    }
+
+    area.removeFromTop (8);
+
+    // --- Mono switches row ---
+    {
+        auto monoRow = centreRow (area.removeFromTop (30), 500);
+        monoLeftRightSwapButton.setBounds (monoRow.removeFromLeft (160));
+        monoRow.removeFromLeft (22);
+        monoSourceToStereoButton.setBounds (monoRow.removeFromLeft (228));
+    }
 
     area.removeFromTop (10);
 
-    const auto showTankControls = showUnavailableTankControlsButton.getToggleState();
-    auto TankArea = centreRow (area.removeFromTop (showTankControls ? 166 : 0), 980);
-    auto topTankRow = TankArea.removeFromTop (78);
-    TankArea.removeFromTop (10);
-    auto bottomTankRow = TankArea;
-
-    auto leftArea = topTankRow.removeFromLeft ((topTankRow.getWidth() - 18) / 2);
-    topTankRow.removeFromLeft (18);
-    auto rightArea = topTankRow;
-
-    auto left2Area = bottomTankRow.removeFromLeft ((bottomTankRow.getWidth() - 18) / 2);
-    bottomTankRow.removeFromLeft (18);
-    auto right2Area = bottomTankRow;
-
-    const auto layoutTankGroup = [] (juce::Rectangle<int> groupArea,
-                                       juce::GroupComponent& group,
-                                       juce::Label& label,
-                                       juce::TextButton& button)
+    // --- Knobs ---
     {
-        group.setBounds (groupArea);
-        auto inner = groupArea.reduced (10, 14);
-        label.setBounds (inner.removeFromTop (20));
-        inner.removeFromTop (4);
-        button.setBounds (inner.removeFromTop (24));
-    };
+        auto knobArea = area.removeFromTop (214);
+        const int knobWidth = 104;
+        const int knobGap   = 22;
+        const int knobHeight = 92;
 
-    layoutTankGroup (leftArea, leftTankGroup, leftTankLabel, leftTankLoadButton);
-    layoutTankGroup (rightArea, rightTankGroup, rightTankLabel, rightTankLoadButton);
-    layoutTankGroup (left2Area, leftTank2Group, leftTank2Label, leftTank2LoadButton);
-    layoutTankGroup (right2Area, rightTank2Group, rightTank2Label, rightTank2LoadButton);
+        auto layoutKnob = [&] (juce::Rectangle<int> b, juce::Label& lbl, juce::Slider& sl)
+        {
+            lbl.setBounds (b.removeFromTop (18));
+            sl.setBounds  (b.removeFromTop (knobHeight));
+        };
+
+        auto row1 = centreRow (knobArea.removeFromTop (knobHeight + 24), knobWidth * 5 + knobGap * 4);
+        auto row2 = centreRow (knobArea.removeFromTop (knobHeight + 24), knobWidth * 4 + knobGap * 3);
+
+        layoutKnob (row1.removeFromLeft (knobWidth), driveLabel,           driveSlider);           row1.removeFromLeft (knobGap);
+        layoutKnob (row1.removeFromLeft (knobWidth), preHpfCutoffLabel,    preHpfCutoffSlider);    row1.removeFromLeft (knobGap);
+        layoutKnob (row1.removeFromLeft (knobWidth), preHpfResonanceLabel, preHpfResonanceSlider); row1.removeFromLeft (knobGap);
+        layoutKnob (row1.removeFromLeft (knobWidth), postLpfCutoffLabel,   postLpfCutoffSlider);   row1.removeFromLeft (knobGap);
+        layoutKnob (row1.removeFromLeft (knobWidth), postLpfResonanceLabel,postLpfResonanceSlider);
+
+        layoutKnob (row2.removeFromLeft (knobWidth), crossfadeAmountLabel, crossfadeAmountSlider); row2.removeFromLeft (knobGap);
+        layoutKnob (row2.removeFromLeft (knobWidth), extTankMixLabel,      extTankMixSlider);      row2.removeFromLeft (knobGap);
+        layoutKnob (row2.removeFromLeft (knobWidth), feedbackAmountLabel,  feedbackAmountSlider);  row2.removeFromLeft (knobGap);
+        layoutKnob (row2.removeFromLeft (knobWidth), wetDryLabel,          wetDrySlider);
+    }
+
+    area.removeFromTop (10);
+
+    // --- Tank groups (expandable) ---
+    {
+        const auto showTanks = showUnavailableTankControlsButton.getToggleState();
+        auto tankArea = centreRow (area.removeFromTop (showTanks ? 152 : 0), 880);
+        auto topRow   = tankArea.removeFromTop (66);
+        tankArea.removeFromTop (10);
+        auto botRow   = tankArea;
+
+        auto la  = topRow.removeFromLeft ((topRow.getWidth() - 14) / 2);  topRow.removeFromLeft (14);
+        auto ra  = topRow;
+        auto la2 = botRow.removeFromLeft ((botRow.getWidth() - 14) / 2);  botRow.removeFromLeft (14);
+        auto ra2 = botRow;
+
+        const auto layoutGroup = [] (juce::Rectangle<int> g,
+                                     juce::GroupComponent& grp,
+                                     juce::Label& lbl,
+                                     juce::TextButton& btn)
+        {
+            grp.setBounds (g);
+            auto inner = g.reduced (10, 12);
+            lbl.setBounds (inner.removeFromTop (18));
+            inner.removeFromTop (4);
+            btn.setBounds (inner.removeFromTop (22));
+        };
+
+        layoutGroup (la,  leftTankGroup,   leftTankLabel,   leftTankLoadButton);
+        layoutGroup (ra,  rightTankGroup,  rightTankLabel,  rightTankLoadButton);
+        layoutGroup (la2, leftTank2Group,  leftTank2Label,  leftTank2LoadButton);
+        layoutGroup (ra2, rightTank2Group, rightTank2Label, rightTank2LoadButton);
+    }
 
     area.removeFromTop (8);
-    playbackLabel.setBounds (area.removeFromTop (20));
+
+    // --- Playback ---
+    playbackLabel.setBounds (area.removeFromTop (18));
     area.removeFromTop (4);
 
-    auto playbackControls = centreRow (area.removeFromTop (30), 980);
-    playbackSourceComboBox.setBounds (playbackControls.removeFromLeft (720));
-    playbackControls.removeFromLeft (12);
-    loadPlaybackButton.setBounds (playbackControls.removeFromLeft (120));
-    playbackControls.removeFromLeft (12);
-    playbackToggleButton.setBounds (playbackControls.removeFromLeft (80));
+    {
+        auto pb = centreRow (area.removeFromTop (28), 880);
+        playbackSourceComboBox.setBounds (pb.removeFromLeft (640));
+        pb.removeFromLeft (10);
+        loadPlaybackButton.setBounds (pb.removeFromLeft (108));
+        pb.removeFromLeft (10);
+        playbackToggleButton.setBounds (pb.removeFromLeft (72));
+    }
 }
-
 void TheGreatAmericanSpringAudioProcessorEditor::configureRotarySlider (juce::Slider& slider,
                                                                           juce::Label& label,
                                                                           const juce::String& labelText,
@@ -892,7 +950,7 @@ void TheGreatAmericanSpringAudioProcessorEditor::refreshOptionControls()
         component->setVisible (showTankControls);
     }
 
-    targetEditorHeight = showTankControls ? 760 : 620;
+    targetEditorHeight = showTankControls ? 800 : 640;
 }
 
 void TheGreatAmericanSpringAudioProcessorEditor::updateExpandedTankControlsAnimation()
