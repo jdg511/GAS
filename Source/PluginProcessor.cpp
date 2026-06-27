@@ -210,24 +210,21 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
         const auto inputMode = getInputMode();
         if (inputMode != InputMode::stereo && externalInputBuffer.getNumChannels() >= 2)
         {
-            // Sum L+R to mono, write to both channels (dual-mono)
+            // Pick the selected source channel and copy it to both channels (dual-mono).
+            // Mono L uses the left input, Mono R uses the right input.
+            const int sourceChannel = (inputMode == InputMode::monoR) ? 1 : 0;
             for (int i = 0; i < numSamples; ++i)
             {
-                const float sum = (externalInputBuffer.getSample (0, i) + externalInputBuffer.getSample (1, i)) * 0.5f;
-                externalInputBuffer.setSample (0, i, sum);
-                externalInputBuffer.setSample (1, i, sum);
+                const float s = externalInputBuffer.getSample (sourceChannel, i);
+                externalInputBuffer.setSample (0, i, s);
+                externalInputBuffer.setSample (1, i, s);
             }
         }
     }
 
-    const auto forceMonoLeftOnly = (getInputMode() == InputMode::stereo) && detectMonoExternalInput (numSamples);
-    lastMonoSourceWithoutStereoConversion.store (forceMonoLeftOnly, std::memory_order_relaxed);
-
-    if (forceMonoLeftOnly)
-    {
-        externalInputBuffer.clear (1, 0, numSamples);
-        feedbackReturnBuffer.clear (1, 0, numSamples);
-    }
+    // Mono routing is driven solely by the user's Input Mode selection (Stereo / Mono L / Mono R).
+    // Never auto-detect mono from signal content — that caused the app to start muted on the right.
+    lastMonoSourceWithoutStereoConversion.store (false, std::memory_order_relaxed);
 
     dryTapBuffer.copyFrom (0, 0, externalInputBuffer, 0, 0, numSamples);
     dryTapBuffer.copyFrom (1, 0, externalInputBuffer, 1, 0, numSamples);
@@ -299,7 +296,7 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
     wetStereoBuffer.copyFrom (1, 0, monoRightBuffer, 0, 0, numSamples);
 
     chain.stereoTankCrossfade.setCrossfadeAmount (
-        forceMonoLeftOnly ? 0.0f : parameters.getRawParameterValue (crossfadeAmountParameterID)->load());
+        parameters.getRawParameterValue (crossfadeAmountParameterID)->load());
 
     chain.stereoTankCrossfade.process (wetStereoBuffer, numSamples);
 
@@ -326,9 +323,6 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
                                wetAfterFeedbackBuffer,
                                buffer,
                                numSamples);
-
-    if (forceMonoLeftOnly && buffer.getNumChannels() > 1)
-        buffer.clear (1, 0, numSamples);
 
     sanitizeBuffer (buffer, numSamples);
 }
@@ -374,10 +368,8 @@ void TheGreatAmericanSpringAudioProcessor::setStateInformation (const void* data
             parameters.replaceState (restoredState);
             applyDefaultGasSettings();
 
-            playbackFilePath = restoredState.getProperty ("playbackFilePath").toString();
-
-            if (playbackFilePath.isEmpty())
-                playbackFilePath = getEmbeddedPlaybackSources().front().displayPath;
+            // Always reset playback to GBS default on startup
+            playbackFilePath = getEmbeddedPlaybackSources().front().displayPath;
 
             refreshAvailableSpringIRs();
             assignDefaultTankIRs();
@@ -757,21 +749,72 @@ void TheGreatAmericanSpringAudioProcessor::setParameterPlainValue (const juce::S
 
 void TheGreatAmericanSpringAudioProcessor::applyDefaultGasSettings()
 {
-    setParameterPlainValue (modeParameterID, 0.0f);
-    setParameterPlainValue (driveParameterID, 6.0f);
-    setParameterPlainValue (preHpfCutoffParameterID, 120.0f);
-    setParameterPlainValue (preHpfResonanceParameterID, 0.707f);
-    setParameterPlainValue (postLpfCutoffParameterID, 16000.0f);
-    setParameterPlainValue (postLpfResonanceParameterID, 0.707f);
-    setParameterPlainValue (x2TanksParameterID, 2.0f);
-    setParameterPlainValue (extTankMixParameterID, 1.0f);
-    setParameterPlainValue (crossfadeAmountParameterID, 0.2f);
-    setParameterPlainValue (feedbackAmountParameterID, 0.2f);
-    setParameterPlainValue (feedbackPhaseInvertParameterID, 0.0f);
-    setParameterPlainValue (wetDryParameterID, 0.5f);
+    // "GBS default" preset
+    setParameterPlainValue (modeParameterID, 0.0f);                 // Clean
+    setParameterPlainValue (driveParameterID, 6.0f);                // 6 dB
+    setParameterPlainValue (preHpfCutoffParameterID, 100.0f);       // 100 Hz
+    setParameterPlainValue (preHpfResonanceParameterID, 1.0f);      // Q = 1
+    setParameterPlainValue (postLpfCutoffParameterID, 12000.0f);    // 12 kHz
+    setParameterPlainValue (postLpfResonanceParameterID, 1.0f);     // Q = 1
+    setParameterPlainValue (x2TanksParameterID, 0.0f);              // Ext Reverb Tanks: Off
+    setParameterPlainValue (extTankMixParameterID, 1.0f);           // 100%
+    setParameterPlainValue (crossfadeAmountParameterID, 0.0f);      // 0
+    setParameterPlainValue (feedbackAmountParameterID, 0.1f);       // 10%
+    setParameterPlainValue (feedbackPhaseInvertParameterID, 0.0f);  // Normal
+    setParameterPlainValue (wetDryParameterID, 0.5f);               // 50%
     setParameterPlainValue (monoSourceToStereoParameterID, 0.0f);
     setParameterPlainValue (showUnavailableTankControlsParameterID, 0.0f);
+    setParameterPlainValue (inputModeParameterID, 0.0f);            // Stereo
     assignDefaultTankIRs();
+}
+
+void TheGreatAmericanSpringAudioProcessor::applyGasPresetSettings()
+{
+    // "GAS default" preset — same as GBS except where noted
+    setParameterPlainValue (modeParameterID, 3.0f);                 // Germanium
+    setParameterPlainValue (driveParameterID, 6.0f);                // 6 dB
+    setParameterPlainValue (preHpfCutoffParameterID, 250.0f);       // 250 Hz
+    setParameterPlainValue (preHpfResonanceParameterID, 1.0f);      // Q = 1
+    setParameterPlainValue (postLpfCutoffParameterID, 8000.0f);     // 8 kHz
+    setParameterPlainValue (postLpfResonanceParameterID, 1.0f);     // Q = 1
+    setParameterPlainValue (x2TanksParameterID, 1.0f);              // Series
+    setParameterPlainValue (extTankMixParameterID, 1.0f);           // 100%
+    setParameterPlainValue (crossfadeAmountParameterID, 0.25f);     // 25%
+    setParameterPlainValue (feedbackAmountParameterID, 0.25f);      // 25%
+    setParameterPlainValue (feedbackPhaseInvertParameterID, 0.0f);  // Normal
+    setParameterPlainValue (wetDryParameterID, 0.5f);               // 50%
+    setParameterPlainValue (monoSourceToStereoParameterID, 0.0f);
+    setParameterPlainValue (showUnavailableTankControlsParameterID, 0.0f);
+    setParameterPlainValue (inputModeParameterID, 0.0f);            // Stereo
+    assignDefaultTankIRs();
+}
+
+void TheGreatAmericanSpringAudioProcessor::loadPreset (int index)
+{
+    if (index == 0)
+        applyDefaultGasSettings();   // GBS default
+    else if (index == 1)
+        applyGasPresetSettings();    // GAS default
+    else
+        return;
+
+    playbackFilePath = getEmbeddedPlaybackSources().front().displayPath;
+
+    if (isPrepared)
+    {
+        loadTankIRFromCurrentPath (TankSlot::left1);
+        loadTankIRFromCurrentPath (TankSlot::right1);
+        loadTankIRFromCurrentPath (TankSlot::left2);
+        loadTankIRFromCurrentPath (TankSlot::right2);
+        loadSelectedPlaybackSource();
+    }
+
+    sendChangeMessage();
+}
+
+juce::StringArray TheGreatAmericanSpringAudioProcessor::getPresetNames()
+{
+    return { "GBS default", "GAS default" };
 }
 
 bool TheGreatAmericanSpringAudioProcessor::loadTankIRFromCurrentPath (TankSlot slot)
@@ -1153,15 +1196,21 @@ bool TheGreatAmericanSpringAudioProcessor::detectMonoExternalInput (int numSampl
     const auto* left = externalInputBuffer.getReadPointer (0);
     const auto* right = externalInputBuffer.getReadPointer (1);
     auto maximumDifference = 0.0f;
+    auto maximumLeftMagnitude = 0.0f;
     auto maximumRightMagnitude = 0.0f;
 
     for (int sample = 0; sample < numSamples; ++sample)
     {
         maximumDifference = juce::jmax (maximumDifference, std::abs (left[sample] - right[sample]));
+        maximumLeftMagnitude = juce::jmax (maximumLeftMagnitude, std::abs (left[sample]));
         maximumRightMagnitude = juce::jmax (maximumRightMagnitude, std::abs (right[sample]));
     }
 
-    return maximumRightMagnitude <= 1.0e-7f || maximumDifference <= 1.0e-6f;
+    // Only flag as mono-L when the left channel carries actual signal but the right
+    // is silent or identical. Pure silence on both channels (e.g. at startup / no
+    // audio playing) must NOT be treated as mono-L or the right output gets muted.
+    return maximumLeftMagnitude > 1.0e-7f
+        && (maximumRightMagnitude <= 1.0e-7f || maximumDifference <= 1.0e-6f);
 }
 
 void TheGreatAmericanSpringAudioProcessor::applyWetPredelay (int numSamples)

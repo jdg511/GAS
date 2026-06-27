@@ -41,6 +41,29 @@ juce::Font makeFont (float height, int styleFlags, const juce::String& typefaceN
     return juce::Font (juce::FontOptions (height, styleFlags));
 }
 
+/** Pick the most Art-Nouveau-flavoured display face actually installed on the
+    host. Falls back gracefully to a refined serif so the title is always legible.
+*/
+juce::String pickArtNouveauTypeface()
+{
+    static const juce::String preferred[] = {
+        "Harrington",          // Belle Epoque / Art Nouveau display face (Windows)
+        "Goudy Stout",
+        "Bauhaus 93",
+        "Felix Titling",
+        "Modern No. 20",
+        "Bodoni MT",
+        "Georgia"
+    };
+
+    const auto available = juce::Font::findAllTypefaceNames();
+    for (const auto& name : preferred)
+        if (available.contains (name))
+            return name;
+
+    return "Georgia";
+}
+
 ThemeStyle getThemeStyle (Theme theme)
 {
     switch (theme)
@@ -395,9 +418,7 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     addAndMakeVisible (logoButton);
     refreshLogoButton();
 
-    titleLabel.setText ("The Great American Spring", juce::dontSendNotification);
-    titleLabel.setJustificationType (juce::Justification::centred);
-    addAndMakeVisible (titleLabel);
+    addAndMakeVisible (titleComponent);
 
     subtitleLabel.setText ({}, juce::dontSendNotification);
     subtitleLabel.setJustificationType (juce::Justification::centred);
@@ -569,7 +590,7 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     }
 
     inputModeLabel.setText ("Input", juce::dontSendNotification);
-    inputModeLabel.setJustificationType (juce::Justification::centredRight);
+    inputModeLabel.setJustificationType (juce::Justification::centredLeft);
     addAndMakeVisible (inputModeLabel);
 
     inputModeComboBox.addItem ("Stereo",  1);
@@ -581,6 +602,20 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     inputModeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (
         audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::inputModeParameterID, inputModeComboBox);
 
+    presetLabel.setText ("Preset", juce::dontSendNotification);
+    presetLabel.setJustificationType (juce::Justification::centredLeft);
+    addAndMakeVisible (presetLabel);
+
+    presetComboBox.addItemList (TheGreatAmericanSpringAudioProcessor::getPresetNames(), 1);
+    presetComboBox.setSelectedItemIndex (0, juce::dontSendNotification);
+    presetComboBox.onChange = [this]
+    {
+        const auto index = presetComboBox.getSelectedItemIndex();
+        if (index >= 0)
+            audioProcessor.loadPreset (index);
+    };
+    addAndMakeVisible (presetComboBox);
+
     monoSourceToStereoButton.setButtonText ("Mono Source To Stereo");
     monoSourceToStereoButton.onClick = [this] { refreshOptionControls(); };
     addAndMakeVisible (monoSourceToStereoButton);
@@ -590,7 +625,7 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     showUnavailableTankControlsButton.setButtonText ("Options not available in real life");
     showUnavailableTankControlsButton.onClick = [this]
     {
-        targetEditorHeight = showUnavailableTankControlsButton.getToggleState() ? 810 : 660;
+        targetEditorHeight = showUnavailableTankControlsButton.getToggleState() ? 900 : 694;
         refreshOptionControls();
         startTimerHz (30);
     };
@@ -598,7 +633,7 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     showUnavailableTankControlsAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (
         audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::showUnavailableTankControlsParameterID, showUnavailableTankControlsButton);
 
-    animatedEditorHeight = audioProcessor.shouldShowUnavailableTankControls() ? 810 : 660;
+    animatedEditorHeight = audioProcessor.shouldShowUnavailableTankControls() ? 900 : 694;
     targetEditorHeight = animatedEditorHeight;
     setSize (920, animatedEditorHeight);
     refreshTankLabels();
@@ -711,8 +746,11 @@ void TheGreatAmericanSpringAudioProcessorEditor::paint (juce::Graphics& graphics
 
 void TheGreatAmericanSpringAudioProcessorEditor::resized()
 {
-    constexpr int pad     = 8;
-    constexpr int halfPad = pad / 2;
+    constexpr int pad        = 8;
+    constexpr int halfPad    = pad / 2;
+    // All header rows and the Mode/Input rows share this column width so they
+    // appear visually centred together rather than spanning the full panel.
+    constexpr int contentWidth = 720;
     auto area = getLocalBounds().reduced (20);
 
     const auto centreRow = [] (juce::Rectangle<int> row, int w)
@@ -722,53 +760,71 @@ void TheGreatAmericanSpringAudioProcessorEditor::resized()
     };
 
     // ── Header ────────────────────────────────────────────────────────────────
-    auto header = area.removeFromTop (170);
-    logoButton.setBounds (header.removeFromLeft (280).reduced (4, 4));
+    auto header = area.removeFromTop (204);
 
-    // Title centred in remaining header width
-    titleLabel.setBounds (header.removeFromTop (60));
+    // Logo: 1.75× size (289×193), pushed 20 px left and 10 px above the top-left corner.
+    logoButton.setBounds (juce::Rectangle<int> (-20, -10, 289, 193));
+
+    // Title band – centred in the shared content column.
+    // Band is 80 px so the 0.50 font-scale factor gives ~30 px text, letting
+    // "The Great American Spring reverb" occupy roughly the same visual width
+    // as the shorter name did at the original larger size.
+    titleComponent.setBounds (centreRow (header.removeFromTop (80), contentWidth));
     subtitleLabel.setBounds ({});
 
     header.removeFromTop (halfPad);
 
-    // Art row (theme selector)
+    // Art row (theme selector) – cluster centred within the content column.
     {
-        auto artRow = header.removeFromTop (30);
-        const int w = 28 + 6 + 68 + 68 + 84;
-        auto r = centreRow (artRow, w);
+        auto artRow = centreRow (header.removeFromTop (30), contentWidth);
+        const int artW = 28 + 6 + 80 + 80 + 90;   // = 284
+        auto r = centreRow (artRow, artW);
         themeLabel.setBounds (r.removeFromLeft (28));
         r.removeFromLeft (6);
-        solarThemeButton.setBounds (r.removeFromLeft (68));
-        petalThemeButton.setBounds  (r.removeFromLeft (68));
-        cosmicThemeButton.setBounds (r.removeFromLeft (84));
+        solarThemeButton.setBounds (r.removeFromLeft (80));
+        petalThemeButton.setBounds  (r.removeFromLeft (80));
+        cosmicThemeButton.setBounds (r.removeFromLeft (90));
     }
 
     header.removeFromTop (halfPad);
 
-    // "Options not available in real life" toggle
-    showUnavailableTankControlsButton.setBounds (centreRow (header.removeFromTop (26), 340));
+    // "Options not available in real life" toggle – centred within content column.
+    // Our LookAndFeel draws a 38 px switch to the LEFT of the text, so the text
+    // centre sits 19 px right of the button-bounds centre.  Shift the whole button
+    // 19 px left so the TEXT (the dominant visual) lands at the column centre.
+    {
+        auto optRow = centreRow (header.removeFromTop (26), contentWidth);
+        auto optBounds = centreRow (optRow, 340);
+        // -19 accounts for the 38 px switch on the left (centres the text),
+        // then +25+30 = +55 total shift right as requested.
+        showUnavailableTankControlsButton.setBounds (optBounds.withX (optBounds.getX() + 36));
+    }
 
     area.removeFromTop (pad);
 
-    // ── Controls row: Mode | Ext Routing | Feedback Phase ───────────────────────────────
+    // ── Preset row ────────────────────────────────────────────────────────────
     {
-        // 3 logical groups, each left-aligned within their column
-        // col A: Mode label + combo (200px)
-        // col B: Ext Routing label + combo (260px)  gap 24
-        // col C: Feedback Phase label + Normal + Invert  gap 24
-        auto row = centreRow (area.removeFromTop (28), 860);
+        auto row = centreRow (area.removeFromTop (26), contentWidth);
+        presetLabel.setBounds (row.removeFromLeft (50));
+        row.removeFromLeft (8);
+        presetComboBox.setBounds (row.removeFromLeft (180));
+    }
 
-        // Col A
+    area.removeFromTop (pad);
+
+    // ── Controls row: Mode | Ext Routing | Feedback Phase ───────────────────
+    // All three groups fit in contentWidth (708 px of content < 720 px column).
+    {
+        auto row = centreRow (area.removeFromTop (28), contentWidth);
+
         modeLabel.setBounds (row.removeFromLeft (44));
         modeComboBox.setBounds (row.removeFromLeft (130));
         row.removeFromLeft (24);
 
-        // Col B
         ir2RoutingLabel.setBounds (row.removeFromLeft (112));
         ir2RoutingComboBox.setBounds (row.removeFromLeft (110));
         row.removeFromLeft (24);
 
-        // Col C
         feedbackPhaseLabel.setBounds (row.removeFromLeft (104));
         feedbackPhaseNormalButton.setBounds (row.removeFromLeft (84));
         feedbackPhaseInvertButton.setBounds (row.removeFromLeft (76));
@@ -776,17 +832,15 @@ void TheGreatAmericanSpringAudioProcessorEditor::resized()
 
     area.removeFromTop (pad);
 
-    // ── Input + Mono Source row ────────────────────────────────────────────
+    // ── Input + Mono Source row ──────────────────────────────────────────────
+    // Shares contentWidth so it stays centre-aligned with the row above.
     {
-        // "Input" label + 3-way combo | "Mono Source To Stereo" switch
-        // Align combo boxes to same column as Mode/Ext above
-        auto row = centreRow (area.removeFromTop (28), 860);
+        auto row = centreRow (area.removeFromTop (28), contentWidth);
 
         inputModeLabel.setBounds (row.removeFromLeft (44));
         inputModeComboBox.setBounds (row.removeFromLeft (130));
         row.removeFromLeft (24);
 
-        // monoSourceToStereo takes the col B + col C width area
         monoSourceToStereoButton.setBounds (row.removeFromLeft (310));
     }
 
@@ -827,14 +881,14 @@ void TheGreatAmericanSpringAudioProcessorEditor::resized()
     // ── Tank groups (expandable) ───────────────────────────────────────────────
     {
         const bool show = showUnavailableTankControlsButton.getToggleState();
-        auto ta = centreRow (area.removeFromTop (show ? 148 : 0), 880);
-        auto top = ta.removeFromTop (62);
+        auto ta = centreRow (area.removeFromTop (show ? 204 : 0), 880);
+        auto top = ta.removeFromTop (98);
         ta.removeFromTop (pad);
         auto bot = ta;
 
-        auto la  = top.removeFromLeft ((top.getWidth() - 12) / 2);  top.removeFromLeft (12);
+        auto la  = top.removeFromLeft ((top.getWidth() - 16) / 2);  top.removeFromLeft (16);
         auto ra  = top;
-        auto la2 = bot.removeFromLeft ((bot.getWidth() - 12) / 2);  bot.removeFromLeft (12);
+        auto la2 = bot.removeFromLeft ((bot.getWidth() - 16) / 2);  bot.removeFromLeft (16);
         auto ra2 = bot;
 
         const auto layoutGroup = [] (juce::Rectangle<int> g,
@@ -843,10 +897,12 @@ void TheGreatAmericanSpringAudioProcessorEditor::resized()
                                      juce::TextButton& btn)
         {
             grp.setBounds (g);
-            auto inner = g.reduced (10, 10);
-            lbl.setBounds (inner.removeFromTop (17));
-            inner.removeFromTop (4);
-            btn.setBounds (inner.removeFromTop (20));
+            auto inner = g.reduced (14, 10);
+            // Clear the group's caption row so the filename label isn't crowded.
+            inner.removeFromTop (22);
+            lbl.setBounds (inner.removeFromTop (20));
+            inner.removeFromTop (8);
+            btn.setBounds (inner.removeFromTop (26));
         };
 
         layoutGroup (la,  leftTankGroup,   leftTankLabel,   leftTankLoadButton);
@@ -858,12 +914,14 @@ void TheGreatAmericanSpringAudioProcessorEditor::resized()
     area.removeFromTop (pad);
 
     // ── Playback ────────────────────────────────────────────────────────────
-    playbackLabel.setBounds (area.removeFromTop (17));
+    // Label and controls share contentWidth so they centre-align with everything above.
+    // Combo width is 514 so total fits exactly: 514+8+110+8+80 = 720.
+    playbackLabel.setBounds (centreRow (area.removeFromTop (17), contentWidth));
     area.removeFromTop (halfPad);
 
     {
-        auto pb = centreRow (area.removeFromTop (26), 880);
-        playbackSourceComboBox.setBounds (pb.removeFromLeft (620));
+        auto pb = centreRow (area.removeFromTop (26), contentWidth);
+        playbackSourceComboBox.setBounds (pb.removeFromLeft (514));
         pb.removeFromLeft (pad);
         loadPlaybackButton.setBounds     (pb.removeFromLeft (110));
         pb.removeFromLeft (pad);
@@ -896,13 +954,12 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
 
     const auto style = getThemeStyle (currentTheme);
 
-    titleLabel.setFont (makeFont (34.0f, juce::Font::italic, style.titleTypeface));
+    titleComponent.setStyle (style.textPrimary, style.accentA, pickArtNouveauTypeface());
     subtitleLabel.setFont (makeFont (12.0f, juce::Font::plain, style.bodyTypeface));
     modeLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
     ir2RoutingLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
     feedbackPhaseLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
     themeLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
-    titleLabel.setColour (juce::Label::textColourId, style.textPrimary);
     subtitleLabel.setColour (juce::Label::textColourId, style.textSecondary);
     modeLabel.setColour (juce::Label::textColourId, style.textPrimary);
     ir2RoutingLabel.setColour (juce::Label::textColourId, style.textPrimary);
@@ -921,6 +978,7 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
     styleComboBox (ir2RoutingComboBox);
     styleComboBox (playbackSourceComboBox);
     styleComboBox (inputModeComboBox);
+    styleComboBox (presetComboBox);
 
     const auto styleControlLabel = [&style] (juce::Label& label)
     {
@@ -937,6 +995,9 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
 
     inputModeLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
     inputModeLabel.setColour (juce::Label::textColourId, style.textPrimary);
+
+    presetLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
+    presetLabel.setColour (juce::Label::textColourId, style.textPrimary);
 
     playbackLabel.setFont (makeFont (12.0f, juce::Font::bold, style.bodyTypeface));
 
@@ -1016,24 +1077,13 @@ void TheGreatAmericanSpringAudioProcessorEditor::refreshOptionControls()
         component->setVisible (showTankControls);
     }
 
-    targetEditorHeight = showTankControls ? 810 : 660;
+    targetEditorHeight = showTankControls ? 900 : 694;
 
-    // Input mode controls monoSourceToStereo availability
+    // "Mono Source To Stereo" only applies to a mono input. Enable it when the
+    // input is Mono L / Mono R; grey it out for Stereo (not applicable).
     const bool isMono = inputModeComboBox.getSelectedItemIndex() > 0;
-    monoSourceToStereoButton.setEnabled (! isMono);
-    monoSourceToStereoButton.setAlpha (isMono ? 0.5f : 1.0f);
-    if (isMono)
-    {
-        audioProcessor.setParameterPlainValue (TheGreatAmericanSpringAudioProcessor::monoSourceToStereoParameterID, 1.0f);
-        monoSourceToStereoButton.setToggleState (true, juce::dontSendNotification);
-    }
-    // When stereo, grey out monoSourceToStereo (not applicable)
-    const bool isStereo = inputModeComboBox.getSelectedItemIndex() == 0;
-    if (isStereo)
-    {
-        monoSourceToStereoButton.setEnabled (false);
-        monoSourceToStereoButton.setAlpha (0.45f);
-    }
+    monoSourceToStereoButton.setEnabled (isMono);
+    monoSourceToStereoButton.setAlpha (isMono ? 1.0f : 0.45f);
 }
 
 void TheGreatAmericanSpringAudioProcessorEditor::updateExpandedTankControlsAnimation()
@@ -1057,19 +1107,20 @@ void TheGreatAmericanSpringAudioProcessorEditor::timerCallback()
 {
     introElapsedMs += 33;
 
-    if (introThemeStep == 0 && introElapsedMs >= 1000)
+    // Wait 3 s before the first flip, then hold each artwork for 2 s.
+    if (introThemeStep == 0 && introElapsedMs >= 3000)
     {
         introThemeStep = 1;
         applyTheme (Theme::petal);
     }
 
-    if (introThemeStep == 1 && introElapsedMs >= 2000)
+    if (introThemeStep == 1 && introElapsedMs >= 5000)
     {
         introThemeStep = 2;
         applyTheme (Theme::cosmic);
     }
 
-    if (introThemeStep == 2 && introElapsedMs >= 3000)
+    if (introThemeStep == 2 && introElapsedMs >= 7000)
     {
         introThemeStep = 3;
         applyTheme (Theme::solar);

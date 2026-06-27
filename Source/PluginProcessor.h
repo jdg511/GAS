@@ -100,6 +100,9 @@ public:
 
     void setParameterPlainValue (const juce::String& parameterID, float plainValue);
 
+    void loadPreset (int presetIndex);
+    static juce::StringArray getPresetNames();
+
 private:
     juce::File getCurrentModuleBinaryFile() const;
     juce::Array<juce::File> getSpringIrSearchDirectories() const;
@@ -109,6 +112,7 @@ private:
     void refreshAvailableSpringIRs();
     void assignRandomTankIRsIfNeeded();
     void applyDefaultGasSettings();
+    void applyGasPresetSettings();
     void assignDefaultTankIRs();
     bool loadTankIRFromCurrentPath (TankSlot slot);
     void loadFallbackTankIR (TankSlot slot);
