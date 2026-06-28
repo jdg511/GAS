@@ -4,6 +4,8 @@
 
 #include <JuceHeader.h>
 
+#include <array>
+
 #include "DSP/ModularFxChain.h"
 
 class TheGreatAmericanSpringAudioProcessor final : public juce::AudioProcessor,
@@ -135,7 +137,7 @@ private:
     void sanitizeBuffer (juce::AudioBuffer<float>& buffer, int numSamples) const;
     void applySecondaryTankPredelay (juce::AudioBuffer<float>& monoBuffer,
                                        juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear>& delayLine,
-                                       float delaySamples,
+                                       const float* delaySamplesPerSample,
                                        int numSamples);
     FilterClipperBlock::Parameters getFilterClipperParameters() const;
 
@@ -176,11 +178,11 @@ private:
     double playbackReadPosition = 0.0;
     double predelayLfoPhase = 0.0;
     int currentMaximumBlockSize = 512;
-    float wetPredelaySamples = 0.0f;
-    float wetPredelayTargetMilliseconds = 35.0f;
-    float secondaryLeftPredelaySamples = 0.0f;
-    float secondaryRightPredelaySamples = 0.0f;
-    juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> wetPredelayMillisecondsSmoothed;
+    // Four independent predelay lanes, each wandering within its own range:
+    //   0 = primary L, 1 = primary R   (20-30 ms)
+    //   2 = 2nd-tank L, 3 = 2nd-tank R (30-42 ms)
+    std::array<juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear>, 4> predelayMsSmoothed;
+    std::array<float, 4> predelayTargetMs { { 25.0f, 25.0f, 36.0f, 36.0f } };
     juce::Random predelayRandom;
     Ir2RoutingMode lastIr2RoutingMode = Ir2RoutingMode::off;
     std::atomic<bool> lastMonoSourceWithoutStereoConversion { false };

@@ -12,12 +12,13 @@
 namespace
 {
 constexpr auto projectSpringIrDirectoryPath = R"(C:\Users\Jason\source\repos\GAS\Spring IRs)";
-constexpr double randomPredelayLfoFrequencyHz = 0.3;
-constexpr double randomPredelayMinimumMilliseconds = 28.0;
-constexpr double randomPredelayMaximumMilliseconds = 36.0;
-constexpr double randomPredelaySmoothingSeconds = 1.25;
-constexpr double secondaryLeftTankPredelayMilliseconds = 41.0;
-constexpr double secondaryRightTankPredelayMilliseconds = 31.0;
+constexpr double predelayLfoFrequencyHz = 0.3;
+constexpr double predelaySmoothingSeconds = 1.25;
+// Each tank gets its own predelay, wandering independently within these ranges.
+constexpr double primaryPredelayMinMs = 20.0;   // primary tanks: 20-30 ms
+constexpr double primaryPredelayMaxMs = 30.0;
+constexpr double secondaryPredelayMinMs = 30.0; // 2nd (Ext) tanks: 30-42 ms
+constexpr double secondaryPredelayMaxMs = 42.0;
 constexpr float fallbackImpulse = 1.0f;
 constexpr auto defaultLeftTank1IrFileName = "GBS-L.wav";
 constexpr auto defaultRightTank1IrFileName = "GBS-R.wav";
@@ -113,15 +114,17 @@ void TheGreatAmericanSpringAudioProcessor::prepareToPlay (double sampleRate, int
 {
     currentSampleRate = sampleRate;
     currentMaximumBlockSize = juce::jmax (1, samplesPerBlock);
-    wetPredelayTargetMilliseconds = juce::jmap (predelayRandom.nextFloat(),
-                                                static_cast<float> (randomPredelayMinimumMilliseconds),
-                                                static_cast<float> (randomPredelayMaximumMilliseconds));
-    wetPredelayMillisecondsSmoothed.reset (currentSampleRate, randomPredelaySmoothingSeconds);
-    wetPredelayMillisecondsSmoothed.setCurrentAndTargetValue (wetPredelayTargetMilliseconds);
     predelayLfoPhase = 0.0;
-    wetPredelaySamples = wetPredelayTargetMilliseconds * 0.001f * static_cast<float> (currentSampleRate);
-    secondaryLeftPredelaySamples = static_cast<float> (secondaryLeftTankPredelayMilliseconds * 0.001 * currentSampleRate);
-    secondaryRightPredelaySamples = static_cast<float> (secondaryRightTankPredelayMilliseconds * 0.001 * currentSampleRate);
+    for (int lane = 0; lane < 4; ++lane)
+    {
+        const auto minMs = (lane < 2) ? primaryPredelayMinMs : secondaryPredelayMinMs;
+        const auto maxMs = (lane < 2) ? primaryPredelayMaxMs : secondaryPredelayMaxMs;
+        predelayTargetMs[lane] = juce::jmap (predelayRandom.nextFloat(),
+                                             static_cast<float> (minMs),
+                                             static_cast<float> (maxMs));
+        predelayMsSmoothed[lane].reset (currentSampleRate, predelaySmoothingSeconds);
+        predelayMsSmoothed[lane].setCurrentAndTargetValue (predelayTargetMs[lane]);
+    }
 
     resizeProcessingBuffers (currentMaximumBlockSize);
 
@@ -134,8 +137,6 @@ void TheGreatAmericanSpringAudioProcessor::prepareToPlay (double sampleRate, int
     wetPredelayRight.prepare (monoSpec);
     secondaryLeftTankPredelay.prepare (monoSpec);
     secondaryRightTankPredelay.prepare (monoSpec);
-    secondaryLeftTankPredelay.setDelay (secondaryLeftPredelaySamples);
-    secondaryRightTankPredelay.setDelay (secondaryRightPredelaySamples);
 
     chain.prepare (sampleRate, currentMaximumBlockSize);
     reset();
@@ -161,12 +162,11 @@ void TheGreatAmericanSpringAudioProcessor::reset()
 
     wetPredelayLeft.reset();
     wetPredelayRight.reset();
-    wetPredelayMillisecondsSmoothed.setCurrentAndTargetValue (wetPredelayTargetMilliseconds);
-    predelayLfoPhase = 0.0;
     secondaryLeftTankPredelay.reset();
     secondaryRightTankPredelay.reset();
-    secondaryLeftTankPredelay.setDelay (secondaryLeftPredelaySamples);
-    secondaryRightTankPredelay.setDelay (secondaryRightPredelaySamples);
+    predelayLfoPhase = 0.0;
+    for (int lane = 0; lane < 4; ++lane)
+        predelayMsSmoothed[lane].setCurrentAndTargetValue (predelayTargetMs[lane]);
     lastIr2RoutingMode = getIr2RoutingMode();
 
     externalInputBuffer.clear();
@@ -257,10 +257,12 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
 
     if (ir2Parallel)
     {
-        monoLeftSecondaryBuffer.copyFrom (0, 0, wetStereoBuffer, 0, 0, numSamples);
-        monoRightSecondaryBuffer.copyFrom (0, 0, wetStereoBuffer, 1, 0, numSamples);
-        applySecondaryTankPredelay (monoLeftSecondaryBuffer, secondaryLeftTankPredelay, secondaryLeftPredelaySamples, numSamples);
-        applySecondaryTankPredelay (monoRightSecondaryBuffer, secondaryRightTankPredelay, secondaryRightPredelaySamples, numSamples);
+        // Parallel: 2nd tank branches from the dry wet input (pre primary-predelay)
+        // and gets ONLY its own 30-42 ms predelay, truly parallel to the primary.
+        monoLeftSecondaryBuffer.copyFrom (0, 0, wetInputBaseBuffer, 0, 0, numSamples);
+        monoRightSecondaryBuffer.copyFrom (0, 0, wetInputBaseBuffer, 1, 0, numSamples);
+        applySecondaryTankPredelay (monoLeftSecondaryBuffer, secondaryLeftTankPredelay, predelayModulationBuffer.getReadPointer (3), numSamples);
+        applySecondaryTankPredelay (monoRightSecondaryBuffer, secondaryRightTankPredelay, predelayModulationBuffer.getReadPointer (4), numSamples);
     }
 
     chain.leftTank.process (monoLeftBuffer, numSamples);
@@ -271,25 +273,37 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
         chain.leftTankSecondary.process (monoLeftSecondaryBuffer, numSamples);
         chain.rightTankSecondary.process (monoRightSecondaryBuffer, numSamples);
 
-        const auto extGain = 0.5f * extTankMix;
-        monoLeftBuffer.applyGain (0, 0, numSamples, 1.0f - extGain);
-        monoRightBuffer.applyGain (0, 0, numSamples, 1.0f - extGain);
-        monoLeftBuffer.addFrom (0, 0, monoLeftSecondaryBuffer, 0, 0, numSamples, extGain);
-        monoRightBuffer.addFrom (0, 0, monoRightSecondaryBuffer, 0, 0, numSamples, extGain);
+        // Parallel blend = additive "amount of 2nd tank": the primary stays at
+        // full level and the 2nd tank is summed on top, scaled from silent
+        // (Mix 0) to full (Mix 100%). Mirrors a single pot that just dials in
+        // how much 2nd tank you hear, the same meaning as in Series.
+        monoLeftBuffer.addFrom (0, 0, monoLeftSecondaryBuffer, 0, 0, numSamples, extTankMix);
+        monoRightBuffer.addFrom (0, 0, monoRightSecondaryBuffer, 0, 0, numSamples, extTankMix);
     }
     else if (ir2Series)
     {
         monoLeftSecondaryBuffer.copyFrom (0, 0, monoLeftBuffer, 0, 0, numSamples);
         monoRightSecondaryBuffer.copyFrom (0, 0, monoRightBuffer, 0, 0, numSamples);
-        applySecondaryTankPredelay (monoLeftBuffer, secondaryLeftTankPredelay, secondaryLeftPredelaySamples, numSamples);
-        applySecondaryTankPredelay (monoRightBuffer, secondaryRightTankPredelay, secondaryRightPredelaySamples, numSamples);
+        applySecondaryTankPredelay (monoLeftBuffer, secondaryLeftTankPredelay, predelayModulationBuffer.getReadPointer (3), numSamples);
+        applySecondaryTankPredelay (monoRightBuffer, secondaryRightTankPredelay, predelayModulationBuffer.getReadPointer (4), numSamples);
+
+        // +12 dB makeup gain between the two tanks (Series only) to compensate
+        // for the level drop from cascading the second reverb tank.
+        const float interTankGain = juce::Decibels::decibelsToGain (12.0f);
+        monoLeftBuffer.applyGain  (0, 0, numSamples, interTankGain);
+        monoRightBuffer.applyGain (0, 0, numSamples, interTankGain);
+
         chain.leftTankSecondary.process (monoLeftBuffer, numSamples);
         chain.rightTankSecondary.process (monoRightBuffer, numSamples);
 
+        // Additive blend, identical pot meaning to Parallel: the primary tank
+        // stays at full level and the cascaded 2nd-tank signal is summed on top,
+        // scaled from silent (Mix 0) to full (Mix 100%). monoLeft/RightSecondary
+        // hold the full-level primary; monoLeft/Right hold the cascade.
         monoLeftBuffer.applyGain (0, 0, numSamples, extTankMix);
         monoRightBuffer.applyGain (0, 0, numSamples, extTankMix);
-        monoLeftBuffer.addFrom (0, 0, monoLeftSecondaryBuffer, 0, 0, numSamples, 1.0f - extTankMix);
-        monoRightBuffer.addFrom (0, 0, monoRightSecondaryBuffer, 0, 0, numSamples, 1.0f - extTankMix);
+        monoLeftBuffer.addFrom (0, 0, monoLeftSecondaryBuffer, 0, 0, numSamples, 1.0f);
+        monoRightBuffer.addFrom (0, 0, monoRightSecondaryBuffer, 0, 0, numSamples, 1.0f);
     }
 
     wetStereoBuffer.copyFrom (0, 0, monoLeftBuffer, 0, 0, numSamples);
@@ -1035,7 +1049,7 @@ void TheGreatAmericanSpringAudioProcessor::resizeProcessingBuffers (int samplesP
     wetStereoBuffer.setSize (2, samplesPerBlock);
     wetAfterFeedbackBuffer.setSize (2, samplesPerBlock);
     feedbackReturnBuffer.setSize (2, samplesPerBlock);
-    predelayModulationBuffer.setSize (2, samplesPerBlock);
+    predelayModulationBuffer.setSize (5, samplesPerBlock);
     monoLeftBuffer.setSize (1, samplesPerBlock);
     monoRightBuffer.setSize (1, samplesPerBlock);
     monoLeftSecondaryBuffer.setSize (1, samplesPerBlock);
@@ -1219,22 +1233,30 @@ void TheGreatAmericanSpringAudioProcessor::applyWetPredelay (int numSamples)
     auto* wetRight = wetInputBaseBuffer.getWritePointer (1);
     auto* delayedLeft = wetStereoBuffer.getWritePointer (0);
     auto* delayedRight = wetStereoBuffer.getWritePointer (1);
-    const auto* wetDelaySamplesPerSample = predelayModulationBuffer.getReadPointer (0);
+    const auto* leftDelay  = predelayModulationBuffer.getReadPointer (0);   // primary L
+    const auto* rightDelay = predelayModulationBuffer.getReadPointer (2);   // primary R
 
     for (int sample = 0; sample < numSamples; ++sample)
     {
         wetPredelayLeft.pushSample (0, wetLeft[sample]);
         wetPredelayRight.pushSample (0, wetRight[sample]);
-        delayedLeft[sample] = wetPredelayLeft.popSample (0, wetDelaySamplesPerSample[sample]);
-        delayedRight[sample] = wetPredelayRight.popSample (0, wetDelaySamplesPerSample[sample]);
+        delayedLeft[sample]  = wetPredelayLeft.popSample (0, leftDelay[sample]);
+        delayedRight[sample] = wetPredelayRight.popSample (0, rightDelay[sample]);
     }
 }
 
 void TheGreatAmericanSpringAudioProcessor::updatePredelayModulation (int numSamples)
 {
-    auto* wetDelaySamples = predelayModulationBuffer.getWritePointer (0);
-    auto* feedbackDelaySamples = predelayModulationBuffer.getWritePointer (1);
-    const auto phaseIncrement = randomPredelayLfoFrequencyHz / currentSampleRate;
+    // predelayModulationBuffer channel map (per sample, in samples):
+    //   0 = primary L   1 = feedback   2 = primary R   3 = 2nd L   4 = 2nd R
+    auto* primaryLeftOut  = predelayModulationBuffer.getWritePointer (0);
+    auto* feedbackOut     = predelayModulationBuffer.getWritePointer (1);
+    auto* primaryRightOut = predelayModulationBuffer.getWritePointer (2);
+    auto* secondaryLeftOut  = predelayModulationBuffer.getWritePointer (3);
+    auto* secondaryRightOut = predelayModulationBuffer.getWritePointer (4);
+
+    const auto phaseIncrement = predelayLfoFrequencyHz / currentSampleRate;
+    const auto msToSamples = 0.001f * static_cast<float> (currentSampleRate);
 
     for (int sample = 0; sample < numSamples; ++sample)
     {
@@ -1243,17 +1265,29 @@ void TheGreatAmericanSpringAudioProcessor::updatePredelayModulation (int numSamp
         while (predelayLfoPhase >= 1.0)
         {
             predelayLfoPhase -= 1.0;
-            wetPredelayTargetMilliseconds = juce::jmap (predelayRandom.nextFloat(),
-                                                        static_cast<float> (randomPredelayMinimumMilliseconds),
-                                                        static_cast<float> (randomPredelayMaximumMilliseconds));
-            wetPredelayMillisecondsSmoothed.setTargetValue (wetPredelayTargetMilliseconds);
+
+            // Pick a fresh, independent random target for each of the four lanes.
+            for (int lane = 0; lane < 4; ++lane)
+            {
+                const auto minMs = (lane < 2) ? primaryPredelayMinMs : secondaryPredelayMinMs;
+                const auto maxMs = (lane < 2) ? primaryPredelayMaxMs : secondaryPredelayMaxMs;
+                predelayTargetMs[lane] = juce::jmap (predelayRandom.nextFloat(),
+                                                     static_cast<float> (minMs),
+                                                     static_cast<float> (maxMs));
+                predelayMsSmoothed[lane].setTargetValue (predelayTargetMs[lane]);
+            }
         }
 
-        const auto wetDelayMilliseconds = wetPredelayMillisecondsSmoothed.getNextValue();
-        const auto wetDelay = wetDelayMilliseconds * 0.001f * static_cast<float> (currentSampleRate);
+        const auto priL = predelayMsSmoothed[0].getNextValue() * msToSamples;
+        const auto priR = predelayMsSmoothed[1].getNextValue() * msToSamples;
+        const auto secL = predelayMsSmoothed[2].getNextValue() * msToSamples;
+        const auto secR = predelayMsSmoothed[3].getNextValue() * msToSamples;
 
-        wetDelaySamples[sample] = wetDelay;
-        feedbackDelaySamples[sample] = wetDelay / 3.0f;
+        primaryLeftOut[sample]    = priL;
+        primaryRightOut[sample]   = priR;
+        secondaryLeftOut[sample]  = secL;
+        secondaryRightOut[sample] = secR;
+        feedbackOut[sample]       = 0.5f * (priL + priR) / 3.0f;
     }
 }
 
@@ -1278,7 +1312,7 @@ void TheGreatAmericanSpringAudioProcessor::sanitizeBuffer (juce::AudioBuffer<flo
 void TheGreatAmericanSpringAudioProcessor::applySecondaryTankPredelay (
     juce::AudioBuffer<float>& monoBuffer,
     juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear>& delayLine,
-    float delaySamples,
+    const float* delaySamplesPerSample,
     int numSamples)
 {
     auto* samples = monoBuffer.getWritePointer (0);
@@ -1286,7 +1320,7 @@ void TheGreatAmericanSpringAudioProcessor::applySecondaryTankPredelay (
     for (int sample = 0; sample < numSamples; ++sample)
     {
         delayLine.pushSample (0, samples[sample]);
-        samples[sample] = delayLine.popSample (0, delaySamples);
+        samples[sample] = delayLine.popSample (0, delaySamplesPerSample[sample]);
     }
 }
 

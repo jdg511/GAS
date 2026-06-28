@@ -77,6 +77,9 @@ public:
 
         for (auto& filter : postLpf)
             filter.reset();
+
+        dcBlockerX1 = { { 0.0f, 0.0f } };
+        dcBlockerY1 = { { 0.0f, 0.0f } };
     }
 
     void setParameters (const Parameters& newParameters)
@@ -125,6 +128,27 @@ public:
             }
 
             oversampling->processSamplesDown (baseBlock);
+
+            // Static makeup gain + DC blocker (asymmetric modes only), base rate.
+            for (int channel = 0; channel < 2; ++channel)
+            {
+                auto* samples = (channel == 0) ? left : right;
+
+                for (int sample = 0; sample < numSamples; ++sample)
+                {
+                    auto value = samples[sample] * tuning.makeup;
+
+                    if (tuning.blockDc)
+                    {
+                        const auto out = value - dcBlockerX1[channel] + 0.9995f * dcBlockerY1[channel];
+                        dcBlockerX1[channel] = value;
+                        dcBlockerY1[channel] = out;
+                        value = out;
+                    }
+
+                    samples[sample] = value;
+                }
+            }
         }
 
         for (int sample = 0; sample < numSamples; ++sample)
@@ -137,30 +161,55 @@ public:
 private:
     struct ModeTuning
     {
-        float threshold = 1.0f;
+        // Per-diode model.
+        //  thresholdPos/Neg : forward-voltage clip points (normalised). Unequal
+        //                     values = asymmetric clipping -> even harmonics.
+        //  knee             : transition sharpness (higher = harder/sharper).
+        //  bleed            : feedback-loop passthrough that keeps the curve
+        //                     rising so it never fully flattens (op-amp feedback
+        //                     topologies). 0 for shunt-to-ground.
+        //  makeup           : static output gain so the quieter modes land near
+        //                     LED's loudness (LED is the loudest reference).
+        //  blockDc          : remove the DC offset that asymmetric clipping adds.
+        float thresholdPos = 1.0f;
+        float thresholdNeg = 1.0f;
         float knee = 1.0f;
-        float leakage = 0.0f;
+        float bleed = 0.0f;
+        float makeup = 1.0f;
+        bool  blockDc = false;
     };
 
     static ModeTuning getModeTuning (Mode mode)
     {
         switch (mode)
         {
-            case Mode::clean:      return { 1.0f, 1.0f, 0.0f };
-            case Mode::silicon:    return { 0.65f * juce::Decibels::decibelsToGain (-12.0f), 1.85f, 0.0f };
-            case Mode::led:        return { 1.05f * juce::Decibels::decibelsToGain (-9.0f), 1.20f, 0.0f };
-            case Mode::germanium:  return { 0.78f * juce::Decibels::decibelsToGain (-12.0f), 0.95f, 0.06f };
-        }
+            // Germanium: asymmetric shunt-to-ground (2 diodes up / 1 down).
+            // Lowest Vf, soft Ge knee; unequal halves -> strong even harmonics.
+            // Shunt topology => no bleed; DC-block the asymmetric offset.
+            case Mode::germanium:  return { 0.60f, 0.30f, 2.5f, 0.00f, 1.8f, true };
 
-        return {};
+            // Silicon: anti-parallel diodes in the op-amp feedback loop (TS-style).
+            // Mid Vf, softest knee, generous bleed => smooth, dynamic, never
+            // fully saturates.
+            case Mode::silicon:    return { 0.70f, 0.70f, 1.5f, 0.12f, 1.4f, false };
+
+            // LED: high-Vf clipping in a feedback loop (Bluesbreaker / OCD).
+            // Clips loud and late with the sharpest knee => open but hard crunch.
+            // Loudest mode => reference level, no makeup.
+            case Mode::led:        return { 1.70f, 1.70f, 5.0f, 0.06f, 1.0f, false };
+
+            case Mode::clean:
+            default:               return { 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, false };
+        }
     }
 
-    static float applyTransferFunction (float inputSample, const ModeTuning& tuning)
+    static float applyTransferFunction (float x, const ModeTuning& tuning)
     {
-        const auto scaled = inputSample / juce::jmax (0.05f, tuning.threshold);
-        const auto softClipped = std::tanh (scaled * tuning.knee) * tuning.threshold;
-        const auto leakageComponent = tuning.leakage * std::tanh ((inputSample + 0.03f) * 0.75f);
-        return softClipped + leakageComponent;
+        const auto threshold = (x >= 0.0f) ? tuning.thresholdPos : tuning.thresholdNeg;
+        const auto a = std::abs (x) / juce::jmax (0.05f, threshold);
+        // Soft-knee saturator that asymptotes to +/-threshold; knee sets hardness.
+        const auto clipped = x / std::pow (1.0f + std::pow (a, tuning.knee), 1.0f / tuning.knee);
+        return clipped + tuning.bleed * x;
     }
 
     void updateFilterState (float preCutoff, float preQ, float postCutoff, float postQ)
@@ -194,5 +243,7 @@ private:
     juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> postLpfResonance;
     std::array<juce::dsp::StateVariableTPTFilter<float>, 2> preHpf;
     std::array<juce::dsp::StateVariableTPTFilter<float>, 2> postLpf;
+    std::array<float, 2> dcBlockerX1 { { 0.0f, 0.0f } };
+    std::array<float, 2> dcBlockerY1 { { 0.0f, 0.0f } };
     std::unique_ptr<juce::dsp::Oversampling<float>> oversampling;
 };
