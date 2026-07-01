@@ -2,9 +2,91 @@
 
 #include "PluginProcessor.h"
 
+//==============================================================================
+/** A self-contained Art Nouveau wordmark for the plugin title.
+
+    Draws the title in a decorative typeface (chosen at runtime from the fonts
+    available on the host machine) with a hand-drawn whiplash flourish beneath
+    it. Owns no state beyond its current theme colours and typeface, so it can
+    be retheme'd cheaply by the editor.
+*/
+class ArtNouveauTitle final : public juce::Component
+{
+public:
+    ArtNouveauTitle() { setInterceptsMouseClicks (false, false); }
+
+    void setStyle (juce::Colour primaryColour,
+                   juce::Colour accentColour,
+                   const juce::String& typeface)
+    {
+        textColour     = primaryColour;
+        flourishColour = accentColour;
+        typefaceName   = typeface;
+        repaint();
+    }
+
+    void paint (juce::Graphics& g) override
+    {
+        auto bounds = getLocalBounds().toFloat();
+
+        // Reserve the lower strip for the flourish, the rest for the lettering.
+        auto flourishArea = bounds.removeFromBottom (juce::jmax (16.0f, bounds.getHeight() * 0.26f));
+        auto textArea     = bounds;
+
+        auto font = juce::Font (juce::FontOptions (typefaceName,
+                                                   textArea.getHeight() * 0.50f,
+                                                   juce::Font::plain))
+                        .withExtraKerningFactor (0.07f);
+        g.setFont (font);
+
+        // drawFittedText scales the lettering down to fit the band, so the
+        // wordmark never overruns its bounds regardless of the chosen face.
+        const auto textBox = textArea.toNearestInt();
+
+        // Soft drop shadow for depth.
+        g.setColour (juce::Colours::black.withAlpha (0.40f));
+        g.drawFittedText (titleText, textBox.translated (0, 2), juce::Justification::centred, 1, 1.0f);
+
+        g.setColour (textColour);
+        g.drawFittedText (titleText, textBox, juce::Justification::centred, 1, 1.0f);
+
+        // ── Whiplash flourish ────────────────────────────────────────────────
+        const auto cx = flourishArea.getCentreX();
+        const auto cy = flourishArea.getCentreY();
+        const auto reach = juce::jmin (flourishArea.getWidth() * 0.42f, 230.0f);
+
+        g.setColour (flourishColour.withAlpha (0.9f));
+
+        juce::Path flourish;
+        // Left sweep
+        flourish.startNewSubPath (cx - 9.0f, cy);
+        flourish.cubicTo (cx - reach * 0.35f, cy + 5.0f,
+                          cx - reach * 0.6f,  cy - 6.0f,
+                          cx - reach,         cy);
+        // Right sweep (mirror)
+        flourish.startNewSubPath (cx + 9.0f, cy);
+        flourish.cubicTo (cx + reach * 0.35f, cy + 5.0f,
+                          cx + reach * 0.6f,  cy - 6.0f,
+                          cx + reach,         cy);
+        g.strokePath (flourish, juce::PathStrokeType (1.5f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+        // Centre medallion + end dots
+        g.fillEllipse (juce::Rectangle<float> (9.0f, 9.0f).withCentre ({ cx, cy }));
+        g.setColour (flourishColour.withAlpha (0.65f));
+        g.fillEllipse (juce::Rectangle<float> (5.0f, 5.0f).withCentre ({ cx - reach, cy }));
+        g.fillEllipse (juce::Rectangle<float> (5.0f, 5.0f).withCentre ({ cx + reach, cy }));
+    }
+
+private:
+    juce::String titleText { "The Great American Spring reverb" };
+    juce::String typefaceName { "Georgia" };
+    juce::Colour textColour { juce::Colours::white };
+    juce::Colour flourishColour { juce::Colours::white };
+};
+
 class TheGreatAmericanSpringAudioProcessorEditor final : public juce::AudioProcessorEditor,
-                                                           private juce::ChangeListener,
-                                                           private juce::Timer
+                                                          private juce::ChangeListener,
+                                                          private juce::Timer
 {
 public:
     enum class Theme
@@ -42,7 +124,7 @@ private:
 
     TheGreatAmericanSpringAudioProcessor& audioProcessor;
 
-    juce::Label titleLabel;
+    ArtNouveauTitle titleComponent;
     juce::Label subtitleLabel;
     juce::Label modeLabel;
     juce::ComboBox modeComboBox;
@@ -58,6 +140,8 @@ private:
     juce::ToggleButton petalThemeButton;
     juce::ToggleButton cosmicThemeButton;
     juce::ImageButton logoButton;
+    juce::Label presetLabel;
+    juce::ComboBox presetComboBox;
 
     juce::Label driveLabel;
     juce::Slider driveSlider;
@@ -110,6 +194,9 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> extTankMixAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> feedbackAmountAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> wetDryAttachment;
+    juce::Label inputModeLabel;
+    juce::ComboBox inputModeComboBox;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> inputModeAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> monoSourceToStereoAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> showUnavailableTankControlsAttachment;
     std::unique_ptr<juce::LookAndFeel_V4> lookAndFeel;
@@ -121,8 +208,8 @@ private:
     Theme currentTheme = Theme::solar;
     int introThemeStep = 0;
     int introElapsedMs = 0;
-    int animatedEditorHeight = 620;
-    int targetEditorHeight = 620;
+    int animatedEditorHeight = 694;
+    int targetEditorHeight = 694;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TheGreatAmericanSpringAudioProcessorEditor)
 };

@@ -41,6 +41,29 @@ juce::Font makeFont (float height, int styleFlags, const juce::String& typefaceN
     return juce::Font (juce::FontOptions (height, styleFlags));
 }
 
+/** Pick the most Art-Nouveau-flavoured display face actually installed on the
+    host. Falls back gracefully to a refined serif so the title is always legible.
+*/
+juce::String pickArtNouveauTypeface()
+{
+    static const juce::String preferred[] = {
+        "Harrington",          // Belle Epoque / Art Nouveau display face (Windows)
+        "Goudy Stout",
+        "Bauhaus 93",
+        "Felix Titling",
+        "Modern No. 20",
+        "Bodoni MT",
+        "Georgia"
+    };
+
+    const auto available = juce::Font::findAllTypefaceNames();
+    for (const auto& name : preferred)
+        if (available.contains (name))
+            return name;
+
+    return "Georgia";
+}
+
 ThemeStyle getThemeStyle (Theme theme)
 {
     switch (theme)
@@ -68,7 +91,7 @@ ThemeStyle getThemeStyle (Theme theme)
                 juce::Colour::fromRGB (246, 222, 160),
                 juce::Colour::fromRGB (245, 235, 194),
                 juce::Colour::fromRGB (130, 151, 166),
-                "Palatino Linotype",
+                "Felix Titling",
                 "Georgia"
             };
 
@@ -95,7 +118,7 @@ ThemeStyle getThemeStyle (Theme theme)
                 juce::Colour::fromRGB (244, 226, 170),
                 juce::Colour::fromRGB (251, 239, 213),
                 juce::Colour::fromRGB (110, 142, 134),
-                "Book Antiqua",
+                "Felix Titling",
                 "Palatino Linotype"
             };
 
@@ -122,7 +145,7 @@ ThemeStyle getThemeStyle (Theme theme)
                 juce::Colour::fromRGB (246, 175, 93),
                 juce::Colour::fromRGB (247, 217, 123),
                 juce::Colour::fromRGB (124, 151, 214),
-                "Cambria",
+                "Felix Titling",
                 "Georgia"
             };
     }
@@ -223,6 +246,23 @@ struct ArtDirectedLookAndFeel final : juce::LookAndFeel_V4
                                bool shouldDrawButtonAsHighlighted,
                                bool shouldDrawButtonAsDown) override
     {
+        const bool gasInverted = button.getProperties()["gasInverted"];
+        if (gasInverted)
+        {
+            const auto style = getThemeStyle (theme);
+            const auto bounds = button.getLocalBounds().toFloat().reduced (0.5f);
+            auto base = button.getToggleState() ? style.panelTop.brighter (0.22f) : style.panelTop.brighter (0.12f);
+            if (shouldDrawButtonAsDown)        base = base.darker (0.16f);
+            else if (shouldDrawButtonAsHighlighted) base = base.brighter (0.12f);
+            juce::ColourGradient fill (base, bounds.getCentreX(), bounds.getY(),
+                                       style.panelBottom.darker (0.08f), bounds.getCentreX(), bounds.getBottom(), false);
+            g.setGradientFill (fill);
+            g.fillRoundedRectangle (bounds, 8.0f);
+            g.setColour (style.buttonOutline);
+            g.drawRoundedRectangle (bounds, 8.0f, 1.4f);
+            return;
+        }
+
         if (button.getRadioGroupId() != 0)
             return;
 
@@ -246,6 +286,17 @@ struct ArtDirectedLookAndFeel final : juce::LookAndFeel_V4
 
     void drawButtonText (juce::Graphics& g, juce::TextButton& button, bool, bool) override
     {
+        const bool gasInverted = button.getProperties()["gasInverted"];
+        if (gasInverted)
+        {
+            const auto style = getThemeStyle (theme);
+            auto font = makeFont (12.5f, juce::Font::bold, style.bodyTypeface);
+            g.setColour (style.textPrimary);
+            g.setFont (font);
+            g.drawFittedText (button.getButtonText(), button.getLocalBounds(), juce::Justification::centred, 1);
+            return;
+        }
+
         const auto style = getThemeStyle (theme);
         auto font = makeFont (12.5f, juce::Font::bold, style.bodyTypeface);
         g.setColour (style.textPrimary);
@@ -367,9 +418,7 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     addAndMakeVisible (logoButton);
     refreshLogoButton();
 
-    titleLabel.setText ("The Great American Spring", juce::dontSendNotification);
-    titleLabel.setJustificationType (juce::Justification::centred);
-    addAndMakeVisible (titleLabel);
+    addAndMakeVisible (titleComponent);
 
     subtitleLabel.setText ({}, juce::dontSendNotification);
     subtitleLabel.setJustificationType (juce::Justification::centred);
@@ -533,16 +582,50 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     };
     addAndMakeVisible (playbackToggleButton);
 
+    for (auto* btn : std::initializer_list<juce::TextButton*> { &leftTankLoadButton, &rightTankLoadButton,
+                                                                 &leftTank2LoadButton, &rightTank2LoadButton,
+                                                                 &loadPlaybackButton, &playbackToggleButton })
+    {
+        btn->getProperties().set ("gasInverted", true);
+    }
+
+    inputModeLabel.setText ("Input", juce::dontSendNotification);
+    inputModeLabel.setJustificationType (juce::Justification::centredLeft);
+    addAndMakeVisible (inputModeLabel);
+
+    inputModeComboBox.addItem ("Stereo",  1);
+    inputModeComboBox.addItem ("Mono L",  2);
+    inputModeComboBox.addItem ("Mono R",  3);
+    inputModeComboBox.onChange = [this] { refreshOptionControls(); };
+    addAndMakeVisible (inputModeComboBox);
+
+    inputModeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (
+        audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::inputModeParameterID, inputModeComboBox);
+
+    presetLabel.setText ("Preset", juce::dontSendNotification);
+    presetLabel.setJustificationType (juce::Justification::centredLeft);
+    addAndMakeVisible (presetLabel);
+
+    presetComboBox.addItemList (TheGreatAmericanSpringAudioProcessor::getPresetNames(), 1);
+    presetComboBox.setSelectedItemIndex (0, juce::dontSendNotification);
+    presetComboBox.onChange = [this]
+    {
+        const auto index = presetComboBox.getSelectedItemIndex();
+        if (index >= 0)
+            audioProcessor.loadPreset (index);
+    };
+    addAndMakeVisible (presetComboBox);
+
     monoSourceToStereoButton.setButtonText ("Mono Source To Stereo");
     monoSourceToStereoButton.onClick = [this] { refreshOptionControls(); };
     addAndMakeVisible (monoSourceToStereoButton);
     monoSourceToStereoAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (
         audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::monoSourceToStereoParameterID, monoSourceToStereoButton);
 
-    showUnavailableTankControlsButton.setButtonText ("Will not be available in real life");
+    showUnavailableTankControlsButton.setButtonText ("Options not available in real life");
     showUnavailableTankControlsButton.onClick = [this]
     {
-        targetEditorHeight = showUnavailableTankControlsButton.getToggleState() ? 760 : 620;
+        targetEditorHeight = showUnavailableTankControlsButton.getToggleState() ? 900 : 694;
         refreshOptionControls();
         startTimerHz (30);
     };
@@ -550,9 +633,9 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     showUnavailableTankControlsAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (
         audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::showUnavailableTankControlsParameterID, showUnavailableTankControlsButton);
 
-    animatedEditorHeight = audioProcessor.shouldShowUnavailableTankControls() ? 760 : 620;
+    animatedEditorHeight = audioProcessor.shouldShowUnavailableTankControls() ? 900 : 694;
     targetEditorHeight = animatedEditorHeight;
-    setSize (1180, animatedEditorHeight);
+    setSize (920, animatedEditorHeight);
     refreshTankLabels();
     refreshPlaybackLabel();
     refreshOptionControls();
@@ -613,130 +696,238 @@ void TheGreatAmericanSpringAudioProcessorEditor::paint (juce::Graphics& graphics
     graphics.drawRoundedRectangle (panel, 24.0f, 1.8f);
     graphics.setColour (style.textPrimary.withAlpha (0.14f));
     graphics.drawRoundedRectangle (panel.reduced (7.0f), 18.0f, 1.0f);
+
+    // Art Nouveau corner flourishes
+    {
+        const auto accentColour = style.accentA.withAlpha (0.28f);
+        graphics.setColour (accentColour);
+        const float cx = panel.getX();
+        const float cy = panel.getY();
+        const float cr = panel.getRight();
+        const float cb = panel.getBottom();
+        const float fl = 38.0f; // flourish length
+
+        // Top-left
+        juce::Path tl;
+        tl.startNewSubPath (cx + 22, cy + 8);
+        tl.cubicTo (cx + 22, cy + fl, cx + 8, cy + fl, cx + 8, cy + 22);
+        graphics.strokePath (tl, juce::PathStrokeType (1.6f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+        // Top-right
+        juce::Path tr;
+        tr.startNewSubPath (cr - 22, cy + 8);
+        tr.cubicTo (cr - 22, cy + fl, cr - 8, cy + fl, cr - 8, cy + 22);
+        graphics.strokePath (tr, juce::PathStrokeType (1.6f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+        // Bottom-left
+        juce::Path bl;
+        bl.startNewSubPath (cx + 22, cb - 8);
+        bl.cubicTo (cx + 22, cb - fl, cx + 8, cb - fl, cx + 8, cb - 22);
+        graphics.strokePath (bl, juce::PathStrokeType (1.6f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+        // Bottom-right
+        juce::Path br;
+        br.startNewSubPath (cr - 22, cb - 8);
+        br.cubicTo (cr - 22, cb - fl, cr - 8, cb - fl, cr - 8, cb - 22);
+        graphics.strokePath (br, juce::PathStrokeType (1.6f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+
+        // Top centre diamond accent
+        const float mx = bounds.getCentreX();
+        juce::Path diamond;
+        diamond.startNewSubPath (mx, cy + 5);
+        diamond.lineTo (mx + 6, cy + 11);
+        diamond.lineTo (mx, cy + 17);
+        diamond.lineTo (mx - 6, cy + 11);
+        diamond.closeSubPath();
+        graphics.setColour (accentColour.withMultipliedAlpha (0.7f));
+        graphics.strokePath (diamond, juce::PathStrokeType (1.2f));
+    }
 }
 
 void TheGreatAmericanSpringAudioProcessorEditor::resized()
 {
-    auto area = getLocalBounds().reduced (18);
-    const auto centreRow = [] (juce::Rectangle<int> rowArea, int contentWidth)
+    constexpr int pad        = 8;
+    constexpr int halfPad    = pad / 2;
+    // All header rows and the Mode/Input rows share this column width so they
+    // appear visually centred together rather than spanning the full panel.
+    constexpr int contentWidth = 720;
+    auto area = getLocalBounds().reduced (20);
+
+    const auto centreRow = [] (juce::Rectangle<int> row, int w)
     {
-        return rowArea.withWidth (juce::jmin (contentWidth, rowArea.getWidth()))
-                      .withX (rowArea.getX() + juce::jmax (0, (rowArea.getWidth() - contentWidth) / 2));
+        return row.withWidth (juce::jmin (w, row.getWidth()))
+                  .withX (row.getX() + juce::jmax (0, (row.getWidth() - w) / 2));
     };
 
-    auto headerArea = area.removeFromTop (116);
-    logoButton.setBounds (headerArea.removeFromLeft (364).reduced (6, 2));
-    titleLabel.setBounds (headerArea.removeFromTop (52));
+    // ── Header ────────────────────────────────────────────────────────────────
+    auto header = area.removeFromTop (204);
+
+    // Logo: 1.75× size (289×193), pushed 20 px left and 10 px above the top-left corner.
+    logoButton.setBounds (juce::Rectangle<int> (-20, -10, 289, 193));
+
+    // Title band – centred in the shared content column.
+    // Band is 80 px so the 0.50 font-scale factor gives ~30 px text, letting
+    // "The Great American Spring reverb" occupy roughly the same visual width
+    // as the shorter name did at the original larger size.
+    titleComponent.setBounds (centreRow (header.removeFromTop (80), contentWidth));
     subtitleLabel.setBounds ({});
-    area.removeFromTop (8);
 
-    auto topRow = centreRow (area.removeFromTop (32), 1080);
-    auto leftTop = topRow.removeFromLeft (500);
-    auto rightTop = topRow;
+    header.removeFromTop (halfPad);
 
-    modeLabel.setBounds (leftTop.removeFromLeft (52));
-    modeComboBox.setBounds (leftTop.removeFromLeft (150));
-    leftTop.removeFromLeft (18);
-    ir2RoutingLabel.setBounds (leftTop.removeFromLeft (130));
-    ir2RoutingComboBox.setBounds (leftTop.removeFromLeft (150));
-
-    feedbackPhaseLabel.setBounds (rightTop.removeFromLeft (104));
-    feedbackPhaseNormalButton.setBounds (rightTop.removeFromLeft (92));
-    feedbackPhaseInvertButton.setBounds (rightTop.removeFromLeft (82));
-    rightTop.removeFromLeft (14);
-    themeLabel.setBounds (rightTop.removeFromLeft (28));
-    solarThemeButton.setBounds (rightTop.removeFromLeft (68));
-    petalThemeButton.setBounds (rightTop.removeFromLeft (68));
-    cosmicThemeButton.setBounds (rightTop.removeFromLeft (84));
-
-    area.removeFromTop (8);
-
-    auto optionsRow = centreRow (area.removeFromTop (30), 930);
-    monoSourceToStereoButton.setBounds (optionsRow.removeFromLeft (240));
-    optionsRow.removeFromLeft (22);
-    showUnavailableTankControlsButton.setBounds (optionsRow.removeFromLeft (350));
-
-    area.removeFromTop (8);
-
-    auto knobArea = area.removeFromTop (214);
-    const int knobWidth = 104;
-    const int knobGap = 22;
-    const int knobHeight = 92;
-    const int firstKnobRowWidth = (knobWidth * 5) + (knobGap * 4);
-    const int secondKnobRowWidth = (knobWidth * 4) + (knobGap * 3);
-
-    auto layoutKnob = [&] (juce::Rectangle<int> bounds, juce::Label& label, juce::Slider& slider)
+    // Art row (theme selector) – cluster centred within the content column.
     {
-        label.setBounds (bounds.removeFromTop (18));
-        slider.setBounds (bounds.removeFromTop (knobHeight));
-    };
+        auto artRow = centreRow (header.removeFromTop (30), contentWidth);
+        const int artW = 28 + 6 + 80 + 80 + 90;   // = 284
+        auto r = centreRow (artRow, artW);
+        themeLabel.setBounds (r.removeFromLeft (28));
+        r.removeFromLeft (6);
+        solarThemeButton.setBounds (r.removeFromLeft (80));
+        petalThemeButton.setBounds  (r.removeFromLeft (80));
+        cosmicThemeButton.setBounds (r.removeFromLeft (90));
+    }
 
-    auto firstKnobRow = centreRow (knobArea.removeFromTop (knobHeight + 24), firstKnobRowWidth);
-    auto secondKnobRow = centreRow (knobArea.removeFromTop (knobHeight + 24), secondKnobRowWidth);
+    header.removeFromTop (halfPad);
 
-    layoutKnob (firstKnobRow.removeFromLeft (knobWidth), driveLabel, driveSlider);
-    firstKnobRow.removeFromLeft (knobGap);
-    layoutKnob (firstKnobRow.removeFromLeft (knobWidth), preHpfCutoffLabel, preHpfCutoffSlider);
-    firstKnobRow.removeFromLeft (knobGap);
-    layoutKnob (firstKnobRow.removeFromLeft (knobWidth), preHpfResonanceLabel, preHpfResonanceSlider);
-    firstKnobRow.removeFromLeft (knobGap);
-    layoutKnob (firstKnobRow.removeFromLeft (knobWidth), postLpfCutoffLabel, postLpfCutoffSlider);
-    firstKnobRow.removeFromLeft (knobGap);
-    layoutKnob (firstKnobRow.removeFromLeft (knobWidth), postLpfResonanceLabel, postLpfResonanceSlider);
-
-    layoutKnob (secondKnobRow.removeFromLeft (knobWidth), crossfadeAmountLabel, crossfadeAmountSlider);
-    secondKnobRow.removeFromLeft (knobGap);
-    layoutKnob (secondKnobRow.removeFromLeft (knobWidth), extTankMixLabel, extTankMixSlider);
-    secondKnobRow.removeFromLeft (knobGap);
-    layoutKnob (secondKnobRow.removeFromLeft (knobWidth), feedbackAmountLabel, feedbackAmountSlider);
-    secondKnobRow.removeFromLeft (knobGap);
-    layoutKnob (secondKnobRow.removeFromLeft (knobWidth), wetDryLabel, wetDrySlider);
-
-    area.removeFromTop (10);
-
-    const auto showTankControls = showUnavailableTankControlsButton.getToggleState();
-    auto TankArea = centreRow (area.removeFromTop (showTankControls ? 166 : 0), 980);
-    auto topTankRow = TankArea.removeFromTop (78);
-    TankArea.removeFromTop (10);
-    auto bottomTankRow = TankArea;
-
-    auto leftArea = topTankRow.removeFromLeft ((topTankRow.getWidth() - 18) / 2);
-    topTankRow.removeFromLeft (18);
-    auto rightArea = topTankRow;
-
-    auto left2Area = bottomTankRow.removeFromLeft ((bottomTankRow.getWidth() - 18) / 2);
-    bottomTankRow.removeFromLeft (18);
-    auto right2Area = bottomTankRow;
-
-    const auto layoutTankGroup = [] (juce::Rectangle<int> groupArea,
-                                       juce::GroupComponent& group,
-                                       juce::Label& label,
-                                       juce::TextButton& button)
+    // "Options not available in real life" toggle – centred within content column.
+    // Our LookAndFeel draws a 38 px switch to the LEFT of the text, so the text
+    // centre sits 19 px right of the button-bounds centre.  Shift the whole button
+    // 19 px left so the TEXT (the dominant visual) lands at the column centre.
     {
-        group.setBounds (groupArea);
-        auto inner = groupArea.reduced (10, 14);
-        label.setBounds (inner.removeFromTop (20));
-        inner.removeFromTop (4);
-        button.setBounds (inner.removeFromTop (24));
-    };
+        auto optRow = centreRow (header.removeFromTop (26), contentWidth);
+        auto optBounds = centreRow (optRow, 340);
+        // -19 accounts for the 38 px switch on the left (centres the text),
+        // then +25+30 = +55 total shift right as requested.
+        showUnavailableTankControlsButton.setBounds (optBounds.withX (optBounds.getX() + 36));
+    }
 
-    layoutTankGroup (leftArea, leftTankGroup, leftTankLabel, leftTankLoadButton);
-    layoutTankGroup (rightArea, rightTankGroup, rightTankLabel, rightTankLoadButton);
-    layoutTankGroup (left2Area, leftTank2Group, leftTank2Label, leftTank2LoadButton);
-    layoutTankGroup (right2Area, rightTank2Group, rightTank2Label, rightTank2LoadButton);
+    area.removeFromTop (pad);
 
-    area.removeFromTop (8);
-    playbackLabel.setBounds (area.removeFromTop (20));
-    area.removeFromTop (4);
+    // ── Preset row ────────────────────────────────────────────────────────────
+    {
+        auto row = centreRow (area.removeFromTop (26), contentWidth);
+        presetLabel.setBounds (row.removeFromLeft (50));
+        row.removeFromLeft (8);
+        presetComboBox.setBounds (row.removeFromLeft (180));
+    }
 
-    auto playbackControls = centreRow (area.removeFromTop (30), 980);
-    playbackSourceComboBox.setBounds (playbackControls.removeFromLeft (720));
-    playbackControls.removeFromLeft (12);
-    loadPlaybackButton.setBounds (playbackControls.removeFromLeft (120));
-    playbackControls.removeFromLeft (12);
-    playbackToggleButton.setBounds (playbackControls.removeFromLeft (80));
+    area.removeFromTop (pad);
+
+    // ── Controls row: Mode | Ext Routing | Feedback Phase ───────────────────
+    // All three groups fit in contentWidth (708 px of content < 720 px column).
+    {
+        auto row = centreRow (area.removeFromTop (28), contentWidth);
+
+        modeLabel.setBounds (row.removeFromLeft (44));
+        modeComboBox.setBounds (row.removeFromLeft (130));
+        row.removeFromLeft (24);
+
+        ir2RoutingLabel.setBounds (row.removeFromLeft (112));
+        ir2RoutingComboBox.setBounds (row.removeFromLeft (110));
+        row.removeFromLeft (24);
+
+        feedbackPhaseLabel.setBounds (row.removeFromLeft (104));
+        feedbackPhaseNormalButton.setBounds (row.removeFromLeft (84));
+        feedbackPhaseInvertButton.setBounds (row.removeFromLeft (76));
+    }
+
+    area.removeFromTop (pad);
+
+    // ── Input + Mono Source row ──────────────────────────────────────────────
+    // Shares contentWidth so it stays centre-aligned with the row above.
+    {
+        auto row = centreRow (area.removeFromTop (28), contentWidth);
+
+        inputModeLabel.setBounds (row.removeFromLeft (44));
+        inputModeComboBox.setBounds (row.removeFromLeft (130));
+        row.removeFromLeft (24);
+
+        monoSourceToStereoButton.setBounds (row.removeFromLeft (310));
+    }
+
+    area.removeFromTop (pad + 4);
+
+    // ── Knob rows ────────────────────────────────────────────────────────────
+    {
+        constexpr int kw = 100;
+        constexpr int kg = 20;
+        constexpr int kh = 88;
+
+        auto knobs = area.removeFromTop (kh * 2 + 22 * 2 + 4);
+
+        auto layoutKnob = [&] (juce::Rectangle<int> b, juce::Label& lbl, juce::Slider& sl)
+        {
+            lbl.setBounds (b.removeFromTop (18));
+            sl.setBounds  (b.removeFromTop (kh));
+        };
+
+        auto row1 = centreRow (knobs.removeFromTop (kh + 22), kw * 5 + kg * 4);
+        knobs.removeFromTop (4);
+        auto row2 = centreRow (knobs.removeFromTop (kh + 22), kw * 4 + kg * 3);
+
+        layoutKnob (row1.removeFromLeft (kw), driveLabel,            driveSlider);            row1.removeFromLeft (kg);
+        layoutKnob (row1.removeFromLeft (kw), preHpfCutoffLabel,     preHpfCutoffSlider);     row1.removeFromLeft (kg);
+        layoutKnob (row1.removeFromLeft (kw), preHpfResonanceLabel,  preHpfResonanceSlider);  row1.removeFromLeft (kg);
+        layoutKnob (row1.removeFromLeft (kw), postLpfCutoffLabel,    postLpfCutoffSlider);    row1.removeFromLeft (kg);
+        layoutKnob (row1.removeFromLeft (kw), postLpfResonanceLabel, postLpfResonanceSlider);
+
+        layoutKnob (row2.removeFromLeft (kw), crossfadeAmountLabel,  crossfadeAmountSlider);  row2.removeFromLeft (kg);
+        layoutKnob (row2.removeFromLeft (kw), extTankMixLabel,       extTankMixSlider);       row2.removeFromLeft (kg);
+        layoutKnob (row2.removeFromLeft (kw), feedbackAmountLabel,   feedbackAmountSlider);   row2.removeFromLeft (kg);
+        layoutKnob (row2.removeFromLeft (kw), wetDryLabel,           wetDrySlider);
+    }
+
+    area.removeFromTop (pad);
+
+    // ── Tank groups (expandable) ───────────────────────────────────────────────
+    {
+        const bool show = showUnavailableTankControlsButton.getToggleState();
+        auto ta = centreRow (area.removeFromTop (show ? 204 : 0), 880);
+        auto top = ta.removeFromTop (98);
+        ta.removeFromTop (pad);
+        auto bot = ta;
+
+        auto la  = top.removeFromLeft ((top.getWidth() - 16) / 2);  top.removeFromLeft (16);
+        auto ra  = top;
+        auto la2 = bot.removeFromLeft ((bot.getWidth() - 16) / 2);  bot.removeFromLeft (16);
+        auto ra2 = bot;
+
+        const auto layoutGroup = [] (juce::Rectangle<int> g,
+                                     juce::GroupComponent& grp,
+                                     juce::Label& lbl,
+                                     juce::TextButton& btn)
+        {
+            grp.setBounds (g);
+            auto inner = g.reduced (14, 10);
+            // Clear the group's caption row so the filename label isn't crowded.
+            inner.removeFromTop (22);
+            lbl.setBounds (inner.removeFromTop (20));
+            inner.removeFromTop (8);
+            btn.setBounds (inner.removeFromTop (26));
+        };
+
+        layoutGroup (la,  leftTankGroup,   leftTankLabel,   leftTankLoadButton);
+        layoutGroup (ra,  rightTankGroup,  rightTankLabel,  rightTankLoadButton);
+        layoutGroup (la2, leftTank2Group,  leftTank2Label,  leftTank2LoadButton);
+        layoutGroup (ra2, rightTank2Group, rightTank2Label, rightTank2LoadButton);
+    }
+
+    area.removeFromTop (pad);
+
+    // ── Playback ────────────────────────────────────────────────────────────
+    // Label and controls share contentWidth so they centre-align with everything above.
+    // Combo width is 514 so total fits exactly: 514+8+110+8+80 = 720.
+    playbackLabel.setBounds (centreRow (area.removeFromTop (17), contentWidth));
+    area.removeFromTop (halfPad);
+
+    {
+        auto pb = centreRow (area.removeFromTop (26), contentWidth);
+        playbackSourceComboBox.setBounds (pb.removeFromLeft (514));
+        pb.removeFromLeft (pad);
+        loadPlaybackButton.setBounds     (pb.removeFromLeft (110));
+        pb.removeFromLeft (pad);
+        playbackToggleButton.setBounds   (pb.removeFromLeft (80));
+    }
 }
-
 void TheGreatAmericanSpringAudioProcessorEditor::configureRotarySlider (juce::Slider& slider,
                                                                           juce::Label& label,
                                                                           const juce::String& labelText,
@@ -763,13 +954,12 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
 
     const auto style = getThemeStyle (currentTheme);
 
-    titleLabel.setFont (makeFont (28.0f, juce::Font::bold, style.titleTypeface));
+    titleComponent.setStyle (style.textPrimary, style.accentA, pickArtNouveauTypeface());
     subtitleLabel.setFont (makeFont (12.0f, juce::Font::plain, style.bodyTypeface));
     modeLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
     ir2RoutingLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
     feedbackPhaseLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
     themeLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
-    titleLabel.setColour (juce::Label::textColourId, style.textPrimary);
     subtitleLabel.setColour (juce::Label::textColourId, style.textSecondary);
     modeLabel.setColour (juce::Label::textColourId, style.textPrimary);
     ir2RoutingLabel.setColour (juce::Label::textColourId, style.textPrimary);
@@ -787,6 +977,8 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
     styleComboBox (modeComboBox);
     styleComboBox (ir2RoutingComboBox);
     styleComboBox (playbackSourceComboBox);
+    styleComboBox (inputModeComboBox);
+    styleComboBox (presetComboBox);
 
     const auto styleControlLabel = [&style] (juce::Label& label)
     {
@@ -800,6 +992,12 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
     {
         styleControlLabel (*label);
     }
+
+    inputModeLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
+    inputModeLabel.setColour (juce::Label::textColourId, style.textPrimary);
+
+    presetLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
+    presetLabel.setColour (juce::Label::textColourId, style.textPrimary);
 
     playbackLabel.setFont (makeFont (12.0f, juce::Font::bold, style.bodyTypeface));
 
@@ -868,19 +1066,6 @@ void TheGreatAmericanSpringAudioProcessorEditor::refreshOptionControls()
     feedbackPhaseNormalButton.setToggleState (! feedbackInverted, juce::dontSendNotification);
     feedbackPhaseInvertButton.setToggleState (feedbackInverted, juce::dontSendNotification);
 
-    const auto crossfadeAvailable = audioProcessor.isCrossfadeAvailableForCurrentLayout();
-    crossfadeAmountSlider.setEnabled (crossfadeAvailable);
-    crossfadeAmountLabel.setAlpha (crossfadeAvailable ? 1.0f : 0.45f);
-    crossfadeAmountSlider.setAlpha (crossfadeAvailable ? 1.0f : 0.45f);
-
-    if (! crossfadeAvailable)
-    {
-        if (std::abs (crossfadeAmountSlider.getValue()) > 0.0001)
-            audioProcessor.setParameterPlainValue (TheGreatAmericanSpringAudioProcessor::crossfadeAmountParameterID, 0.0f);
-
-        crossfadeAmountSlider.setValue (0.0, juce::dontSendNotification);
-    }
-
     const auto showTankControls = showUnavailableTankControlsButton.getToggleState();
 
     juce::Component* tankControls[] = { &leftTankGroup, &rightTankGroup, &leftTank2Group, &rightTank2Group,
@@ -892,7 +1077,13 @@ void TheGreatAmericanSpringAudioProcessorEditor::refreshOptionControls()
         component->setVisible (showTankControls);
     }
 
-    targetEditorHeight = showTankControls ? 760 : 620;
+    targetEditorHeight = showTankControls ? 900 : 694;
+
+    // "Mono Source To Stereo" only applies to a mono input. Enable it when the
+    // input is Mono L / Mono R; grey it out for Stereo (not applicable).
+    const bool isMono = inputModeComboBox.getSelectedItemIndex() > 0;
+    monoSourceToStereoButton.setEnabled (isMono);
+    monoSourceToStereoButton.setAlpha (isMono ? 1.0f : 0.45f);
 }
 
 void TheGreatAmericanSpringAudioProcessorEditor::updateExpandedTankControlsAnimation()
@@ -916,19 +1107,20 @@ void TheGreatAmericanSpringAudioProcessorEditor::timerCallback()
 {
     introElapsedMs += 33;
 
-    if (introThemeStep == 0 && introElapsedMs >= 1000)
+    // Wait 3 s before the first flip, then hold each artwork for 2 s.
+    if (introThemeStep == 0 && introElapsedMs >= 3000)
     {
         introThemeStep = 1;
         applyTheme (Theme::petal);
     }
 
-    if (introThemeStep == 1 && introElapsedMs >= 2000)
+    if (introThemeStep == 1 && introElapsedMs >= 5000)
     {
         introThemeStep = 2;
         applyTheme (Theme::cosmic);
     }
 
-    if (introThemeStep == 2 && introElapsedMs >= 3000)
+    if (introThemeStep == 2 && introElapsedMs >= 7000)
     {
         introThemeStep = 3;
         applyTheme (Theme::solar);

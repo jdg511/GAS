@@ -20,7 +20,7 @@ else()
 endif()
 
 set(SCC_ASSET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Assets")
-set(SCC_BASE_PLUGIN_FORMATS Standalone VST3 CACHE STRING "JUCE plugin formats to request. Platform-incompatible formats are ignored by JUCE.")
+set(SCC_BASE_PLUGIN_FORMATS Standalone VST3 LV2 CACHE STRING "JUCE plugin formats to request. Platform-incompatible formats are ignored by JUCE.")
 set(SCC_VST2_SDK_PATH "" CACHE PATH "Path to the legacy Steinberg VST2 SDK folder. When set, the JUCE VST format is added.")
 set(SCC_DEPLOY_WINDOWS_VST3_AFTER_BUILD ON CACHE BOOL "Copy the Windows VST3 bundle to SCC_VST3_DEPLOY_ROOT after building.")
 set(SCC_VST3_DEPLOY_ROOT "C:/Program Files/Common Files/VST3" CACHE PATH "Windows VST3 install root used when SCC_DEPLOY_WINDOWS_VST3_AFTER_BUILD is ON.")
@@ -62,7 +62,7 @@ juce_add_plugin(TheGreatAmericanSpring
     LV2URI "urn:illicitapothecary:plugins:great-american-spring"
     VST3_CATEGORIES Fx Reverb Stereo
     AAX_CATEGORY Reverb Effect
-    PRODUCT_NAME "The Great American Spring")
+    PRODUCT_NAME "The Great American Spring reverb")
 
 juce_generate_juce_header(TheGreatAmericanSpring)
 
@@ -109,7 +109,7 @@ function(scc_copy_spring_irs_after_build target_name)
     endif()
 endfunction()
 
-foreach(format_name IN ITEMS Standalone VST VST3)
+foreach(format_name IN ITEMS Standalone VST VST3 LV2)
     scc_copy_spring_irs_after_build(TheGreatAmericanSpring_${format_name})
 endforeach()
 

@@ -4,10 +4,12 @@
 
 #include <JuceHeader.h>
 
+#include <array>
+
 #include "DSP/ModularFxChain.h"
 
 class TheGreatAmericanSpringAudioProcessor final : public juce::AudioProcessor,
-                                                     public juce::ChangeBroadcaster
+                                                    public juce::ChangeBroadcaster
 {
 public:
     enum class TankSlot
@@ -65,6 +67,11 @@ public:
     bool shouldShowUnavailableTankControls() const;
     bool isCrossfadeAvailableForCurrentLayout() const;
 
+    static constexpr auto inputModeParameterID = "inputMode";
+
+    enum class InputMode { stereo = 0, monoL, monoR };
+    InputMode getInputMode() const;
+
     bool loadPlaybackFile (const juce::File& file);
     void setPlaybackActive (bool shouldPlay);
     bool isPlaybackActive() const;
@@ -95,6 +102,9 @@ public:
 
     void setParameterPlainValue (const juce::String& parameterID, float plainValue);
 
+    void loadPreset (int presetIndex);
+    static juce::StringArray getPresetNames();
+
 private:
     juce::File getCurrentModuleBinaryFile() const;
     juce::Array<juce::File> getSpringIrSearchDirectories() const;
@@ -104,6 +114,7 @@ private:
     void refreshAvailableSpringIRs();
     void assignRandomTankIRsIfNeeded();
     void applyDefaultGasSettings();
+    void applyGasPresetSettings();
     void assignDefaultTankIRs();
     bool loadTankIRFromCurrentPath (TankSlot slot);
     void loadFallbackTankIR (TankSlot slot);
@@ -126,7 +137,7 @@ private:
     void sanitizeBuffer (juce::AudioBuffer<float>& buffer, int numSamples) const;
     void applySecondaryTankPredelay (juce::AudioBuffer<float>& monoBuffer,
                                        juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear>& delayLine,
-                                       float delaySamples,
+                                       const float* delaySamplesPerSample,
                                        int numSamples);
     FilterClipperBlock::Parameters getFilterClipperParameters() const;
 
@@ -167,11 +178,11 @@ private:
     double playbackReadPosition = 0.0;
     double predelayLfoPhase = 0.0;
     int currentMaximumBlockSize = 512;
-    float wetPredelaySamples = 0.0f;
-    float wetPredelayTargetMilliseconds = 35.0f;
-    float secondaryLeftPredelaySamples = 0.0f;
-    float secondaryRightPredelaySamples = 0.0f;
-    juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> wetPredelayMillisecondsSmoothed;
+    // Four independent predelay lanes, each wandering within its own range:
+    //   0 = primary L, 1 = primary R   (20-30 ms)
+    //   2 = 2nd-tank L, 3 = 2nd-tank R (30-42 ms)
+    std::array<juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear>, 4> predelayMsSmoothed;
+    std::array<float, 4> predelayTargetMs { { 25.0f, 25.0f, 36.0f, 36.0f } };
     juce::Random predelayRandom;
     Ir2RoutingMode lastIr2RoutingMode = Ir2RoutingMode::off;
     std::atomic<bool> lastMonoSourceWithoutStereoConversion { false };
