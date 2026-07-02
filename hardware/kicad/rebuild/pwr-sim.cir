@@ -1,0 +1,20 @@
+.title KiCad schematic
+.include "C:/Users/Jason/GAS-build/repo/hardware/kicad/sim/power-backplane-sim/gas-power-models.lib"
+.ac dec 50 100 10Meg
+; plots rail ripple rejection: probe v(+15va), v(-15va)
+; the bead+LC filter should be >40 dB down at the module's
+; 350 kHz switching frequency
+XFB500 +15VRAW +15VA BEAD600
+C501 +15VA AGND 100u
+C502 +15VA AGND 10u
+C503 +15VA AGND 100n
+XFB501 -15VRAW -15VA BEAD600
+C506 -15VA AGND 100n
+C504 AGND -15VA 100u
+C505 -15VA AGND 10u
+V2 GND -15VRAW DC 15 AC 1  
+V1 +15VRAW GND DC 15 AC 1  
+V3 AGND GND DC 0 
+RL1 +15VA AGND 60
+RL2 -15VA AGND 60
+.end
