@@ -1,0 +1,26 @@
+** Drc report for io-board.kicad_pcb **
+** Created on 2026-07-02T04:01:44 **
+** Report includes: Errors, Warnings **
+
+** Found 1 DRC violations **
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(66.0000 mm, 54.7200 mm): Reference field of U1
+    @(66.0875 mm, 54.0000 mm): Pad 1 [N_U1A_P] of R14 on F.Cu
+
+** Found 1 unconnected pads **
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(31.0000 mm, 31.0000 mm): Zone [AGND] on B.Cu, priority 0
+    @(31.0000 mm, 31.0000 mm): Zone [AGND] on F.Cu, priority 0
+
+** Found 0 Footprint errors **
+
+** Ignored checks **
+    - Footprint has no courtyard defined
+    - Track endpoint not centered on via
+    - Tuning profile track geometries
+    - Footprint doesn't match symbol's footprint filters
+    - Footprint component type doesn't match footprint pads
+
+** End of Report **

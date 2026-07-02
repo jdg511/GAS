@@ -25,7 +25,8 @@ CONFIGS = {
     "ext-tank-routing": dict(
         power=["+15VA", "-15VA", "+5VAUX"], power_w=0.8, gnd=["AGND"]),
     "io-board": dict(
-        power=["+15VA", "-15VA"], power_w=0.8, gnd=["AGND"]),
+        power=["+15VA", "-15VA", "AGND"], power_w=0.8, gnd=["AGND"],
+        cut=[]),  # AGND is routed as a net on this board (pours are bonus)
 }
 
 def mm(v):
@@ -88,6 +89,23 @@ def clear_of_foreign_copper(board, pt, code, margin):
 def stitch(board, gnd):
     code = board.GetNetsByName()[gnd].GetNetCode()
     added = 0
+    zones = [z for z in board.Zones() if z.GetNetCode() == code]
+
+    def both_layers(pt):
+        """A stitch via must land in ground copper on BOTH layers."""
+        for lay in (pcbnew.F_Cu, pcbnew.B_Cu):
+            if not any(z.HitTestFilledArea(lay, pt, 0) for z in zones
+                       if lay in z.GetLayerSet().Seq()):
+                return False
+        return True
+
+    # purge existing one-sided ground stitch vias (in a void on one layer)
+    for t in list(board.GetTracks()):
+        if t.GetClass() == "PCB_VIA" and t.GetNetCode() == code:
+            if not both_layers(t.GetPosition()):
+                board.Remove(t)
+    gvias = [t for t in board.GetTracks()
+             if t.GetClass() == "PCB_VIA" and t.GetNetCode() == code]
     for zone in board.Zones():
         if zone.GetNetCode() != code:
             continue
@@ -95,6 +113,18 @@ def stitch(board, gnd):
             polys = zone.GetFilledPolysList(layer)
             for i in range(polys.OutlineCount()):
                 ol = polys.Outline(i)
+                if any(zone.HitTestFilledArea(layer, v.GetPosition(), 0)
+                       for v in gvias):
+                    pass  # fragment-level check below still applies per outline
+                # skip if an existing ground via already lands in this outline
+                bb_pts = [ol.CPoint(k) for k in range(ol.PointCount())]
+                bxs = [p.x for p in bb_pts]
+                bys = [p.y for p in bb_pts]
+                if any(min(bxs) <= v.GetPosition().x <= max(bxs) and
+                       min(bys) <= v.GetPosition().y <= max(bys) and
+                       zone.HitTestFilledArea(layer, v.GetPosition(), 0)
+                       for v in gvias):
+                    continue
                 n = ol.PointCount()
                 cx = sum(ol.CPoint(k).x for k in range(n)) // n
                 cy = sum(ol.CPoint(k).y for k in range(n)) // n
@@ -118,6 +148,8 @@ def stitch(board, gnd):
                     gx += step
                 for pt in cands:
                     if not zone.HitTestFilledArea(layer, pt, 0):
+                        continue
+                    if not both_layers(pt):
                         continue
                     if not clear_of_foreign_copper(board, pt, code, mm(0.65)):
                         continue
@@ -143,7 +175,8 @@ def main():
     if mode == "export":
         ok = pcbnew.ExportSpecctraDSN(board, dsn)
         print("DSN export:", ok)
-        patch_dsn(dsn, cfg["power"], cfg["power_w"], cfg["gnd"])
+        patch_dsn(dsn, cfg["power"], cfg["power_w"],
+                  cfg.get("cut", cfg["gnd"]))
     elif mode == "import":
         ok = pcbnew.ImportSpecctraSES(board, ses)
         print("SES import:", ok)
