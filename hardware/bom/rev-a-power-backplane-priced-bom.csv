@@ -1,0 +1,6 @@
+Board,RefDes,Qty,Manufacturer,MPN,Description,UnitPrice,Currency,Supplier,ExtPrice,BuyURL,AssemblyScope,Notes
+Power Backplane,J500,1,Same Sky,PJ-005B,"Panel-mount DC barrel jack, 5.5 mm OD / 2.5 mm ID",3.17,USD,DigiKey,3.17,https://www.digikey.com/en/products/detail/same-sky-formerly-cui-devices/PJ-005B/275425,Panel-DNP,"Service-endcap DC input jack"
+Power Backplane,PS500,1,Mornsun,URB2415YMD-10WR3,"Isolated DC-DC module, 18-36V in, +/-15V at 10W out",9.27,USD,DigiKey,9.27,https://www.digikey.com/en/products/detail/mornsun-america-llc/URB2415YMD-10WR3/13160913,SMD-or-module,"Primary +/-15V generation"
+Power Backplane,PS501,1,RECOM,R-78E5.0-0.5,"Switching regulator module, +5V/500mA out",3.37,USD,DigiKey,3.37,https://www.digikey.com/en/products/detail/recom-power/R-78E5-0-0-5/2834904,SMD-or-module,"+5VAUX generation"
+Power Backplane,P501-P505,5,JST Sales America Inc.,B3P-VH-B,"3-position 3.96mm through-hole header",0.23,USD,DigiKey,1.15,https://www.digikey.com/en/products/detail/jst-sales-america-inc/B3P-VH-B/9924220,TH,"Split-rail board power outputs"
+Power Backplane,P506,1,JST Sales America Inc.,B4P-VH-B,"4-position 3.96mm through-hole header",0.29,USD,DigiKey,0.29,https://www.digikey.com/en/products/detail/jst-sales-america-inc/B4P-VH-B/9924221,TH,"Ext-routing board power output including +5VAUX"

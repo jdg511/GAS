@@ -1,0 +1,4 @@
+Board,RefDes,Qty,Manufacturer,MPN,Description,UnitPrice,Currency,Supplier,ExtPrice,BuyURL,AssemblyScope,Notes
+Crossfade/Feedback,U301,1,Texas Instruments,OPA1679IDR,"Quad audio op amp",1.52,USD,DigiKey,1.52,https://www.digikey.com/en/products/detail/texas-instruments/OPA1679IDR/7034963,SMD,"Crossfade feedback and wet handoff"
+Crossfade/Feedback,P301-P305,5,JST Sales America Inc.,B3B-XH-A,"3-position 2.50mm through-hole header",0.15,USD,DigiKey,0.75,https://www.digikey.com/en/products/detail/jst-sales-america-inc/B3B-XH-A/1651046,TH,"Signal interconnect headers"
+Crossfade/Feedback,P306,1,JST Sales America Inc.,B3P-VH-B,"3-position 3.96mm through-hole header",0.23,USD,DigiKey,0.23,https://www.digikey.com/en/products/detail/jst-sales-america-inc/B3P-VH-B/9924220,TH,"Board power input"

@@ -1,0 +1,11 @@
+RefDes,Qty,MPN,Description,Notes
+U401,1,OPA1679IDR,"Quad audio op amp","Pre-HPF and drive buffer channels"
+U402,1,OPA1679IDR,"Quad audio op amp","Post-LPF and output buffer channels"
+P401,1,B3B-XH-A,"3-position signal header","Input from crossfade board"
+P402,1,B3B-XH-A,"3-position signal header","Output to wet/feedback board"
+P403,1,B12B-XH-A,"12-position control header group A","Drive and HPF control landing; pairs naturally with backplane P613"
+P404,1,B3P-VH-B,"3-position power header","Board power input"
+P405,1,B12B-XH-A,"12-position control header group B","LPF and clip-mode control landing; pairs naturally with backplane P614"
+D401-D4xx,1,set,"Clip diodes and LEDs","Silicon, LED, and germanium options"
+R*,1,set,"Filter and gain resistors","Final values to be tuned against listening tests"
+C*,1,set,"Filter timing capacitors","Prefer film-family parts in audio path"

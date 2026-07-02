@@ -114,6 +114,8 @@ private:
     void refreshX2VisualState();
     void choosePlaybackFile();
     void refreshPlaybackLabel();
+    void refreshPresetOptions();
+    void promptToSaveUserPreset();
     void applyTheme (Theme newTheme);
     void refreshThemeButtons();
     void refreshLogoButton();
@@ -194,9 +196,6 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> extTankMixAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> feedbackAmountAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> wetDryAttachment;
-    juce::Label inputModeLabel;
-    juce::ComboBox inputModeComboBox;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> inputModeAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> monoSourceToStereoAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> showUnavailableTankControlsAttachment;
     std::unique_ptr<juce::LookAndFeel_V4> lookAndFeel;
@@ -210,6 +209,7 @@ private:
     int introElapsedMs = 0;
     int animatedEditorHeight = 694;
     int targetEditorHeight = 694;
+    juce::String currentPresetSelection { "GBS default" };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TheGreatAmericanSpringAudioProcessorEditor)
 };

@@ -9,6 +9,7 @@ set(GAS_JUCE_GIT_TAG "8.0.12" CACHE STRING "JUCE git tag to fetch when JUCE_SOUR
 
 if (EXISTS "${JUCE_SOURCE_DIR}/CMakeLists.txt")
     add_subdirectory("${JUCE_SOURCE_DIR}" JUCE-build)
+    set(_gas_juce_src_dir "${JUCE_SOURCE_DIR}")
 else()
     message(STATUS "JUCE_SOURCE_DIR was not found; fetching JUCE ${GAS_JUCE_GIT_TAG}.")
     FetchContent_Declare(
@@ -17,6 +18,17 @@ else()
         GIT_TAG ${GAS_JUCE_GIT_TAG}
         GIT_SHALLOW TRUE)
     FetchContent_MakeAvailable(juce)
+    set(_gas_juce_src_dir "${juce_SOURCE_DIR}")
+endif()
+
+# juce_graphics.cpp exceeds MSVC's default 64k section limit; /bigobj lifts it.
+# /Od skips optimisation on that TU, keeping the compile fast.
+if (MSVC)
+    set_source_files_properties(
+        "${_gas_juce_src_dir}/modules/juce_graphics/juce_graphics.cpp"
+        "${_gas_juce_src_dir}/modules/juce_graphics/juce_graphics_Harfbuzz.cpp"
+        PROPERTIES
+            COMPILE_OPTIONS "/Od;/bigobj")
 endif()
 
 set(SCC_ASSET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Assets")
@@ -25,14 +37,6 @@ set(SCC_VST2_SDK_PATH "" CACHE PATH "Path to the legacy Steinberg VST2 SDK folde
 set(SCC_DEPLOY_WINDOWS_VST3_AFTER_BUILD ON CACHE BOOL "Copy the Windows VST3 bundle to SCC_VST3_DEPLOY_ROOT after building.")
 set(SCC_VST3_DEPLOY_ROOT "C:/Program Files/Common Files/VST3" CACHE PATH "Windows VST3 install root used when SCC_DEPLOY_WINDOWS_VST3_AFTER_BUILD is ON.")
 set(SPRING_IR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Spring IRs")
-
-if (MSVC)
-    set_source_files_properties(
-        ${JUCE_SOURCE_DIR}/modules/juce_graphics/juce_graphics.cpp
-        ${JUCE_SOURCE_DIR}/modules/juce_graphics/juce_graphics_Harfbuzz.cpp
-        PROPERTIES
-            COMPILE_OPTIONS "/Od;/bigobj")
-endif()
 
 set(SCC_PLUGIN_FORMATS ${SCC_BASE_PLUGIN_FORMATS})
 

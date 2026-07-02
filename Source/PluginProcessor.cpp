@@ -7,6 +7,7 @@
  #include <windows.h>
 #endif
 
+#include <algorithm>
 #include <array>
 
 namespace
@@ -24,6 +25,7 @@ constexpr auto defaultLeftTank1IrFileName = "GBS-L.wav";
 constexpr auto defaultRightTank1IrFileName = "GBS-R.wav";
 constexpr auto defaultLeftTank2IrFileName = "GAS-L.wav";
 constexpr auto defaultRightTank2IrFileName = "GAS-R.wav";
+constexpr auto presetNameProperty = "presetName";
 
 struct EmbeddedPlaybackSource
 {
@@ -41,6 +43,18 @@ const auto& getEmbeddedPlaybackSources()
     }};
 
     return sources;
+}
+
+juce::StringArray getFactoryPresetNames()
+{
+    return { "GBS default", "GAS default" };
+}
+
+juce::String sanitizePresetFileName (juce::String presetName)
+{
+    presetName = presetName.trim();
+    presetName = presetName.retainCharacters ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-()");
+    return presetName.trim();
 }
 }
 
@@ -206,24 +220,8 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
 
     buildExternalInput (buffer, numSamples);
 
-    {
-        const auto inputMode = getInputMode();
-        if (inputMode != InputMode::stereo && externalInputBuffer.getNumChannels() >= 2)
-        {
-            // Pick the selected source channel and copy it to both channels (dual-mono).
-            // Mono L uses the left input, Mono R uses the right input.
-            const int sourceChannel = (inputMode == InputMode::monoR) ? 1 : 0;
-            for (int i = 0; i < numSamples; ++i)
-            {
-                const float s = externalInputBuffer.getSample (sourceChannel, i);
-                externalInputBuffer.setSample (0, i, s);
-                externalInputBuffer.setSample (1, i, s);
-            }
-        }
-    }
-
-    // Mono routing is driven solely by the user's Input Mode selection (Stereo / Mono L / Mono R).
-    // Never auto-detect mono from signal content — that caused the app to start muted on the right.
+    // The plugin always stays on its stereo processing path.
+    // The optional mono-to-stereo toggle is handled when copying mono input in buildExternalInput().
     lastMonoSourceWithoutStereoConversion.store (false, std::memory_order_relaxed);
 
     dryTapBuffer.copyFrom (0, 0, externalInputBuffer, 0, 0, numSamples);
@@ -257,8 +255,10 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
 
     if (ir2Parallel)
     {
-        // Parallel: 2nd tank branches from the dry wet input (pre primary-predelay)
-        // and gets ONLY its own 30-42 ms predelay, truly parallel to the primary.
+        // Parallel: the secondary tank model branches from the dry wet input
+        // before the primary-tank predelay. In hardware terms this maps to the
+        // left 9EB2C1B and right 9EB3C1B tank path running alongside the
+        // primary 4AB1C1B tank path.
         monoLeftSecondaryBuffer.copyFrom (0, 0, wetInputBaseBuffer, 0, 0, numSamples);
         monoRightSecondaryBuffer.copyFrom (0, 0, wetInputBaseBuffer, 1, 0, numSamples);
         applySecondaryTankPredelay (monoLeftSecondaryBuffer, secondaryLeftTankPredelay, predelayModulationBuffer.getReadPointer (3), numSamples);
@@ -351,7 +351,7 @@ juce::AudioProcessorEditor* TheGreatAmericanSpringAudioProcessor::createEditor()
     return new TheGreatAmericanSpringAudioProcessorEditor (*this);
 }
 
-void TheGreatAmericanSpringAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+juce::ValueTree TheGreatAmericanSpringAudioProcessor::createStateTree()
 {
     auto state = parameters.copyState();
     state.setProperty (getTankIrPathPropertyName (TankSlot::left1), leftTank1IrPath, nullptr);
@@ -359,6 +359,12 @@ void TheGreatAmericanSpringAudioProcessor::getStateInformation (juce::MemoryBloc
     state.setProperty (getTankIrPathPropertyName (TankSlot::left2), leftTank2IrPath, nullptr);
     state.setProperty (getTankIrPathPropertyName (TankSlot::right2), rightTank2IrPath, nullptr);
     state.setProperty ("playbackFilePath", playbackFilePath, nullptr);
+    return state;
+}
+
+void TheGreatAmericanSpringAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+{
+    auto state = createStateTree();
 
     if (auto xml = state.createXml())
         copyXmlToBinary (*xml, destData);
@@ -477,14 +483,6 @@ bool TheGreatAmericanSpringAudioProcessor::isFeedbackPhaseInverted() const
 bool TheGreatAmericanSpringAudioProcessor::shouldConvertMonoSourceToStereo() const
 {
     return parameters.getRawParameterValue (monoSourceToStereoParameterID)->load() >= 0.5f;
-}
-
-TheGreatAmericanSpringAudioProcessor::InputMode TheGreatAmericanSpringAudioProcessor::getInputMode() const
-{
-    const int v = static_cast<int> (parameters.getRawParameterValue (inputModeParameterID)->load());
-    if (v == 1) return InputMode::monoL;
-    if (v == 2) return InputMode::monoR;
-    return InputMode::stereo;
 }
 
 bool TheGreatAmericanSpringAudioProcessor::shouldShowUnavailableTankControls() const
@@ -677,11 +675,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout TheGreatAmericanSpringAudioP
                                                             "Will not be available in real life",
                                                             false));
 
-    layout.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { inputModeParameterID, 1 },
-                                                          "Input Mode",
-                                                          juce::StringArray { "Stereo", "Mono L", "Mono R" },
-                                                          0));
-
     return layout;
 }
 
@@ -778,7 +771,6 @@ void TheGreatAmericanSpringAudioProcessor::applyDefaultGasSettings()
     setParameterPlainValue (wetDryParameterID, 0.5f);               // 50%
     setParameterPlainValue (monoSourceToStereoParameterID, 0.0f);
     setParameterPlainValue (showUnavailableTankControlsParameterID, 0.0f);
-    setParameterPlainValue (inputModeParameterID, 0.0f);            // Stereo
     assignDefaultTankIRs();
 }
 
@@ -799,18 +791,33 @@ void TheGreatAmericanSpringAudioProcessor::applyGasPresetSettings()
     setParameterPlainValue (wetDryParameterID, 0.5f);               // 50%
     setParameterPlainValue (monoSourceToStereoParameterID, 0.0f);
     setParameterPlainValue (showUnavailableTankControlsParameterID, 0.0f);
-    setParameterPlainValue (inputModeParameterID, 0.0f);            // Stereo
     assignDefaultTankIRs();
 }
 
-void TheGreatAmericanSpringAudioProcessor::loadPreset (int index)
+bool TheGreatAmericanSpringAudioProcessor::loadPreset (int index)
 {
+    const auto factoryPresetNames = getFactoryPresetNames();
+
     if (index == 0)
         applyDefaultGasSettings();   // GBS default
     else if (index == 1)
         applyGasPresetSettings();    // GAS default
     else
-        return;
+    {
+        const auto userPresetFiles = getUserPresetFiles();
+        const auto userPresetIndex = index - factoryPresetNames.size();
+
+        if (! juce::isPositiveAndBelow (userPresetIndex, userPresetFiles.size()))
+            return false;
+
+        if (auto presetXml = juce::parseXML (userPresetFiles.getReference (userPresetIndex)))
+        {
+            const auto presetName = userPresetFiles.getReference (userPresetIndex).getFileNameWithoutExtension();
+            return applyPresetState (juce::ValueTree::fromXml (*presetXml), presetName);
+        }
+
+        return false;
+    }
 
     playbackFilePath = getEmbeddedPlaybackSources().front().displayPath;
 
@@ -824,11 +831,112 @@ void TheGreatAmericanSpringAudioProcessor::loadPreset (int index)
     }
 
     sendChangeMessage();
+    return true;
 }
 
-juce::StringArray TheGreatAmericanSpringAudioProcessor::getPresetNames()
+juce::StringArray TheGreatAmericanSpringAudioProcessor::getPresetNames() const
 {
-    return { "GBS default", "GAS default" };
+    auto names = getFactoryPresetNames();
+
+    for (const auto& presetFile : getUserPresetFiles())
+        names.add (presetFile.getFileNameWithoutExtension());
+
+    return names;
+}
+
+bool TheGreatAmericanSpringAudioProcessor::saveUserPreset (const juce::String& presetName)
+{
+    const auto fileName = sanitizePresetFileName (presetName);
+
+    if (fileName.isEmpty())
+        return false;
+
+    const auto presetDirectory = getUserPresetDirectory();
+    presetDirectory.createDirectory();
+
+    auto state = createStateTree();
+    state.setProperty (presetNameProperty, fileName, nullptr);
+
+    if (auto xml = state.createXml())
+        return xml->writeTo (presetDirectory.getChildFile (fileName + ".xml"));
+
+    return false;
+}
+
+bool TheGreatAmericanSpringAudioProcessor::applyPresetState (juce::ValueTree restoredState,
+                                                             const juce::String& presetName)
+{
+    if (! restoredState.hasType (parameters.state.getType()))
+        return false;
+
+    const auto restoredIr2Routing = restoredState.getProperty (x2TanksParameterID);
+
+    if (restoredIr2Routing.isBool())
+        restoredState.setProperty (x2TanksParameterID,
+                                   static_cast<bool> (restoredIr2Routing) ? 2 : 0,
+                                   nullptr);
+
+    parameters.replaceState (restoredState);
+    leftTank1IrPath = restoredState.getProperty (getTankIrPathPropertyName (TankSlot::left1)).toString();
+    rightTank1IrPath = restoredState.getProperty (getTankIrPathPropertyName (TankSlot::right1)).toString();
+    leftTank2IrPath = restoredState.getProperty (getTankIrPathPropertyName (TankSlot::left2)).toString();
+    rightTank2IrPath = restoredState.getProperty (getTankIrPathPropertyName (TankSlot::right2)).toString();
+    playbackFilePath = restoredState.getProperty ("playbackFilePath",
+                                                  getEmbeddedPlaybackSources().front().displayPath).toString();
+    playbackActive = false;
+
+    if (isPrepared)
+    {
+        loadTankIRFromCurrentPath (TankSlot::left1);
+        loadTankIRFromCurrentPath (TankSlot::right1);
+        loadTankIRFromCurrentPath (TankSlot::left2);
+        loadTankIRFromCurrentPath (TankSlot::right2);
+
+        const auto playbackSourceIndex = getPlaybackSourceIndexForPath (playbackFilePath);
+
+        if (playbackSourceIndex >= 0)
+        {
+            loadSelectedPlaybackSource();
+        }
+        else if (const auto restoredPlaybackFile = resolvePlaybackFile (playbackFilePath);
+                 restoredPlaybackFile.existsAsFile())
+        {
+            loadPlaybackFile (restoredPlaybackFile);
+        }
+        else
+        {
+            loadSelectedPlaybackSource();
+        }
+    }
+
+    juce::ignoreUnused (presetName);
+    sendChangeMessage();
+    return true;
+}
+
+juce::File TheGreatAmericanSpringAudioProcessor::getUserPresetDirectory() const
+{
+    return juce::File::getSpecialLocation (juce::File::userApplicationDataDirectory)
+        .getChildFile ("Illicit Apothecary")
+        .getChildFile ("The Great American Spring")
+        .getChildFile ("Presets");
+}
+
+juce::Array<juce::File> TheGreatAmericanSpringAudioProcessor::getUserPresetFiles() const
+{
+    juce::Array<juce::File> presetFiles;
+    const auto presetDirectory = getUserPresetDirectory();
+
+    if (! presetDirectory.isDirectory())
+        return presetFiles;
+
+    presetDirectory.findChildFiles (presetFiles, juce::File::findFiles, false, "*.xml");
+    std::sort (presetFiles.begin(), presetFiles.end(),
+               [] (const juce::File& a, const juce::File& b)
+               {
+                   return a.getFileNameWithoutExtension().compareIgnoreCase (b.getFileNameWithoutExtension()) < 0;
+               });
+    return presetFiles;
 }
 
 bool TheGreatAmericanSpringAudioProcessor::loadTankIRFromCurrentPath (TankSlot slot)
@@ -1248,7 +1356,8 @@ void TheGreatAmericanSpringAudioProcessor::applyWetPredelay (int numSamples)
 void TheGreatAmericanSpringAudioProcessor::updatePredelayModulation (int numSamples)
 {
     // predelayModulationBuffer channel map (per sample, in samples):
-    //   0 = primary L   1 = feedback   2 = primary R   3 = 2nd L   4 = 2nd R
+    //   0 = primary L (4AB1C1B), 1 = feedback, 2 = primary R (4AB1C1B),
+    //   3 = 2nd L (9EB2C1B),    4 = 2nd R (9EB3C1B)
     auto* primaryLeftOut  = predelayModulationBuffer.getWritePointer (0);
     auto* feedbackOut     = predelayModulationBuffer.getWritePointer (1);
     auto* primaryRightOut = predelayModulationBuffer.getWritePointer (2);

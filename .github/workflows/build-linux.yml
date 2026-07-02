@@ -1,0 +1,53 @@
+name: Build Linux Plugins
+
+on:
+  push:
+    branches:
+      - main
+      - 'claude/**'
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    name: Linux Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out GAS
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libasound2-dev \
+            libx11-dev \
+            libxcomposite-dev \
+            libxcursor-dev \
+            libxrandr-dev \
+            libxinerama-dev \
+            libfreetype6-dev \
+            libfontconfig1-dev \
+            libcurl4-openssl-dev \
+            pkg-config \
+            ninja-build
+
+      - name: Configure
+        run: >
+          cmake
+          -S .
+          -B build-linux
+          -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DSCC_BASE_PLUGIN_FORMATS="Standalone;VST3;LV2"
+          -DSCC_DEPLOY_WINDOWS_VST3_AFTER_BUILD=OFF
+
+      - name: Build
+        run: cmake --build build-linux
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: The-Great-American-Spring-Linux
+          path: build-linux/TheGreatAmericanSpring_artefacts
+          retention-days: 14

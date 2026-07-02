@@ -1,0 +1,8 @@
+Board,Width_mm,Length_mm,AxialStart_mm,AxialEnd_mm,Notes
+InputOutput,160,75,25,100,"Immediately behind combo-jack field"
+PowerControlBackplane,150,95,105,200,"Close to DC entry and chassis bond"
+ExtTankRouting,120,80,225,305,"First mid-path audio board"
+CrossfadeFeedbackWet,100,70,325,395,"Compact board adjacent to routing"
+FilterClipper,140,90,415,505,"Likely to grow because of film caps and control density"
+TankDriverRecovery,170,110,575,685,"Quiet zone near tank harness landings"
+TankMountingZone,0,0,720,1120,"Not a PCB; reserved for user-supplied spring tanks"

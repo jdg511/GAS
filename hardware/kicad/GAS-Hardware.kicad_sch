@@ -1,0 +1,1263 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "0e6d5c95-0f1f-46a8-82f0-760db7d7a001")
+	(paper "A4")
+	(title_block
+		(title "GAS Hardware Rev A")
+		(company "Illicit Apothecary")
+		(comment 1 "Top-level hierarchical schematic scaffold")
+		(comment 2 "See hardware/kicad/rev-a-sheet-population-plan.md for capture order")
+	)
+	(lib_symbols)
+	(sheet
+		(at 30.48 33.02)
+		(size 60.96 25.40)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "0e6d5c95-0f1f-46a8-82f0-760db7d7b101")
+		(property "Sheetname" "input-output"
+			(at 30.48 32.2575 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "io-board.kicad_sch"
+			(at 30.48 59.1825 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left top)
+			)
+		)
+		(pin "IN_BAL_L_P" input
+			(at 30.48 35.05 180)
+			(uuid "aaaa0001-0000-4000-8000-000000000001")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "IN_BAL_L_N" input
+			(at 30.48 37.08 180)
+			(uuid "aaaa0001-0000-4000-8000-000000000002")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "IN_BAL_R_P" input
+			(at 30.48 39.12 180)
+			(uuid "aaaa0001-0000-4000-8000-000000000003")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "IN_BAL_R_N" input
+			(at 30.48 41.15 180)
+			(uuid "aaaa0001-0000-4000-8000-000000000004")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "WET_SUM_L" input
+			(at 30.48 43.18 180)
+			(uuid "aaaa0001-0000-4000-8000-000000000005")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "WET_SUM_R" input
+			(at 30.48 45.21 180)
+			(uuid "aaaa0001-0000-4000-8000-000000000006")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "WD_L_HI" input
+			(at 30.48 47.24 180)
+			(uuid "aaaa0001-0000-4000-8000-000000000007")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "WD_L_WIPER" input
+			(at 30.48 49.28 180)
+			(uuid "aaaa0001-0000-4000-8000-000000000008")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "WD_L_LO" input
+			(at 30.48 51.31 180)
+			(uuid "aaaa0001-0000-4000-8000-000000000009")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MONO_A" input
+			(at 30.48 53.34 180)
+			(uuid "aaaa0001-0000-4000-8000-00000000000a")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MONO_C" input
+			(at 30.48 55.37 180)
+			(uuid "aaaa0001-0000-4000-8000-00000000000b")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MONO_B" input
+			(at 30.48 57.40 180)
+			(uuid "aaaa0001-0000-4000-8000-00000000000c")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "OUT_BAL_L_P" output
+			(at 91.44 35.05 0)
+			(uuid "aaaa0001-0000-4000-8000-00000000000d")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "OUT_BAL_L_N" output
+			(at 91.44 37.08 0)
+			(uuid "aaaa0001-0000-4000-8000-00000000000e")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "OUT_BAL_R_P" output
+			(at 91.44 39.12 0)
+			(uuid "aaaa0001-0000-4000-8000-00000000000f")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "OUT_BAL_R_N" output
+			(at 91.44 41.15 0)
+			(uuid "aaaa0001-0000-4000-8000-000000000010")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "DRY_L" output
+			(at 91.44 43.18 0)
+			(uuid "aaaa0001-0000-4000-8000-000000000011")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "DRY_R" output
+			(at 91.44 45.21 0)
+			(uuid "aaaa0001-0000-4000-8000-000000000012")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "WET_SEND_L" output
+			(at 91.44 47.24 0)
+			(uuid "aaaa0001-0000-4000-8000-000000000013")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "WET_SEND_R" output
+			(at 91.44 49.28 0)
+			(uuid "aaaa0001-0000-4000-8000-000000000014")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "WD_R_HI" input
+			(at 91.44 51.31 0)
+			(uuid "aaaa0001-0000-4000-8000-000000000015")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "WD_R_WIPER" input
+			(at 91.44 53.34 0)
+			(uuid "aaaa0001-0000-4000-8000-000000000016")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "WD_R_LO" input
+			(at 91.44 55.37 0)
+			(uuid "aaaa0001-0000-4000-8000-000000000017")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(instances
+			(project "GAS-Hardware"
+				(path "/0e6d5c95-0f1f-46a8-82f0-760db7d7a001"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 101.60 33.02)
+		(size 60.96 25.40)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "0e6d5c95-0f1f-46a8-82f0-760db7d7b102")
+		(property "Sheetname" "tank-driver-recovery"
+			(at 101.60 32.2575 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "tank-driver-recovery.kicad_sch"
+			(at 101.60 59.1825 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left top)
+			)
+		)
+		(pin "PRI_SEND_L" input
+			(at 101.60 36.00 180)
+			(uuid "dddd0001-0000-4000-8000-000000000001")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "PRI_RET_L" output
+			(at 101.60 38.20 180)
+			(uuid "dddd0001-0000-4000-8000-000000000002")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "PRI_SEND_R" input
+			(at 101.60 40.40 180)
+			(uuid "dddd0001-0000-4000-8000-000000000003")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "PRI_RET_R" output
+			(at 101.60 42.60 180)
+			(uuid "dddd0001-0000-4000-8000-000000000004")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "SEC_SEND_L" input
+			(at 162.56 36.00 0)
+			(uuid "dddd0001-0000-4000-8000-000000000005")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "SEC_RET_L" output
+			(at 162.56 38.20 0)
+			(uuid "dddd0001-0000-4000-8000-000000000006")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "SEC_SEND_R" input
+			(at 162.56 40.40 0)
+			(uuid "dddd0001-0000-4000-8000-000000000007")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "SEC_RET_R" output
+			(at 162.56 42.60 0)
+			(uuid "dddd0001-0000-4000-8000-000000000008")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(instances
+			(project "GAS-Hardware"
+				(path "/0e6d5c95-0f1f-46a8-82f0-760db7d7a001"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 172.72 33.02)
+		(size 60.96 25.40)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "0e6d5c95-0f1f-46a8-82f0-760db7d7b103")
+		(property "Sheetname" "ext-tank-routing"
+			(at 172.72 32.2575 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "ext-tank-routing.kicad_sch"
+			(at 172.72 59.1825 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left top)
+			)
+		)
+		(pin "WET_SEND_L" input
+			(at 172.72 31.00 180)
+			(uuid "eeee0001-0000-4000-8000-000000000019")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "WET_SEND_R" input
+			(at 172.72 33.00 180)
+			(uuid "eeee0001-0000-4000-8000-000000000020")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "EXTMIX_L_HI" input
+			(at 172.72 35.00 180)
+			(uuid "eeee0001-0000-4000-8000-000000000001")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "EXTMIX_L_WIPER" input
+			(at 172.72 37.00 180)
+			(uuid "eeee0001-0000-4000-8000-000000000002")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "EXTMIX_L_LO" input
+			(at 172.72 39.00 180)
+			(uuid "eeee0001-0000-4000-8000-000000000003")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "EXTMIX_R_HI" input
+			(at 172.72 41.00 180)
+			(uuid "eeee0001-0000-4000-8000-000000000004")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "EXTMIX_R_WIPER" input
+			(at 172.72 43.00 180)
+			(uuid "eeee0001-0000-4000-8000-000000000005")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "EXTMIX_R_LO" input
+			(at 172.72 45.00 180)
+			(uuid "eeee0001-0000-4000-8000-000000000006")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "CTL_EXT_MODE_A" input
+			(at 172.72 47.00 180)
+			(uuid "eeee0001-0000-4000-8000-000000000007")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "CTL_EXT_MODE_B" input
+			(at 172.72 49.00 180)
+			(uuid "eeee0001-0000-4000-8000-000000000008")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "PRI_SEND_L" output
+			(at 233.68 35.00 0)
+			(uuid "eeee0001-0000-4000-8000-000000000009")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "PRI_RET_L" input
+			(at 233.68 37.00 0)
+			(uuid "eeee0001-0000-4000-8000-00000000000a")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "PRI_SEND_R" output
+			(at 233.68 39.00 0)
+			(uuid "eeee0001-0000-4000-8000-00000000000b")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "PRI_RET_R" input
+			(at 233.68 41.00 0)
+			(uuid "eeee0001-0000-4000-8000-00000000000c")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "SEC_SEND_L" output
+			(at 233.68 43.00 0)
+			(uuid "eeee0001-0000-4000-8000-00000000000d")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "SEC_RET_L" input
+			(at 233.68 45.00 0)
+			(uuid "eeee0001-0000-4000-8000-00000000000e")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "SEC_SEND_R" output
+			(at 233.68 47.00 0)
+			(uuid "eeee0001-0000-4000-8000-00000000000f")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "SEC_RET_R" input
+			(at 233.68 49.00 0)
+			(uuid "eeee0001-0000-4000-8000-000000000010")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "FB_RET_L" input
+			(at 233.68 51.00 0)
+			(uuid "eeee0001-0000-4000-8000-000000000011")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "FB_RET_R" input
+			(at 233.68 53.00 0)
+			(uuid "eeee0001-0000-4000-8000-000000000012")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "TANK_MIX_L" output
+			(at 233.68 55.00 0)
+			(uuid "eeee0001-0000-4000-8000-000000000013")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "TANK_MIX_R" output
+			(at 233.68 57.00 0)
+			(uuid "eeee0001-0000-4000-8000-000000000014")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(instances
+			(project "GAS-Hardware"
+				(path "/0e6d5c95-0f1f-46a8-82f0-760db7d7a001"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 30.48 88.90)
+		(size 60.96 25.40)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "0e6d5c95-0f1f-46a8-82f0-760db7d7b104")
+		(property "Sheetname" "crossfade-feedback-wet"
+			(at 30.48 88.1375 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "crossfade-feedback-wet.kicad_sch"
+			(at 30.48 115.0625 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left top)
+			)
+		)
+		(pin "TANK_MIX_L" input
+			(at 30.48 90.93 180)
+			(uuid "bbbb0001-0000-4000-8000-000000000001")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "TANK_MIX_R" input
+			(at 30.48 92.96 180)
+			(uuid "bbbb0001-0000-4000-8000-000000000002")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "FILTCLIP_OUT_L" input
+			(at 30.48 94.99 180)
+			(uuid "bbbb0001-0000-4000-8000-000000000003")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "FILTCLIP_OUT_R" input
+			(at 30.48 97.03 180)
+			(uuid "bbbb0001-0000-4000-8000-000000000004")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "XFD_L_HI" input
+			(at 30.48 99.06 180)
+			(uuid "bbbb0001-0000-4000-8000-000000000005")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "XFD_L_WIPER" input
+			(at 30.48 101.09 180)
+			(uuid "bbbb0001-0000-4000-8000-000000000006")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "XFD_L_LO" input
+			(at 30.48 103.12 180)
+			(uuid "bbbb0001-0000-4000-8000-000000000007")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "FB_L_WIPER" input
+			(at 30.48 105.16 180)
+			(uuid "bbbb0001-0000-4000-8000-000000000008")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "CTL_FB_INV" input
+			(at 30.48 107.19 180)
+			(uuid "bbbb0001-0000-4000-8000-000000000009")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "XFADE_OUT_L" output
+			(at 91.44 90.93 0)
+			(uuid "bbbb0001-0000-4000-8000-00000000000a")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "XFADE_OUT_R" output
+			(at 91.44 92.96 0)
+			(uuid "bbbb0001-0000-4000-8000-00000000000b")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "WET_SUM_L" output
+			(at 91.44 94.99 0)
+			(uuid "bbbb0001-0000-4000-8000-00000000000c")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "WET_SUM_R" output
+			(at 91.44 97.03 0)
+			(uuid "bbbb0001-0000-4000-8000-00000000000d")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "FB_RET_L" output
+			(at 91.44 99.06 0)
+			(uuid "bbbb0001-0000-4000-8000-00000000000e")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "FB_RET_R" output
+			(at 91.44 101.09 0)
+			(uuid "bbbb0001-0000-4000-8000-00000000000f")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "XFD_R_HI" input
+			(at 91.44 103.12 0)
+			(uuid "bbbb0001-0000-4000-8000-000000000010")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "XFD_R_WIPER" input
+			(at 91.44 105.16 0)
+			(uuid "bbbb0001-0000-4000-8000-000000000011")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "XFD_R_LO" input
+			(at 91.44 107.19 0)
+			(uuid "bbbb0001-0000-4000-8000-000000000012")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "FB_R_WIPER" input
+			(at 91.44 109.22 0)
+			(uuid "bbbb0001-0000-4000-8000-000000000013")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(instances
+			(project "GAS-Hardware"
+				(path "/0e6d5c95-0f1f-46a8-82f0-760db7d7a001"
+					(page "5")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 101.60 88.90)
+		(size 60.96 25.40)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "0e6d5c95-0f1f-46a8-82f0-760db7d7b105")
+		(property "Sheetname" "filter-clipper"
+			(at 101.60 88.1375 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "filter-clipper.kicad_sch"
+			(at 101.60 115.0625 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left top)
+			)
+		)
+		(pin "XFADE_OUT_L" input
+			(at 101.60 90.90 180)
+			(uuid "ffff0001-0000-4000-8000-000000000001")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "XFADE_OUT_R" input
+			(at 101.60 92.90 180)
+			(uuid "ffff0001-0000-4000-8000-000000000002")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "FILTCLIP_OUT_L" output
+			(at 101.60 94.90 180)
+			(uuid "ffff0001-0000-4000-8000-000000000003")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "FILTCLIP_OUT_R" output
+			(at 101.60 96.90 180)
+			(uuid "ffff0001-0000-4000-8000-000000000004")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "DRV_HI" input
+			(at 101.60 98.90 180)
+			(uuid "ffff0001-0000-4000-8000-000000000005")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "DRV_WIPER" input
+			(at 101.60 100.90 180)
+			(uuid "ffff0001-0000-4000-8000-000000000006")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "DRV_LO" input
+			(at 101.60 102.90 180)
+			(uuid "ffff0001-0000-4000-8000-000000000007")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "HPF_F_L_HI" input
+			(at 101.60 104.90 180)
+			(uuid "ffff0001-0000-4000-8000-000000000008")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "HPF_F_L_WIPER" input
+			(at 101.60 106.90 180)
+			(uuid "ffff0001-0000-4000-8000-000000000009")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "HPF_F_L_LO" input
+			(at 101.60 108.90 180)
+			(uuid "ffff0001-0000-4000-8000-00000000000a")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "HPF_F_R_HI" input
+			(at 101.60 110.90 180)
+			(uuid "ffff0001-0000-4000-8000-00000000000b")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "HPF_F_R_WIPER" input
+			(at 101.60 112.90 180)
+			(uuid "ffff0001-0000-4000-8000-00000000000c")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "HPF_F_R_LO" input
+			(at 101.60 114.90 180)
+			(uuid "ffff0001-0000-4000-8000-00000000000d")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "HPF_Q_L_WIPER" input
+			(at 162.56 90.90 0)
+			(uuid "ffff0001-0000-4000-8000-00000000000e")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "HPF_Q_R_WIPER" input
+			(at 162.56 92.90 0)
+			(uuid "ffff0001-0000-4000-8000-00000000000f")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "LPF_F_L_HI" input
+			(at 162.56 94.90 0)
+			(uuid "ffff0001-0000-4000-8000-000000000010")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "LPF_F_L_WIPER" input
+			(at 162.56 96.90 0)
+			(uuid "ffff0001-0000-4000-8000-000000000011")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "LPF_F_L_LO" input
+			(at 162.56 98.90 0)
+			(uuid "ffff0001-0000-4000-8000-000000000012")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "LPF_F_R_HI" input
+			(at 162.56 100.90 0)
+			(uuid "ffff0001-0000-4000-8000-000000000013")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "LPF_F_R_WIPER" input
+			(at 162.56 102.90 0)
+			(uuid "ffff0001-0000-4000-8000-000000000014")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "LPF_F_R_LO" input
+			(at 162.56 104.90 0)
+			(uuid "ffff0001-0000-4000-8000-000000000015")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "LPF_Q_L_WIPER" input
+			(at 162.56 106.90 0)
+			(uuid "ffff0001-0000-4000-8000-000000000016")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "LPF_Q_R_WIPER" input
+			(at 162.56 108.90 0)
+			(uuid "ffff0001-0000-4000-8000-000000000017")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "CTL_CLIP_MODE_A" input
+			(at 162.56 110.90 0)
+			(uuid "ffff0001-0000-4000-8000-000000000018")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "CTL_CLIP_MODE_B" input
+			(at 162.56 112.90 0)
+			(uuid "ffff0001-0000-4000-8000-000000000019")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(instances
+			(project "GAS-Hardware"
+				(path "/0e6d5c95-0f1f-46a8-82f0-760db7d7a001"
+					(page "6")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 172.72 88.90)
+		(size 60.96 25.40)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "0e6d5c95-0f1f-46a8-82f0-760db7d7b106")
+		(property "Sheetname" "power-backplane"
+			(at 172.72 88.1375 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "power-backplane.kicad_sch"
+			(at 172.72 115.0625 0)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "GAS-Hardware"
+				(path "/0e6d5c95-0f1f-46a8-82f0-760db7d7a001"
+					(page "7")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(text "Rev A hardware capture scaffold\n\n- Analog-only signal path, no MCU or embedded computer\n- External +30 VDC wall adapter, on-board +/-15VA and +5VAUX generation\n- Real tanks: 4AB1C1B x2, 9EB2C1B x1, 9EB3C1B x1\n- User-supplied cylindrical enclosure tube, target 8-9 in diameter x about 48 in long"
+		(exclude_from_sim no)
+		(at 23.00 149.00 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "99999999-9999-4999-8999-000000000001")
+	)
+	(text "Current capture state: top-level hierarchy plus expanded child-sheet ports.\nSee rev-a-sheet-population-plan.md for the remaining direct inter-sheet and board-level wiring work."
+		(exclude_from_sim no)
+		(at 23.00 176.00 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "99999999-9999-4999-8999-000000000002")
+	)
+	(embedded_fonts no)
+)
+
+
+
+
+

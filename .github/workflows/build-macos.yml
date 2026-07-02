@@ -1,6 +1,10 @@
 name: Build macOS Plugins
 
 on:
+  push:
+    branches:
+      - main
+      - 'claude/**'
   workflow_dispatch:
 
 jobs:
@@ -29,3 +33,4 @@ jobs:
         with:
           name: The-Great-American-Spring-macOS
           path: build-macos/TheGreatAmericanSpring_artefacts/Release
+          retention-days: 14
