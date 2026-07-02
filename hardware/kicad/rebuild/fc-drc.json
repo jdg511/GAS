@@ -1,0 +1,474 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-07-02T03:44:31",
+    "ignored_checks": [
+        {
+            "description": "Footprint has no courtyard defined",
+            "key": "missing_courtyard"
+        },
+        {
+            "description": "Track endpoint not centered on via",
+            "key": "track_not_centered_on_via"
+        },
+        {
+            "description": "Tuning profile track geometries",
+            "key": "tuning_profile_track_geometries"
+        },
+        {
+            "description": "Footprint doesn't match symbol's footprint filters",
+            "key": "footprint_filters_mismatch"
+        },
+        {
+            "description": "Footprint component type doesn't match footprint pads",
+            "key": "footprint_type_mismatch"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning"
+    ],
+    "kicad_version": "10.0.3",
+    "schematic_parity": [],
+    "source": "filter-clipper.kicad_pcb",
+    "unconnected_items": [],
+    "violations": [
+        {
+            "description": "Drilled holes co-located",
+            "items": [
+                {
+                    "description": "Via [AGND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 49.753624,
+                        "y": 66.524991
+                    },
+                    "uuid": "058b881b-bbf3-470f-9ace-54d79e76bfae"
+                },
+                {
+                    "description": "Via [AGND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 49.753624,
+                        "y": 66.524991
+                    },
+                    "uuid": "68d3c1be-2538-4766-aff8-221fd58bebd3"
+                }
+            ],
+            "severity": "warning",
+            "type": "holes_co_located"
+        },
+        {
+            "description": "Drilled hole too close to other hole (board setup constraints min 0.2495 mm; actual 0.0000 mm)",
+            "items": [
+                {
+                    "description": "Via [AGND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 106.61903,
+                        "y": 75.746685
+                    },
+                    "uuid": "19c20330-0c2a-499d-b4ce-34f07a66a1a1"
+                },
+                {
+                    "description": "Via [AGND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 106.611337,
+                        "y": 75.747341
+                    },
+                    "uuid": "89751575-fa4c-4b3e-8515-3422103065ac"
+                }
+            ],
+            "severity": "warning",
+            "type": "hole_to_hole"
+        },
+        {
+            "description": "Drilled holes co-located",
+            "items": [
+                {
+                    "description": "Via [AGND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 60.709015,
+                        "y": 67.28117
+                    },
+                    "uuid": "44b04c84-a4ab-428e-b09a-6f548f385c60"
+                },
+                {
+                    "description": "Via [AGND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 60.709035,
+                        "y": 67.28119
+                    },
+                    "uuid": "b377a8cb-2c4e-41ab-9df7-336a4fb20d76"
+                }
+            ],
+            "severity": "warning",
+            "type": "holes_co_located"
+        },
+        {
+            "description": "Drilled holes co-located",
+            "items": [
+                {
+                    "description": "Via [AGND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 58.948463,
+                        "y": 45.017341
+                    },
+                    "uuid": "6f185267-11d6-4804-815c-06e0f7c836b8"
+                },
+                {
+                    "description": "Via [AGND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 58.948463,
+                        "y": 45.017341
+                    },
+                    "uuid": "a0affa60-f464-4aad-852d-87a2dc7b7146"
+                }
+            ],
+            "severity": "warning",
+            "type": "holes_co_located"
+        },
+        {
+            "description": "Drilled holes co-located",
+            "items": [
+                {
+                    "description": "Via [AGND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 114.399454,
+                        "y": 93.766422
+                    },
+                    "uuid": "82107c9d-7090-40e2-b6db-d4b585b252cc"
+                },
+                {
+                    "description": "Via [AGND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 114.399454,
+                        "y": 93.766422
+                    },
+                    "uuid": "e904aa1c-3e75-41dd-95c7-3d8139a90674"
+                }
+            ],
+            "severity": "warning",
+            "type": "holes_co_located"
+        },
+        {
+            "description": "Drilled holes co-located",
+            "items": [
+                {
+                    "description": "Via [AGND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 95.791878,
+                        "y": 53.879292
+                    },
+                    "uuid": "8800b3a2-a522-467b-be83-bd1f8f568c4a"
+                },
+                {
+                    "description": "Via [AGND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 95.791878,
+                        "y": 53.879292
+                    },
+                    "uuid": "ff8b8b70-e413-4684-b5b3-b0d0196014ae"
+                }
+            ],
+            "severity": "warning",
+            "type": "holes_co_located"
+        },
+        {
+            "description": "Drilled holes co-located",
+            "items": [
+                {
+                    "description": "Via [AGND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 103.819591,
+                        "y": 78.988294
+                    },
+                    "uuid": "8ea1c964-63c3-492d-9ed3-d0db8418f442"
+                },
+                {
+                    "description": "Via [AGND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 103.819591,
+                        "y": 78.988294
+                    },
+                    "uuid": "d6e061ff-42ed-4946-a375-8295f3fac9b7"
+                }
+            ],
+            "severity": "warning",
+            "type": "holes_co_located"
+        },
+        {
+            "description": "Drilled holes co-located",
+            "items": [
+                {
+                    "description": "Via [AGND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 99.07389,
+                        "y": 84.99634
+                    },
+                    "uuid": "9d7a6553-ced4-4f10-af23-fd99bb30c6ec"
+                },
+                {
+                    "description": "Via [AGND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 99.07389,
+                        "y": 84.99634
+                    },
+                    "uuid": "cf0c5b87-6c8c-405f-82da-90a42631f09b"
+                }
+            ],
+            "severity": "warning",
+            "type": "holes_co_located"
+        },
+        {
+            "description": "Drilled holes co-located",
+            "items": [
+                {
+                    "description": "Via [AGND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 99.076874,
+                        "y": 39.989374
+                    },
+                    "uuid": "b0f2d7f5-3174-4da0-bc22-f22ae47f3468"
+                },
+                {
+                    "description": "Via [AGND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 99.076874,
+                        "y": 39.989374
+                    },
+                    "uuid": "c68e9d27-2810-48f2-a14e-7734c392ceec"
+                }
+            ],
+            "severity": "warning",
+            "type": "holes_co_located"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of K401",
+                    "pos": {
+                        "x": 145.5,
+                        "y": 52.19
+                    },
+                    "uuid": "26036abf-6c7c-43ba-be10-c04a3e03ca9c"
+                },
+                {
+                    "description": "Segment of K401 on F.Silkscreen",
+                    "pos": {
+                        "x": 146.6,
+                        "y": 47.0
+                    },
+                    "uuid": "6163a37d-c011-4093-baa5-aaf22d6eab35"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of K401",
+                    "pos": {
+                        "x": 145.5,
+                        "y": 52.19
+                    },
+                    "uuid": "26036abf-6c7c-43ba-be10-c04a3e03ca9c"
+                },
+                {
+                    "description": "Segment of K401 on F.Silkscreen",
+                    "pos": {
+                        "x": 146.6,
+                        "y": 47.0
+                    },
+                    "uuid": "6163a37d-c011-4093-baa5-aaf22d6eab35"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of P401 on F.Silkscreen",
+                    "pos": {
+                        "x": 35.54,
+                        "y": 52.56
+                    },
+                    "uuid": "39424002-6ad2-42ea-b43c-1d06e1224333"
+                },
+                {
+                    "description": "Reference field of P401",
+                    "pos": {
+                        "x": 34.45,
+                        "y": 47.5
+                    },
+                    "uuid": "f74c9816-3bc9-4c1b-85b3-8e75238774ad"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of P401 on F.Silkscreen",
+                    "pos": {
+                        "x": 35.55,
+                        "y": 49.25
+                    },
+                    "uuid": "c82fca75-1622-4937-a51c-4ecd6fb9567a"
+                },
+                {
+                    "description": "Reference field of P401",
+                    "pos": {
+                        "x": 34.45,
+                        "y": 47.5
+                    },
+                    "uuid": "f74c9816-3bc9-4c1b-85b3-8e75238774ad"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of P404",
+                    "pos": {
+                        "x": 33.1,
+                        "y": 76.04
+                    },
+                    "uuid": "81faaa84-6264-45dc-ac82-6d8107fbb347"
+                },
+                {
+                    "description": "Segment of P404 on F.Silkscreen",
+                    "pos": {
+                        "x": 34.19,
+                        "y": 80.86
+                    },
+                    "uuid": "d7a0e85b-47fb-4c86-81f3-ad48b742ee4e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of K401",
+                    "pos": {
+                        "x": 145.5,
+                        "y": 52.19
+                    },
+                    "uuid": "26036abf-6c7c-43ba-be10-c04a3e03ca9c"
+                },
+                {
+                    "description": "Segment of K401 on F.Silkscreen",
+                    "pos": {
+                        "x": 146.6,
+                        "y": 47.0
+                    },
+                    "uuid": "6163a37d-c011-4093-baa5-aaf22d6eab35"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of P402 on F.Silkscreen",
+                    "pos": {
+                        "x": 164.45,
+                        "y": 102.75
+                    },
+                    "uuid": "3396ac36-3d80-42b4-8dd8-f03641514942"
+                },
+                {
+                    "description": "Reference field of P402",
+                    "pos": {
+                        "x": 165.55,
+                        "y": 104.5
+                    },
+                    "uuid": "bd5060fe-1463-4398-91cd-6c80c310fa41"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of P402 on F.Silkscreen",
+                    "pos": {
+                        "x": 164.46,
+                        "y": 99.44
+                    },
+                    "uuid": "5f3c40da-2692-4582-abe1-0a1b9960b26d"
+                },
+                {
+                    "description": "Reference field of P402",
+                    "pos": {
+                        "x": 165.55,
+                        "y": 104.5
+                    },
+                    "uuid": "bd5060fe-1463-4398-91cd-6c80c310fa41"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of P402 on F.Silkscreen",
+                    "pos": {
+                        "x": 164.45,
+                        "y": 107.75
+                    },
+                    "uuid": "1eff0089-bcea-4cf1-9c0d-e74ac586bfa1"
+                },
+                {
+                    "description": "Reference field of H4",
+                    "pos": {
+                        "x": 164.0,
+                        "y": 109.85
+                    },
+                    "uuid": "de634187-e3be-4188-bf0a-bbfd93de9aec"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of P402 on F.Silkscreen",
+                    "pos": {
+                        "x": 164.46,
+                        "y": 99.44
+                    },
+                    "uuid": "5f3c40da-2692-4582-abe1-0a1b9960b26d"
+                },
+                {
+                    "description": "Reference field of H4",
+                    "pos": {
+                        "x": 164.0,
+                        "y": 109.85
+                    },
+                    "uuid": "de634187-e3be-4188-bf0a-bbfd93de9aec"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        }
+    ]
+}

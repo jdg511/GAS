@@ -105,6 +105,17 @@ def stitch(board, gnd):
                     for f in (0.15, 0.3, 0.5):
                         cands.append(pcbnew.VECTOR2I(int(mx + (cx - mx) * f),
                                                      int(my + (cy - my) * f)))
+                # dense grid over the fragment's bounding box as fallback
+                xs = [ol.CPoint(k).x for k in range(n)]
+                ys = [ol.CPoint(k).y for k in range(n)]
+                step = mm(2.0)
+                gx = min(xs) + step
+                while gx < max(xs):
+                    gy = min(ys) + step
+                    while gy < max(ys):
+                        cands.append(pcbnew.VECTOR2I(int(gx), int(gy)))
+                        gy += step
+                    gx += step
                 for pt in cands:
                     if not zone.HitTestFilledArea(layer, pt, 0):
                         continue
@@ -136,6 +147,14 @@ def main():
     elif mode == "import":
         ok = pcbnew.ImportSpecctraSES(board, ses)
         print("SES import:", ok)
+        filler = pcbnew.ZONE_FILLER(board)
+        filler.Fill(board.Zones())
+        stitch(board, cfg["gnd"][0])
+        filler = pcbnew.ZONE_FILLER(board)
+        filler.Fill(board.Zones())
+        pcbnew.SaveBoard(board_path, board)
+        print("board saved")
+    elif mode == "stitch":
         filler = pcbnew.ZONE_FILLER(board)
         filler.Fill(board.Zones())
         stitch(board, cfg["gnd"][0])
