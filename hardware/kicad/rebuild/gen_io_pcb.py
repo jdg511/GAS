@@ -43,6 +43,8 @@ def layout():
     # decoupling row
     grid(["C91", "C92", "C93", "C94", "C95", "C96", "C97", "C98"], 16, 56, 7, 0, 8)
     grid(["C99", "C100"], 84, 42, 8, 0, 2)
+    # mono default-stereo bleed (review F2)
+    grid(["R25"], 118, 58, 0, 0, 1)
     return pos
 
 def main():

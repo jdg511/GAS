@@ -85,6 +85,7 @@
       (place R22 53000 -72000 front 0 (PN 100))
       (place R23 60000 -72000 front 0 (PN 100))
       (place R24 67000 -72000 front 0 (PN 100))
+      (place R25 148000 -88000 front 0 (PN 1Meg))
       (place R3 76000 -46000 front 0 (PN 100))
       (place R31 88000 -82000 front 0 (PN 20k))
       (place R32 102000 -82000 front 0 (PN 20k))
@@ -407,7 +408,7 @@
       (pins P6-1 R12-1 U1-1 U1-10)
     )
     (net MONO_C
-      (pins P6-2 U1-12)
+      (pins P6-2 R25-1 U1-12)
     )
     (net N_COLD_L
       (pins R44-1 R50-1 U3-7)
@@ -476,7 +477,7 @@
       (pins P5-4 R23-1 R24-1 U1-13 U1-14)
     )
     (net R_RX
-      (pins P6-3 R16-1 U1-7)
+      (pins P6-3 R16-1 R25-2 U1-7)
     )
     (net WD_L_WIPER
       (pins P5-2 R31-1)

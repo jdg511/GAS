@@ -91,9 +91,12 @@ def _mk():
         cap("C506", "100n", "-15VA", "AGND", fp=g.FP_C1206),
     ]))
 
-    SECTIONS.append(("+5VAUX (R-78E5.0-0.5 from +15VA)", [
+    SECTIONS.append(("+5VAUX (R-78E5.0-0.5 from +15VRAW, pre-bead: review F1)", [
+        # Review finding F1: feed the 5V switcher from the RAW rail so its
+        # input ripple current stays off the filtered analog +15VA rail.
         C("PS501", "Converter_DCDC", "R-78E5.0-0.5", "R-78E5.0-0.5", FP_R78E,
-          {1: {"1": "+15VA", "2": "AGND", "3": "+5VAUX"}}, nosim=True),
+          {1: {"1": "+15VRAW", "2": "AGND", "3": "+5VAUX"}}, nosim=True),
+        scap("C512", "10u", "+15VRAW", "AGND", fp=g.FP_C1206),
         cpol("C507", "47u/16V", "+5VAUX", "AGND", simskip=True),
         scap("C508", "100n", "+5VAUX", "AGND"),
     ]))

@@ -2,34 +2,35 @@
   (base_design "power-backplane")
   (placement
     (resolution um 10)
-    (component "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm"
+    (component Capacitor_THT:CP_Radial_D10.0mm_P5.00mm
       (place C500 700000 -460000 front 0)
       (place C509 920000 -640000 front 0)
     )
-    (component "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm"
+    (component Capacitor_THT:CP_Radial_D6.3mm_P2.50mm
       (place C501 590000 -820000 front 0)
       (place C504 970000 -820000 front 0)
       (place C507 600000 -660000 front 0)
       (place C510 1020000 -700000 front 0)
       (place C511 1120000 -700000 front 0)
     )
-    (component "Capacitor_SMD:C_1206_3216Metric"
+    (component Capacitor_SMD:C_1206_3216Metric
       (place C502 680000 -820000 front 0)
       (place C503 770000 -820000 front 0)
       (place C505 1060000 -820000 front 0)
       (place C506 1150000 -820000 front 0)
+      (place C512 460000 -560000 front 0)
     )
-    (component "Capacitor_SMD:C_0805_2012Metric"
+    (component Capacitor_SMD:C_0805_2012Metric
       (place C508 680000 -660000 front 0)
     )
-    (component "Diode_SMD:D_SMA"
+    (component Diode_SMD:D_SMA
       (place D500 520000 -460000 front 0)
       (place TVS500 840000 -460000 front 0)
     )
-    (component "Fuse:Fuse_1812_4532Metric"
+    (component Fuse:Fuse_1812_4532Metric
       (place F500 620000 -460000 front 0)
     )
-    (component "Inductor_SMD:L_0603_1608Metric"
+    (component Inductor_SMD:L_0603_1608Metric
       (place FB500 500000 -820000 front 0)
       (place FB501 880000 -820000 front 0)
     )
@@ -53,10 +54,10 @@
     (component "Converter_DCDC:Converter_DCDC_RECOM_R-78E-0.5_THT"
       (place PS501 460000 -660000 front 0)
     )
-    (component "Resistor_SMD:R_1206_3216Metric"
+    (component Resistor_SMD:R_1206_3216Metric
       (place R500 1260000 -740000 front 0)
     )
-    (component "MountingHole:MountingHole_3.2mm_M3"
+    (component MountingHole:MountingHole_3.2mm_M3
       (place H1 360000 -360000 front 0)
       (place H2 1440000 -360000 front 0)
       (place H3 360000 -1040000 front 0)
@@ -69,7 +70,7 @@
     (resolution um 10)
     (parser
       (host_cad "KiCad's Pcbnew")
-      (host_version "10.0.3")
+      (host_version 10.0.3)
     )
     (library_out 
       (padstack "Via[0-1]_600:300_um"
@@ -187,30 +188,34 @@
             1260000 -1000000
           )
         )
-        (wire
-          (path B.Cu 8000
-            460000 -660000
-            460000 -690000
-            590000 -820000
-          )
-        )
       )
       (net +15VRAW
         (wire
           (path F.Cu 8000
-            987973 -731576
-            579413 -731576
-            492125 -818864
-            492125 -820000
+            446483 -642076
+            446483 -561233
+            445250 -560000
           )
         )
-        (via "Via[0-1]_600:300_um" 987973 -731576
+        (wire
+          (path F.Cu 8000
+            446483 -660000
+            446483 -642076
+          )
         )
         (wire
-          (path B.Cu 8000
+          (path F.Cu 8000
+            446483 -642076
+            878150 -642076
+            936074 -700000
             1020000 -700000
-            1019549 -700000
-            987973 -731576
+          )
+        )
+        (wire
+          (path F.Cu 8000
+            492125 -820000
+            460000 -787875
+            460000 -660000
           )
         )
         (wire
@@ -220,47 +225,29 @@
             1020000 -700000
           )
         )
-      )
-      (net "+30V_D"
         (wire
           (path F.Cu 8000
-            598625 -460000
-            583518 -475107
-            515107 -475107
+            460000 -660000
+            446483 -660000
+          )
+        )
+      )
+      (net +30V_D
+        (wire
+          (path F.Cu 8000
             500000 -460000
+            515624 -444376
+            583001 -444376
+            598625 -460000
           )
         )
       )
-      (net "+30V_F"
-        (wire
-          (path B.Cu 8000
-            920000 -558717
-            798717 -558717
-            700000 -460000
-          )
-        )
-        (wire
-          (path B.Cu 8000
-            1083800 -414417
-            939500 -558717
-            920000 -558717
-          )
-        )
-        (wire
-          (path B.Cu 8000
-            920000 -558717
-            920000 -640000
-          )
-        )
-        (wire
-          (path B.Cu 8000
-            1083800 -398400
-            1083800 -414417
-          )
-        )
+      (net +30V_F
         (wire
           (path F.Cu 8000
-            641375 -460000
+            820000 -460000
+            803574 -443574
+            716426 -443574
             700000 -460000
           )
         )
@@ -271,32 +258,37 @@
             820000 -460000
           )
         )
-      )
-      (net "+30V_RAW"
         (wire
-          (path F.Cu 8000
-            520001 -462364
-            537636 -462364
-            540000 -460000
+          (path B.Cu 8000
+            1083800 -398400
+            1083800 -414417
           )
-        )
-        (via "Via[0-1]_600:300_um" 520001 -462364
         )
         (wire
           (path B.Cu 8000
+            1083800 -414417
+            920000 -578217
+            920000 -640000
+          )
+        )
+        (wire
+          (path F.Cu 8000
+            641375 -460000
+            700000 -460000
+          )
+        )
+      )
+      (net +30V_RAW
+        (wire
+          (path F.Cu 8000
+            540000 -460000
+            524422 -475578
+            395578 -475578
             380000 -460000
-            517637 -460000
-            520001 -462364
           )
         )
       )
       (net +5VAUX
-        (wire
-          (path F.Cu 8000
-            670500 -661157
-            670500 -660000
-          )
-        )
         (wire
           (path F.Cu 8000
             1380000 -698800
@@ -308,8 +300,14 @@
         (wire
           (path F.Cu 8000
             670500 -661157
-            657166 -674491
-            614491 -674491
+            670500 -660000
+          )
+        )
+        (wire
+          (path F.Cu 8000
+            670500 -661157
+            657255 -674402
+            614402 -674402
             600000 -660000
           )
         )
@@ -435,50 +433,55 @@
           )
         )
       )
-      (net "GND_IN"
+      (net GND_IN
         (wire
           (path F.Cu 8000
-            1046609 -731576
-            1236951 -731576
             1245375 -740000
-          )
-        )
-        (via "Via[0-1]_600:300_um" 1046609 -731576
-        )
-        (wire
-          (path B.Cu 8000
+            1260152 -725223
+            1381275 -725223
+            1399900 -706598
+            1399900 -691033
+            1387867 -679000
+            1009000 -679000
             970000 -640000
-            970000 -728471
-            983480 -741951
-            1036234 -741951
-            1046609 -731576
           )
         )
         (wire
           (path F.Cu 8000
-            844335 -475665
-            765665 -475665
             750000 -460000
+            726890 -483110
+            634053 -483110
+            620000 -469057
+            620000 -450631
+            603702 -434333
+            396684 -434333
+            396017 -435000
           )
         )
         (wire
           (path F.Cu 8000
-            860000 -460000
-            844335 -475665
-          )
-        )
-        (wire
-          (path F.Cu 8000
-            970000 -640000
-            970000 -601330
-            844335 -475665
+            844618 -475382
+            765382 -475382
+            750000 -460000
           )
         )
         (wire
           (path F.Cu 8000
             380000 -435000
-            725000 -435000
-            750000 -460000
+            396017 -435000
+          )
+        )
+        (wire
+          (path F.Cu 8000
+            860000 -460000
+            844618 -475382
+          )
+        )
+        (wire
+          (path F.Cu 8000
+            970000 -640000
+            970000 -600764
+            844618 -475382
           )
         )
         (wire

@@ -90,6 +90,10 @@ SECTIONS = [
     ("MONO ROUTING + PROGRAM BUFFERS + FANOUT", [
         quad("U1_C", 3, {"8": "L_PROG", "9": "L_PROG", "10": "L_RX"}),
         quad("U1_D", 4, {"14": "R_PROG", "13": "R_PROG", "12": "MONO_C"}),
+        # Review finding F2: default the right channel to stereo if the mono
+        # switch has a center-off position or the harness is unplugged;
+        # otherwise U1D+ floats.
+        res("R25", "1Meg", "MONO_C", "R_RX"),
         res("R21", "100", "L_PROG", "DRY_L"),
         res("R22", "100", "L_PROG", "WET_SEND_L"),
         res("R23", "100", "R_PROG", "DRY_R"),

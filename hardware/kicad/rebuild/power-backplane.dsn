@@ -52,6 +52,7 @@
       (place C503 77000 -82000 front 0 (PN 100n))
       (place C505 106000 -82000 front 0 (PN 10u))
       (place C506 115000 -82000 front 0 (PN 100n))
+      (place C512 46000 -56000 front 0 (PN 10u))
     )
     (component Capacitor_SMD:C_0805_2012Metric
       (place C508 68000 -66000 front 0 (PN 100n))
@@ -891,10 +892,10 @@
   (network
     (net +15VA
       (pins C501-1 C502-1 C503-1 FB500-2 P501-1 P502-1 P503-1 P504-1 P505-1 P506-1
-        P601-3 PS501-1)
+        P601-3)
     )
     (net +15VRAW
-      (pins C510-1 FB500-1 PS500-3)
+      (pins C510-1 C512-1 FB500-1 PS500-3 PS501-1)
     )
     (net +30V_D
       (pins D500-1 F500-1)

@@ -1,0 +1,326 @@
+--- Page 1 ---
+DC/DCConverter
+URA_YMD-10WR3&URB_YMD-10WR3Series
+2025.01.21-B/4 Page1of7
+MORNSUN Guangzhou Science&TechnologyCo.,Ltd.reservesthecopyrightandrightoffinalinterpretation
+10WisolatedDC-DC converterinDIPpackage
+Ultra-wideinputandregulateddual/singleoutput
+PatentProtection
+Report
+ Report CB RoHS
+EN62368-1 BSEN62368-1 IEC60950-1
+FEATURES
+ Ultra-wide4:1inputvoltage range
+ Highefficiencyupto88%
+ No-loadpowerconsumptionaslowas0.12W
+ I/Oisolationtestvoltage1.5kVDC
+ Inputunder-voltageprotection,output
+short-circuit,over-current,over-voltageprotection
+ Operatingambienttemperaturerange:-40℃to
++85℃
+ MeetsCISPR32/EN55032CLASSA,withoutextra
+components
+ Inputreversepolarityprotectionavailablewith
+Chassis(A2S)or35mmDIN-Railmounting(A4S)
+version
+ MeetsEN50155railwaystandard
+ Industrystandardpin-out
+URA_YMD-10WR3&URB_YMD-10WR3seriesareisolated10WDC-DCconverterproductsfeatureanultra-widewith4:1inputvoltagewith
+efficienciesofupto88%,1500VDCinputtooutputisolation,operatingambienttemperaturerangeof-40℃ to+85℃,inputunder-voltage
+protection,outputshort-circuit,over-current,over-voltageprotection.TheymeetCLASSAofCISPR32/EN55032EMIstandardswithout
+externalcomponents,optionalpackagesareofferedforchassisorDIN-railmounting(A2S,A4S),addingadditionalinputreversepolarity
+protectionandtheyarewidelyusedinapplicationssuchasindustrialcontrol,electricpower,instruments,communicationandrailway
+applications.
+SelectionGuide
+Certification PartNo.
+①
+InputVoltage(VDC) Output FullLoad
+Efficiency
+④
+(%)Min./Typ.
+Capacitive
+Load
+⑤
+(µF)Max.
+Nominal
+②
+(Range) Max.
+③
+Voltage(VDC) Current(mA)
+Max./Min.
+EN/BSEN/IEC
+*URA2405YMD-10WR3
+24
+(9-36) 40
+±5 ±1000/0 81/83 1000
+URA2409YMD-10WR3 ±9 ±555/0 84/86 680
+*URA2412YMD-10WR3 ±12 ±416/0 85/87 470
+URA2415YMD-10WR3 ±15 ±333/0 85/87 330
+*URA2424YMD-10WR3 ±24 ±208/0 85/87 100
+URB2403YMD-10WR3 3.3 2400/0 75/77 2200
+URB2405YMD-10WR3 5 2000/0 80/82 2200
+URB2409YMD-10WR3 9 1111/0 83/85 680
+URB2412YMD-10WR3 12 833/0 84/86 470
+URB2415YMD-10WR3 15 667/0 84/86 330
+URB2424YMD-10WR3 24 416/0 86/88 100
+*URA4805YMD-10WR3
+48
+(18-75) 80
+±5 ±1000/0 81/83 1000
+*URA4812YMD-10WR3 ±12 ±416/0 85/87 470
+*URA4815YMD-10WR3 ±15 ±333/0 85/87 330
+*URA4824YMD-10WR3 ±24 ±208/0 85/87 100
+*URB4803YMD-10WR3 3.3 2400/0 77/79 2200
+*URB4805YMD-10WR3 5 2000/0 81/83 2200
+*URB4812YMD-10WR3 12 833/0 85/87 470
+*URB4815YMD-10WR3 15 667/0 85/87 330
+*URB4824YMD-10WR3 24 416/0 86/88 100
+Notes：
+1 Use“H”suffix forheatsinkmounting,“A2S”suffixforchassis mountingand“A4S”suffixforDIN-Railmounting;
+
+--- Page 2 ---
+DC/DCConverter
+URA_YMD-10WR3&URB_YMD-10WR3Series
+2025.01.21-B/4 Page2of7
+MORNSUN Guangzhou Science&TechnologyCo.,Ltd.reservesthecopyrightandrightoffinalinterpretation
+2 TheA2SandA4S Model’sstart-upandminimuminputvoltagesareincreasedby1VDC duetotheinputreversepolarityprotectioncircuit;
+3 Exceedingthemaximuminputvoltagemaycausepermanentdamage;
+4 Efficiencyismeasuredatnominalinputvoltageandratedoutputload;efficienciesforA2SandA4SModel’sisdecreasedby2%duetotheinputreverse
+polarityprotectioncircuit;
+5 Thespecifiedmaximum capacitiveloadvalueforpositiveandnegative outputisidentical;
+6 Productsmarkedwith“*”needaninputcapacitorinordertomeetconductedspecificationsofCISPR32/EN55032CLASSA.
+InputSpecifications
+Item OperatingConditions Min. Typ. Max. Unit
+InputCurrent
+(fullload/no-load)
+24VDCnominalinputseries,
+nominalinputvoltage
+3.3VDCoutput -- 429/5 440/12
+mA
+Others -- 502/5 521/12
+48VDCnominalinputseries,
+nominalinputvoltage
+3.3VDCoutput -- 190/4 215/8
+Others -- 251/4 258/8
+ReflectedRippleCurrent
+24VDCnominalinputseries,nominalinputvoltage -- 40 --
+48VDCnominalinputseries,nominalinputvoltage -- 30 --
+SurgeVoltage(1sec.max.)
+24VDCnominalinputseries -0.7 -- 50
+VDC
+48VDCnominalinputseries -0.7 -- 100
+Start-upVoltage
+24VDCnominalinputseries -- -- 9
+48VDCnominalinputseries -- -- 18
+InputUnder-voltageProtection
+24VDCnominalinputseries 5.5 6.5 -- VDC
+48VDCnominalinputseries 12 15.5 --
+Start-upTime Nominalinputvoltage&constantresistanceload -- 10 -- ms
+InputFilter Pifilter
+HotPlug Unavailable
+Ctrl*
+Moduleon Ctrlpinopenorpulledhigh(3.5-12VDC)
+Moduleoff CtrlpinpulledlowtoGND(0-1.2VDC)
+Inputcurrentwhenoff -- 6 10 mA
+Note: *TheCtrlpinvoltage isreferencedtoinputGND.
+OutputSpecifications
+Item OperatingConditions Min. Typ. Max. Unit
+VoltageAccuracy
+①
+0%-100%load -- ±1 ±3
+%
+LinearRegulation Inputvoltagevariationfromlowto
+highatfullload
+Vo1 -- ±0.2 ±0.5
+Vo2 -- ±0.5 ±1
+LoadRegulation
+②
+5%-100%load
+Vo1 -- ±0.5 ±1
+Vo2 -- ±0.5 ±1.5
+CrossRegulation Dualoutput,Vo1loadat50%,Vo2loadatrangeof
+10%-100% -- -- ±5
+TransientRecoveryTime
+25%loadstepchange,nominalinputvoltage
+-- 300 500 µs
+TransientResponseDeviation -- ±3 ±5 %
+TemperatureCoefficient Fullload -- -- ±0.03 %/℃
+Ripple&Noise
+③
+20MHzbandwidth,5%-100%load -- 40 80 mVp-p
+Over-voltageProtection
+Inputvoltagerange
+110 -- 160 %Vo
+Over-currentProtection 110 140 190 %Io
+Short-circuitProtection Continuous,self-recovery
+Note:
+①Outputvoltageaccuracyof±5VDC/±9VDCoutputconverterfor0%-5%load is±5%max;
+②Load regulationfor0%-100%loadis±5%;
+③Under0%-5%loadconditions,ripple &noisedoesnotexceed5%Vo.The“parallelcable”methodisusedforRippleandNoisetest,pleaserefertoDC-DC
+ConverterApplicationNotesforspecificinformation.
+GeneralSpecifications
+
+--- Page 3 ---
+DC/DCConverter
+URA_YMD-10WR3&URB_YMD-10WR3Series
+2025.01.21-B/4 Page3of7
+MORNSUN Guangzhou Science&TechnologyCo.,Ltd.reservesthecopyrightandrightoffinalinterpretation
+Item OperatingConditions Min. Typ. Max. Unit
+Isolation Input-outputElectricStrengthTestfor1minutewith
+aleakagecurrentof1mAmax. 1500 -- -- VDC
+InsulationResistance Input-outputresistanceat500VDC 1000 -- -- MΩ
+IsolationCapacitance Input-outputcapacitanceat100kHz/0.1V -- 1000 -- pF
+OperatingTemperature SeeFig.1 -40 -- +85
+℃
+StorageTemperature -55 -- +125
+StorageHumidity Non-condensing 5 -- 95 %RH
+PinSolderingResistance
+Temperature
+Solderingspotis1.5mmawayfromcasefor10
+seconds -- -- +300 ℃
+Vibration IEC/EN61373-Category1,GradeB
+SwitchingFrequency* PWMmode -- 350 -- kHz
+MTBF MIL-HDBK-217F@25℃ 1000 -- -- khours
+Note:*Switching frequencyismeasuredatfullload.Themodulereducestheswitchingfrequencyforlightload(below50%) efficiencyimprovement.
+MechanicalSpecifications
+CaseMaterial Aluminumalloy
+Dimensions
+Horizontalpackage(withoutheatsink) 25.40×25.40×11.70mm
+Horizontalpackage(withheatsink) 25.40×25.40×16.20mm
+A2Schassismounting 76.00×31.50×21.20mm
+A4SDIN-railmounting 76.00×31.50×25.80mm
+Weight
+withoutheatsink Horizontalpackage/A2Schassis
+mounting/A4SDIN-Rail mounting 12.5g/36.0g/56.0g(Typ.)
+withheatsink Horizontalpackage 17g
+Coolingmethod Freeairconvection
+ElectromagneticCompatibility(EMC)
+Emissions
+CE CISPR32/EN55032 CLASSA(withoutextracomponents)/
+CLASSB(seeFig.3-②forrecommendedcircuit)
+RE CISPR32/EN55032 CLASSA(withoutextracomponents)/
+CLASSB(seeFig.3-②forrecommendedcircuit)
+Immunity
+ESD IEC/EN61000-4-2 Contact±4kV perf.CriteriaB
+RS IEC/EN61000-4-3 10V/m perf.CriteriaA
+EFT IEC/EN61000-4-4 ±2kV(seeFig.3-①forrecommendedcircuit) perf.CriteriaB
+Surge IEC/EN61000-4-5 linetoline±2kV(seeFig.3-①forrecommendedcircuit) perf.CriteriaB
+CS IEC/EN61000-4-6 3Vr.m.s perf.CriteriaA
+Voltagedips,short
+interruptionsand
+voltagevariations
+immunity
+IEC/EN61000-4-29 0%,70% perf.CriteriaB
+ElectromagneticCompatibility(EMC)(EN50155)
+Emissions
+CE EN50121-3-2 150kHz-500kHz 99dBuV (seeFig.3-②forrecommendedcircuit)
+EN55016-2-1 500kHz-30MHz 93dBuV (seeFig.3-②forrecommendedcircuit)
+RE EN50121-3-2 30MHz-230MHz 40dBuV/mat10m (seeFig.3-②forrecommendedcircuit)
+EN55016-2-1 230MHz-1GHz 47dBuV/mat10m (seeFig.3-②forrecommendedcircuit)
+Immunity
+ESD EN50121-3-2 Contact±6kV/Air±8kV perf.CriteriaA
+RS EN50121-3-2 20V/m perf.CriteriaA
+EFT EN50121-3-2 ±2kV 5/50ns 5kHz (seeFig.3-①forrecommendedcircuit) perf.CriteriaA
+Surge EN50121-3-2 linetoline±1kV(42Ω,0.5μF)(seeFig.3-①forrecommendedcircuit) perf.CriteriaA
+CS EN50121-3-2 0.15MHz-80MHz 10Vr.m.s perf.CriteriaA
+TypicalCharacteristicCurves
+
+--- Page 4 ---
+DC/DCConverter
+URA_YMD-10WR3&URB_YMD-10WR3Series
+2025.01.21-B/4 Page4of7
+MORNSUN Guangzhou Science&TechnologyCo.,Ltd.reservesthecopyrightandrightoffinalinterpretation
+Fig.1
+DesignReference
+1. Typicalapplication
+AlltheDC/DCconvertersofthisseriesaretestedbeforedeliveryusingtherecommendedcircuitshowninFig.2.
+Inputand/oroutputripplecanbefurtherreducedbyappropriatelyincreasingtheinput&outputcapacitorvaluesCinandCoutand/orby
+selectingcapacitorswithalowESR(equivalentseriesresistance).Alsomakesurethatthecapacitanceisnotexceedingthespecifiedmax.
+capacitiveloadvalueoftheproduct.
+DC DC
+Vin
+GND
++Vo
+0V
+Cin Cout
+Vin
+GND
++Vo
+0VCin
+Cout
+DC DC
+-Vo
+Cout
+Dual
+Single
+Fig.2
+Vin(VDC) Vout(VDC) Cin Cout
+24
+3.3/5/±5
+100µF/50V
+10µF/16V
+9/12/15/±9/±
+12/±15 10µF/25V
+24/±24 10µF/50V
+48
+3.3/5/±5
+10µF-
+47µF/100V
+10µF/16V
+9/12/15/±9/±
+12/±15 10µF/25V
+24/±24 10µF/50V
+2. EMCcompliancecircuit
+(withoutheatsink) (withheatsink)
+
+--- Page 5 ---
+DC/DCConverter
+URA_YMD-10WR3&URB_YMD-10WR3Series
+2025.01.21-B/4 Page5of7
+MORNSUN Guangzhou Science&TechnologyCo.,Ltd.reservesthecopyrightandrightoffinalinterpretation
+Fig.3
+Notes:ForEMCtestsweusePart ① inFig.3forimmunityandpart ② for
+emissions test.Selectingbasedonneeds.
+Parameterdescription:
+Model Vin:24VDC Vin:48VDC
+FUSE Chooseaccordingto actualinputcurrent
+MOV S20K30 S14K60
+C0,C3 330µF/50V 330µF/100V
+C1 1µF/50V 1µF/100V
+C2 RefertotheCoutinFig.2
+LDM1 4.7µH
+CY1,CY2 1nF/2kV
+3. Theproductsdonotsupportparallelconnectionoftheiroutput
+4. ForadditionalinformationpleaserefertoDC-DCconverterapplicationnoteson
+www.mornsun-power.com
+HorizontalPackage(withoutheatsink)DimensionsandRecommendedLayout
+HorizontalPackage(withheatsink)DimensionsandRecommendedLayout
+
+
+--- Page 6 ---
+DC/DCConverter
+URA_YMD-10WR3&URB_YMD-10WR3Series
+2025.01.21-B/4 Page6of7
+MORNSUN Guangzhou Science&TechnologyCo.,Ltd.reservesthecopyrightandrightoffinalinterpretation
+URA_YMD-10WR3A2S&URB_YMD-10WR3A2SDimensions
+URA_YMD-10WR3A4S&URB_YMD-10WR3A4SDimensions
+
+--- Page 7 ---
+DC/DCConverter
+URA_YMD-10WR3&URB_YMD-10WR3Series
+2025.01.21-B/4 Page7of7
+MORNSUN Guangzhou Science&TechnologyCo.,Ltd.reservesthecopyrightandrightoffinalinterpretation
+Note:
+1. For additional information on Product Packaging please refer to www.mornsun-power.com. Packaging bag number: 58210003 (DIP),
+58220022(A2S/A4Spackage);
+2. Themaximumcapacitiveloadofferedweretestedatinputvoltagerangeandfullload;
+3. Unlessotherwisespecified,parametersinthisdatasheetweremeasuredundertheconditionsofTa=25℃,humidity<75%RHwithnominal
+inputvoltageandratedoutputload;
+4. Allindextestingmethodsinthisdatasheetarebasedonourcompanycorporatestandards;
+5. Wecanprovideproductcustomizationservice,pleasecontactourtechniciansdirectlyforspecificinformation;
+6. Productsarerelatedtolawsandregulations:see"Features"and"EMC";
+7. Our products shall be classified according to ISO14001 and related environmental laws and regulations, and shall be handled by
+qualifiedunits.
+MornsunGuangzhouScience&TechnologyCo.,Ltd.
+Address:No.8,Nanyun4thRoad,HuangpuDistrict,Guangzhou,China
+Tel:86-20-38601850 Fax:86-20-38601272 E-mail:info@mornsun.cn www.mornsun-power.com
