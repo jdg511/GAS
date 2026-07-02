@@ -158,12 +158,13 @@ def layout(parts):
     grid(["C173", "C177"], 138, 44, 8, 0, 2)
     grid(["R174", "R186", "R178", "R182"], 106, 66, 8, 0, 4)
     grid(["C174", "C178"], 138, 66, 8, 0, 2)
-    # Shield strategy, bottom-right near jacks
-    grid(["R205", "C191", "R206"], 128, 96, 10, 0, 3)
+    # Shield strategy: in the right-edge corridor between jack column and edge,
+    # vertical, in the gaps between jack pads (hand-routed, not autorouted)
+    grid(["R205", "C191", "R206"], 163, 34, 0, 11, 1, rot=90)
     # Power + decoupling (bottom band)
     grid(["C291", "C295", "C292", "C296", "C293", "C297", "C294", "C298"],
-         28, 96, 9, 6, 8)
-    grid(["C299", "C300"], 104, 96, 10, 0, 2)
+         28, 96, 12, 6, 8)
+    grid(["C299", "C300"], 124, 96, 12, 0, 2)
     return pos
 
 # ------------------------------------------------------------------ build board
@@ -238,14 +239,14 @@ def main():
                     '\t\t(layer "Edge.Cuts")\n\t\t(uuid "%s")\n\t)' % (a[0], a[1], b[0], b[1], g.uid()))
     # AGND zones both layers
     agnd = netcodes["AGND"]
-    for layer in ("F.Cu", "B.Cu"):
+    for layer, conn in (("F.Cu", "yes "), ("B.Cu", "yes ")):
         body.append(
             '\t(zone\n\t\t(net %d)\n\t\t(net_name "AGND")\n\t\t(layer "%s")\n\t\t(uuid "%s")\n'
-            '\t\t(hatch edge 0.5)\n\t\t(connect_pads\n\t\t\t(clearance 0.4)\n\t\t)\n'
+            '\t\t(hatch edge 0.5)\n\t\t(connect_pads %s\n\t\t\t(clearance 0.4)\n\t\t)\n'
             '\t\t(min_thickness 0.25)\n\t\t(filled_areas_thickness no)\n'
             '\t\t(fill yes\n\t\t\t(thermal_gap 0.5)\n\t\t\t(thermal_bridge_width 0.5)\n\t\t)\n'
             '\t\t(polygon\n\t\t\t(pts\n\t\t\t\t(xy %.2f %.2f) (xy %.2f %.2f) (xy %.2f %.2f) (xy %.2f %.2f)\n\t\t\t)\n\t\t)\n\t)'
-            % (agnd, layer, g.uid(),
+            % (agnd, layer, g.uid(), conn,
                OX + 1, OY + 1, OX + BOARD_W - 1, OY + 1,
                OX + BOARD_W - 1, OY + BOARD_H - 1, OX + 1, OY + BOARD_H - 1))
     body.append('\t(embedded_fonts no)')
