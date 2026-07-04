@@ -9,7 +9,7 @@ This folder is the starting point for turning the JUCE spring-reverb simulation 
 - Do not use an MCU, Arduino, Raspberry Pi, or other general-purpose embedded computer on the production PCB.
 - The external audio interfaces should be balanced line level, nominally `+4 dBu`, with 600-ohm capable line I/O behavior.
 - The external audio connectors should be combo `XLR / TRS` jacks.
-- The enclosure format is now a **user-supplied cylindrical tube**, roughly `8-9 in` diameter and about `48 in` long.
+- The enclosure format is now a **user-supplied cylindrical tube**, `10 in` nominal diameter (standard pipe/cap size; `9 in` fits but is rarely stocked) and about `48 in` long.
 - All external audio connections and DC power entry should land on **one circular service endcap**, in the spirit of the original Great British Spring.
 - In the audio path, avoid ceramic, tantalum, and electrolytic capacitors wherever practical; prefer film-based or other non-ceramic/non-electrolytic solutions and use direct coupling where it makes sense. Power-supply and rail-decoupling positions may use ceramics or electrolytics when practical.
 - Only the simulation's predelay and convolution blocks are software-only stand-ins for the real spring tanks.

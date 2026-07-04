@@ -15,8 +15,8 @@ All of that lands on one circular face.
 
 ## Preferred Endcap Diameter
 
-- preferred clear usable face: about **`8.5-9.0 in`**
-- smaller than that becomes risky once the combo-jack cutouts and nine control bushings are included
+- preferred: **`10 in` nominal** (standard pipe/cap size; measured face will be larger than `10.00 in` on most cap styles)
+- the frozen layout also passes all rules on a `9.0 in` face; below that becomes risky once the combo-jack cutouts and nine control bushings are included
 
 ## Recommended Zones
 

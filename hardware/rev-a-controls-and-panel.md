@@ -6,7 +6,7 @@ This document captures the user-facing controls and service-endcap assumptions f
 
 - cylindrical tube enclosure
 - about `48 in` long
-- target diameter `8-9 in`
+- target diameter `10 in` nominal
 - all user connections and DC power entry on one circular endcap
 
 Because the control count is high and the I/O format is fixed, the endcap is now the primary user interface rather than a conventional flat rack front panel.
@@ -101,7 +101,7 @@ Rev A uses combo `XLR / TRS` connectors for balanced line I/O.
 
 - The unit has a relatively control-dense **circular endcap**
 - The combo-jack requirement takes the widest chord across the face
-- `9 in` diameter is the preferred rev-A target because it gives enough room for four combo jacks plus the full control set
+- `10 in` nominal diameter is the preferred rev-A target: it fits four combo jacks plus the full control set with margin, and unlike `9 in` it is a standard off-the-shelf pipe/cap size
 - Keep the mono-to-stereo switch near the input section so the behavior reads clearly
 - Keep ext-tank mode and amount adjacent so Off / Series / Parallel behavior is easier to understand
 - Keep feedback amount and feedback phase together

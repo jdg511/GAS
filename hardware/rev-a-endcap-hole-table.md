@@ -4,13 +4,14 @@ This is the first drilling and cutout draft for the circular service endcap.
 
 It is intentionally a **prototype handoff table**, not a final CNC drawing. The goals are:
 
-- prove the control and connector count fits the preferred `9 in` face
+- prove the control and connector count fits the preferred `10 in` face
 - provide a metal shop with an organized cutout schedule
-- expose where the `8 in` fallback diameter becomes tight
+- record that the layout also passes all spacing rules on a `9 in` face (no longer preferred only because `9 in` pipe caps are rarely stocked)
 
 ## Reference System
 
-- preferred endcap outer diameter: `9.0 in` (`228.6 mm`)
+- preferred endcap outer diameter: `10.0 in` nominal (`254 mm`)
+- note: "10 in" nominal pipe/cap hardware is not 10.00 in actual (e.g. 10 in steel pipe is `10.75 in` OD; PVC socket vs spigot caps differ) — final DXF must use the measured face of the purchased cap
 - coordinate origin: center of the circular endcap
 - `+X` to the right when facing the unit
 - `+Y` upward when facing the unit
@@ -31,17 +32,17 @@ It is intentionally a **prototype handoff table**, not a final CNC drawing. The 
 | `J2` | right input combo jack | 1 | `-26` | `18` | combo-jack rectangular cutout per Neutrik | jack-bar mounted |
 | `J3` | left output combo jack | 1 | `26` | `18` | combo-jack rectangular cutout per Neutrik | jack-bar mounted |
 | `J4` | right output combo jack | 1 | `78` | `18` | combo-jack rectangular cutout per Neutrik | jack-bar mounted |
-| `J5` | DC jack | 1 | `88` | `-48` | `8.0 mm` round pilot, enlarge to selected jack bushing | keep cable bend clearance |
-| `SW701` | mono selector | 1 | `-70` | `74` | `6.5 mm` round | upper-left switch zone |
+| `J5` | DC jack | 1 | `95` | `-18.35` | `8.0 mm` round pilot, enlarge to selected jack bushing | keep cable bend clearance; use compact-bushing jack |
+| `SW701` | mono selector | 1 | `-63.65` | `61.3` | `6.5 mm` round | upper-left switch zone |
 | `J701` | ext mode rotary | 1 | `-25` | `78` | `9.5 mm` round | upper-center left |
 | `J702` | clip mode rotary | 1 | `25` | `78` | `9.5 mm` round | upper-center right |
-| `SW702` | feedback phase | 1 | `70` | `74` | `6.5 mm` round | upper-right switch zone |
-| `VR701` | wet/dry | 1 | `-78` | `-52` | `7.5 mm` round | lower outer row |
+| `SW702` | feedback phase | 1 | `63.65` | `61.3` | `6.5 mm` round | upper-right switch zone |
+| `VR701` | wet/dry | 1 | `-78` | `-45.65` | `7.5 mm` round | lower outer row |
 | `VR702` | ext amount | 1 | `-47` | `-70` | `7.5 mm` round | lower outer row |
 | `VR703` | crossfade | 1 | `-15` | `-82` | `7.5 mm` round | lower outer row |
 | `VR704` | feedback | 1 | `18` | `-82` | `7.5 mm` round | lower outer row |
 | `VR705` | drive | 1 | `50` | `-70` | `7.5 mm` round | lower outer row |
-| `VR706` | HPF cutoff | 1 | `80` | `-52` | `7.5 mm` round | lower outer row |
+| `VR706` | HPF cutoff | 1 | `80` | `-45.65` | `7.5 mm` round | lower outer row |
 | `VR707` | HPF Q | 1 | `-48` | `-26` | `7.5 mm` round | lower inner row |
 | `VR708` | LPF cutoff | 1 | `0` | `-36` | `7.5 mm` round | lower inner row |
 | `VR709` | LPF Q | 1 | `48` | `-26` | `7.5 mm` round | lower inner row |
@@ -67,17 +68,21 @@ Benefits:
 
 ## Edge-Clearance Audit
 
-For the `9 in` draft:
+For the `10 in` (`254 mm`) preferred face, every item passes all spacing rules with margin. Tightest gaps at the final positions:
 
-- the farthest round-control centers stay comfortably inside the edge
-- the lower control cluster remains plausible with medium knobs
-- the DC plug clears the lower-right pot zone better than a center-bottom power jack would
+- `J5` DC to `VR706` HPF cutoff: `31.2 mm` center-to-center (rule `>= 24 mm`)
+- `J5` DC to `J4` out-R combo: `40.1 mm` (rule `>= 31 mm`)
+- `J5` DC hole edge to rim: `~26 mm` on the `10 in` face (rule `>= 12 mm`)
+- `SW701`/`SW702` toggle hole edge to rim: `~35 mm`
+- closest pot pair (`VR703`-`VR704` crossfade/feedback): `33 mm` (rule `>= 24 mm`)
 
-For an `8 in` fallback:
+On a `9 in` face the same layout still passes everywhere; the slimmest number becomes the DC jack edge margin at `~13.5 mm` against the `12 mm` rule. `9 in` was dropped as the preferred target for sourcing reasons only: standard pipe and cap sizes jump from `8 in` to `10 in`.
 
-- the connector field may still fit
-- the lower control cluster becomes the main risk area
-- expect smaller knobs or tighter spacing if `8 in` is forced
+### Position-Change History (draft corrections)
+
+- `J5` DC jack: `(88, -48)` clashed with `VR706` at `~9 mm` center-to-center → `(88, -12)` → final `(95, -18.35)` for knob-size headroom around `VR706` and hand clearance under `J4`
+- `SW701`/`SW702` toggles: `(±70, 74)` violated the `12 mm` edge rule on the `9 in` draft (`~9 mm` actual) → final `(±63.65, 61.3)`
+- `VR701`/`VR706`: raised `1/4 in` from `Y = -52` to `Y = -45.65` for rim clearance and a softer outer arc
 
 ## Metal-Shop Deliverable Recommendation
 

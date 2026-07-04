@@ -243,7 +243,7 @@ Because the PCB builder will mainly be assembling SMD content, the panel hardwar
 
 ## Mechanical Strategy
 
-- The enclosure is a user-supplied cylindrical tube, roughly `8-9 in` diameter and `48 in` long.
+- The enclosure is a user-supplied cylindrical tube, `10 in` nominal diameter and `48 in` long.
 - All external I/O and DC power entry land on one circular service endcap.
 - Mount the spring tanks to the chassis or an internal subframe, not directly to the signal PCBs.
 - Use shielded RCA tank cables internally.

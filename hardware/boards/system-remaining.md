@@ -27,7 +27,7 @@ The rev-A board set is now defined at the architecture and schematic-ready level
 
 ### 1. Finalize the service-endcap package
 
-- Confirm the enlarged `8-9 inch` pipe-end layout
+- Confirm the `10 inch` nominal pipe-end layout against the measured cap face
 - Freeze combo `XLR / TRS` jack spacing and the low-voltage DC entry
 - Confirm switch / pot spacing against the circular panel geometry
 

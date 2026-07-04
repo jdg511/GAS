@@ -11,8 +11,8 @@ These are **prototype-planning numbers**, not final fab outlines. Their purpose 
 ## Mechanical Reference Frame
 
 - enclosure shell: user-supplied tube
-- preferred outer diameter: `9.0 in` (`228.6 mm`)
-- acceptable fallback outer diameter: `8.0 in` (`203.2 mm`)
+- preferred outer diameter: `10.0 in` nominal (`254 mm`; measured cap face will differ — see rev-a-pipe-enclosure-concept.md)
+- acceptable fallback outer diameter: `9.0 in` (`228.6 mm`) if stock appears; `8.0 in` (`203.2 mm`) only with layout compromises
 - design target length: `48 in` (`1219 mm`)
 
 For the draft board envelopes below, assume:

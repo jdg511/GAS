@@ -5,7 +5,9 @@ This file freezes the first usable mechanical concept for the real enclosure.
 ## Locked Rev-A Direction
 
 - The shell is a **user-supplied cylindrical tube**
-- Target diameter is **`8 in` minimum, `9 in` preferred**
+- Target diameter is **`10 in` nominal, preferred** (`8 in` minimum fallback)
+- `10 in` chosen over the earlier `9 in` preference because standard pipe, cap, and sonotube sizes jump from `8 in` to `10 in` — `9 in` is effectively a custom part
+- nominal is not actual: `10 in` steel pipe is `10.75 in` OD and PVC cap styles differ; final metalwork must use the measured face of the purchased cap
 - Target length is about **`48 in`**
 - All user-facing I/O and power entry live on **one circular service endcap**
 - The opposite endcap is mechanically simple and normally has no external connectors
@@ -62,9 +64,9 @@ If the unit must carry:
 - `2x` rotary switches
 - `2x` toggles
 
-then **`9 in` is the practical rev-A target**.
+then **`10 in` nominal is the practical rev-A target**.
 
-`8 in` may still work, but only with tighter spacing, smaller knob selection, or a more aggressive two-ring control layout.
+The frozen hole-table layout also passes all spacing rules on a `9 in` face, so `9 in` remains a functional fallback if one turns up — the preference for `10 in` is sourcing, not fit. `8 in` may still work, but only with tighter spacing, smaller knob selection, or a more aggressive two-ring control layout.
 
 ## Endcap Material Direction
 

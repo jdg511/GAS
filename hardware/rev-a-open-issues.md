@@ -46,15 +46,15 @@ Status:
 
 ## 4. Endcap Density And Preferred Diameter
 
-Open issue:
+Resolved 2026-07-04:
 
-- the current connector and control count is ambitious for an `8 in` circular endcap
-- `9 in` is the current preferred diameter, but the user left `8 or 9 in` open
+- diameter decided: `10 in` nominal, chosen for off-the-shelf pipe/cap availability (`9 in` fits the layout but is rarely stocked)
+- hole-table positions finalized: toggles moved inboard/down, wet/dry and HPF cutoff raised `1/4 in`, DC jack at `(95, -18.35)` after two clash corrections
 
 Status:
 
-- the enclosure concept is now stable enough to proceed
-- the exact endcap drilling pattern still needs a final mechanical pass before metalwork is frozen
+- the endcap drilling pattern passes all spacing rules on both `10 in` and `9 in` faces
+- remaining before metalwork freeze: measured face diameter of the purchased cap, exact Neutrik cutout geometry, and final bushing diameters
 
 ## 5. Final Filter Values
 
