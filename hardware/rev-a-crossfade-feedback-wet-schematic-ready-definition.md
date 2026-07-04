@@ -219,7 +219,7 @@ Reserve these output parts:
 
 - `FILTCLIP_OUT_L/R` also feed the inverting feedback drivers `U301C/D`
 - `CTL_FB_INV` selects between direct post-filter phase and inverted-driver phase
-- the selected feedback signals leave on `P305` as `FB_RET_L/R`
+- the selected feedback signals leave on `P305` as `FB_RET_L/R`, which the ext-routing board sums into the wet send upstream of the tank drivers — the feedback makes another pass through the spring tanks before it can reach the wet output again
 
 ## 7. Local Decoupling Intent
 

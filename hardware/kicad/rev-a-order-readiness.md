@@ -1,6 +1,12 @@
 # GAS Rev A KiCad Order Readiness
 
 Regenerated 2026-07-02 after the clean rebuild (branch `rev-a-clean-rebuild`).
+Updated 2026-07-04: **ext-tank-routing re-spun** — feedback reinjection moved
+pre-tank (new U202 OPA1656 send summers: `FB_RET` + `WET_SEND` -> `SEND_MIX`
+-> tank sends; removed from the `TANK_MIX` output summers so feedback re-passes
+through the springs). Board re-verified through the full gate below and the
+fab packet regenerated. If any ext-routing gerbers were already uploaded to a
+fab, discard them and re-upload the 2026-07-04 packet.
 
 ## Status
 
@@ -12,7 +18,7 @@ Regenerated 2026-07-02 after the clean rebuild (branch `rev-a-clean-rebuild`).
 | power-backplane | 0 | yes (AC, -50dB @350kHz) | 0 | 0 | yes |
 | crossfade-feedback-wet | 0 | yes (tran) | 0 | 0 | yes |
 | filter-clipper | 0 | yes (tran, clip modes) | 0 | 0 | yes |
-| ext-tank-routing | 0 | yes (tran, mode states) | 0 | 0 | yes |
+| ext-tank-routing | 0 | yes (tran, mode states, pre-tank FB verified) | 0 | 0 | yes (2026-07-04) |
 | io-board | 0 | yes (tran, balanced I/O) | 0 | 0 | yes |
 
 Remaining violations are silkscreen-class warnings only (cosmetic).

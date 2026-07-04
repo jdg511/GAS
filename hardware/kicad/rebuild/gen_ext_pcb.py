@@ -23,11 +23,15 @@ def layout():
     grid(["P203"], 112, 40, 0, 0, 1, rot=270)
     grid(["P204"], 62, 72, 0, 0, 1)
     grid(["P206"], 26, 72, 0, 0, 1)
-    # op amp central-left
+    # op amps central-left (U201 quad final summers, U202 dual send summers)
     grid(["U201"], 36, 30, 0, 0, 1)
-    # summers
-    grid(["R202", "R203", "R204", "R209", "R205"], 20, 10, 8, 0, 5)
-    grid(["R222", "R223", "R224", "R229", "R225"], 20, 60, 8, 0, 5)
+    grid(["U202"], 22, 22, 0, 0, 1)
+    # send summers (WET_SEND + FB_RET pre-tank)
+    grid(["R207", "R204", "R208"], 14, 16, 7, 0, 3)
+    grid(["R227", "R224", "R228"], 14, 28, 7, 0, 3)
+    # final summers
+    grid(["R202", "R203", "R209", "R205"], 20, 10, 8, 0, 4)
+    grid(["R222", "R223", "R229", "R225"], 20, 60, 8, 0, 4)
     grid(["R201"], 64, 10, 0, 0, 1)
     grid(["R221"], 64, 60, 0, 0, 1)
     # secondary buffers
@@ -38,7 +42,7 @@ def layout():
     grid(["K202", "K204"], 86, 48, 0, 16, 1, rot=90)
     grid(["D261", "D262"], 74, 34, 8, 0, 2)
     # decoupling
-    grid(["C291", "C292", "C293", "C294", "C295"], 20, 38, 7, 0, 5)
+    grid(["C291", "C292", "C293", "C294", "C295", "C296", "C297"], 20, 38, 7, 0, 7)
     return pos
 
 def main():

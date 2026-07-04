@@ -40,6 +40,8 @@
       (place C291 50000 -68000 front 0 (PN 100n))
       (place C292 57000 -68000 front 0 (PN 100n))
       (place C295 78000 -68000 front 0 (PN 100n))
+      (place C296 85000 -68000 front 0 (PN 100n))
+      (place C297 92000 -68000 front 0 (PN 100n))
     )
     (component Capacitor_SMD:C_1210_3225Metric
       (place C293 64000 -68000 front 0 (PN 22u))
@@ -76,19 +78,23 @@
       (place R201 94000 -40000 front 0 (PN 100))
       (place R202 50000 -40000 front 0 (PN 20k))
       (place R203 58000 -40000 front 0 (PN 20k))
-      (place R204 66000 -40000 front 0 (PN 20k))
-      (place R205 82000 -40000 front 0 (PN 100))
+      (place R204 51000 -46000 front 0 (PN 20k))
+      (place R205 74000 -40000 front 0 (PN 100))
       (place R206 99000 -52000 front 0 (PN 100))
-      (place R209 74000 -40000 front 0 (PN 20k))
+      (place R207 44000 -46000 front 0 (PN 20k))
+      (place R208 58000 -46000 front 0 (PN 20k))
+      (place R209 66000 -40000 front 0 (PN 20k))
       (place R211 78000 -52000 front 0 (PN 100k))
       (place R212 85000 -52000 front 0 (PN 0))
       (place R221 94000 -90000 front 0 (PN 100))
       (place R222 50000 -90000 front 0 (PN 20k))
       (place R223 58000 -90000 front 0 (PN 20k))
-      (place R224 66000 -90000 front 0 (PN 20k))
-      (place R225 82000 -90000 front 0 (PN 100))
+      (place R224 51000 -58000 front 0 (PN 20k))
+      (place R225 74000 -90000 front 0 (PN 100))
       (place R226 99000 -70000 front 0 (PN 100))
-      (place R229 74000 -90000 front 0 (PN 20k))
+      (place R227 44000 -58000 front 0 (PN 20k))
+      (place R228 58000 -58000 front 0 (PN 20k))
+      (place R229 66000 -90000 front 0 (PN 20k))
       (place R231 78000 -70000 front 0 (PN 100k))
       (place R232 85000 -70000 front 0 (PN 0))
       (place R241 92000 -52000 front 0 (PN 20k))
@@ -96,6 +102,9 @@
     )
     (component "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm"
       (place U201 66000 -60000 front 0 (PN OPA1679IDR))
+    )
+    (component "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+      (place U202 52000 -52000 front 0 (PN OPA1656IDR))
     )
     (component MountingHole:MountingHole_3.2mm_M3
       (place H1 36000 -36000 front 0 (PN M3))
@@ -323,6 +332,25 @@
       (pin RoundRect[T]Pad_1950.000000x600.000000_150.571000_um_0.000000_0 13 2475 2540)
       (pin RoundRect[T]Pad_1950.000000x600.000000_150.571000_um_0.000000_0 14 2475 3810)
     )
+    (image "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+      (outline (polygon signal 0  2195 2455  3695 2455  3695 -2455  2195 -2455  2195 -2695
+            -2195 -2695  -2195 -2455  -3695 -2455  -3695 2455  -2195 2455
+            -2195 2695  2195 2695))
+      (outline (path signal 120  -2060 2560  2060 2560))
+      (outline (path signal 120  -2060 2465  -2060 2560))
+      (outline (path signal 120  -2060 -2560  -2060 -2465))
+      (outline (path signal 120  2060 2560  2060 2465))
+      (outline (path signal 120  2060 -2465  2060 -2560))
+      (outline (path signal 120  2060 -2560  -2060 -2560))
+      (pin RoundRect[T]Pad_1950.000000x600.000000_150.571000_um_0.000000_0 1 -2475 1905)
+      (pin RoundRect[T]Pad_1950.000000x600.000000_150.571000_um_0.000000_0 2 -2475 635)
+      (pin RoundRect[T]Pad_1950.000000x600.000000_150.571000_um_0.000000_0 3 -2475 -635)
+      (pin RoundRect[T]Pad_1950.000000x600.000000_150.571000_um_0.000000_0 4 -2475 -1905)
+      (pin RoundRect[T]Pad_1950.000000x600.000000_150.571000_um_0.000000_0 5 2475 -1905)
+      (pin RoundRect[T]Pad_1950.000000x600.000000_150.571000_um_0.000000_0 6 2475 -635)
+      (pin RoundRect[T]Pad_1950.000000x600.000000_150.571000_um_0.000000_0 7 2475 635)
+      (pin RoundRect[T]Pad_1950.000000x600.000000_150.571000_um_0.000000_0 8 2475 1905)
+    )
     (image MountingHole:MountingHole_3.2mm_M3
       (outline (polygon signal 0  372.747 3427.32  741.112 3366.93  1100.8 3267.06  1447.58 3128.89
             1777.39 2954.03  2086.35 2744.55  2370.86 2502.89  2627.57 2231.88
@@ -460,15 +488,19 @@
   )
   (network
     (net +15VA
-      (pins C291-1 C293-1 P207-1 U201-4)
+      (pins C291-1 C293-1 C296-1 P207-1 U201-4 U202-8)
     )
     (net +5VAUX
       (pins C295-1 P206-7 P207-4)
     )
     (net -15VA
-      (pins C292-1 C294-1 P207-3 U201-11)
+      (pins C292-1 C294-1 C297-1 P207-3 U201-11 U202-4)
     )
-    
+    (net AGND
+      (pins C291-2 C292-2 C293-2 C294-2 C295-2 C296-2 C297-2 D261-2 D262-2 K201-16
+        K202-16 K203-16 K204-16 P201-2 P202-3 P202-6 P203-3 P203-6 P204-2 P205-2 P206-3
+        P206-6 P206-8 P207-2 R211-2 R231-2 R241-2 R251-2 U201-3 U201-5 U202-3 U202-5)
+    )
     (net CTL_EXT_MODE_A
       (pins D262-1 K203-1 K204-1 P206-9)
     )
@@ -505,11 +537,17 @@
     (net N_SECFB_R
       (pins R232-2 R251-1 U201-13)
     )
+    (net N_SND_L_M
+      (pins R204-2 R207-2 R208-2 U202-2)
+    )
+    (net N_SND_R_M
+      (pins R224-2 R227-2 R228-2 U202-6)
+    )
     (net N_SUM_L_M
-      (pins R202-2 R203-2 R204-2 R209-2 U201-2)
+      (pins R202-2 R203-2 R209-2 U201-2)
     )
     (net N_SUM_R_M
-      (pins R222-2 R223-2 R224-2 R229-2 U201-6)
+      (pins R222-2 R223-2 R229-2 U201-6)
     )
     (net N_TMIX_L
       (pins R205-1 R209-1 U201-1)
@@ -553,6 +591,12 @@
     (net SEC_SEND_R
       (pins P203-4 R226-2)
     )
+    (net SEND_MIX_L
+      (pins K201-8 R201-1 R208-1 U202-1)
+    )
+    (net SEND_MIX_R
+      (pins K202-8 R221-1 R228-1 U202-7)
+    )
     (net TANK_MIX_L
       (pins P204-1 R205-2)
     )
@@ -560,17 +604,17 @@
       (pins P204-3 R225-2)
     )
     (net WET_SEND_L
-      (pins K201-8 P201-1 R201-1)
+      (pins P201-1 R207-1)
     )
     (net WET_SEND_R
-      (pins K202-8 P201-3 R221-1)
+      (pins P201-3 R227-1)
     )
     (class kicad_default     CTL_EXT_MODE_A CTL_EXT_MODE_B
       EXTMIX_L_HI EXTMIX_L_WIPER EXTMIX_R_HI EXTMIX_R_WIPER FB_RET_L FB_RET_R
-      N_SECBUF_L N_SECBUF_R N_SECFB_L N_SECFB_R N_SUM_L_M N_SUM_R_M N_TMIX_L
-      N_TMIX_R PRI_RET_L PRI_RET_R PRI_SEND_L PRI_SEND_R SEC_DRV_L SEC_DRV_R
-      SEC_RET_L SEC_RET_R SEC_SEL_L SEC_SEL_R SEC_SEND_L SEC_SEND_R TANK_MIX_L
-      TANK_MIX_R WET_SEND_L WET_SEND_R
+      N_SECBUF_L N_SECBUF_R N_SECFB_L N_SECFB_R N_SND_L_M N_SND_R_M N_SUM_L_M
+      N_SUM_R_M N_TMIX_L N_TMIX_R PRI_RET_L PRI_RET_R PRI_SEND_L PRI_SEND_R
+      SEC_DRV_L SEC_DRV_R SEC_RET_L SEC_RET_R SEC_SEL_L SEC_SEL_R SEC_SEND_L
+      SEC_SEND_R SEND_MIX_L SEND_MIX_R TANK_MIX_L TANK_MIX_R WET_SEND_L WET_SEND_R
       (circuit
         (use_via "Via[0-1]_600:300_um")
       )
@@ -579,7 +623,7 @@
         (clearance 200)
       )
     )
-    (class power "+15VA" "-15VA" "+5VAUX"
+    (class power "+15VA" "-15VA" "+5VAUX" "AGND"
       (circuit (use_via "Via[0-1]_600:300_um"))
       (rule (width 800.0) (clearance 200))
     )

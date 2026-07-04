@@ -50,7 +50,7 @@ This board controls how the secondary tanks are inserted into the signal path. I
 - `P202` primary tank interface to tank driver/recovery board
 - `P203` secondary tank interface to tank driver/recovery board
 - `P204` routed output to crossfade stage: `TANK_MIX_L`, `AGND`, `TANK_MIX_R`
-- `P205` feedback reinjection input: `FB_RET_L`, `AGND`, `FB_RET_R`
+- `P205` feedback reinjection input: `FB_RET_L`, `AGND`, `FB_RET_R` — summed into the wet send upstream of the tank drivers (pre-tank), so feedback passes through the springs again
 - `P206` controls: raw stereo ext amount plus `CTL_EXT_MODE_A`, `CTL_EXT_MODE_B`, or panel-backplane equivalent
 - `P207` power: `+15VA`, `AGND`, `-15VA`, `+5VAUX`
 
@@ -71,5 +71,5 @@ This board controls how the secondary tanks are inserted into the signal path. I
 
 - Decide between relay routing and analog-switch routing
 - Define summing gains for Off / Series / Parallel
-- Define the exact insertion point of feedback return relative to this board
+- Insertion point of feedback return is DECIDED: `FB_RET_L/R` sum into the wet send at the `U202` send summers, upstream of `PRI_SEND_L/R` and the parallel-mode pickoff — never into the `TANK_MIX` output summers
 - Verify that the amount control means the same thing in series and parallel modes

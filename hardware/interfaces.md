@@ -23,7 +23,8 @@ These are the working inter-board signal names for the analog build. The goal is
 - `FB_SEND_L`, `FB_SEND_R`
   - Signals entering the feedback loop
 - `FB_RET_L`, `FB_RET_R`
-  - Feedback return signals summed into the wet path
+  - Feedback return signals summed into the wet send on the ext-routing board, upstream of the primary send and the parallel-mode pickoff, so regenerated signal makes another pass through the spring tanks
+  - Must never sum into the `TANK_MIX` (post-tank) summers
 - `WET_SUM_L`, `WET_SUM_R`
   - Final wet signal presented to the output mix stage
 - `OUT_L`, `OUT_R`

@@ -112,6 +112,7 @@ This file defines the intended board-to-board harnesses for rev A.
 - from: crossfade / feedback / wet board `P305`
 - to: ext tank routing board `P205`
 - connector family: `JST XH`
+- purpose: pre-tank reinjection — sums into the wet send upstream of the tank drivers so feedback re-passes through the springs
 - conductors:
   - `FB_RET_L`
   - `AGND`

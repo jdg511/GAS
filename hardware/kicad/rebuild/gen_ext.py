@@ -2,10 +2,16 @@
 """Generate the GAS Rev A ext-tank-routing schematic (production + sim).
 
 Per hardware/rev-a-ext-routing-schematic-ready-definition.md:
+- U202 OPA1656 dual: A/B wet-input send summers. FB_RET_L/R reinject PRE-TANK
+  here (summed with WET_SEND into SEND_MIX), so feedback re-passes through the
+  spring tanks. FB_RET must NOT enter the U201A/B post-tank summers.
 - U201 OPA1679 quad: A/B final inverting summers (primary return + scaled
-  secondary + feedback reinjection), C/D secondary-send buffers.
+  secondary only), C/D secondary-send buffers.
 - K201/K202 source-select relays (coil = CTL_EXT_MODE_B): NC=PRI_RET (Series),
-  NO=WET_SEND (Parallel).
+  NO=SEND_MIX (Parallel, carries the feedback contribution too).
+- Polarity: the U202 summers invert the wet send; loop polarity stays
+  user-selectable via CTL_FB_INV on the crossfade board. Re-check absolute
+  wet-vs-dry polarity at the I/O blend on the bench.
 - K203/K204 engage relays (coil = CTL_EXT_MODE_A): pole A gates SEC_SEL ->
   SEC_DRV, pole B gates SEC_RET -> EXTMIX_HI. R211/R231 100k park the buffer
   inputs in bypass.
@@ -38,6 +44,10 @@ def opa4(ref, unit, pins):
     return C(ref, "Amplifier_Operational", "OPA1679", "OPA1679IDR", FP_SOIC14,
              {unit: pins}, sim=OPA4_SIM)
 
+def opa2(ref, unit, pins):
+    return C(ref, "Amplifier_Operational", g.OPA, "OPA1656IDR", g.FP_SOIC8,
+             {unit: pins}, sim=g.OPA_SIM)
+
 def relay(ref, pins):
     return C(ref, "Relay", "G5V-2", "G5V-2 DC5", FP_G5V2,
              {1: pins}, nosim=True, w=33, h=27.94)
@@ -65,16 +75,26 @@ SECTIONS = [
            FP_XH10, h=45.72),
         xh("P207", 4, ["+15VA", "AGND", "-15VA", "+5VAUX"], FP_VH4),
     ]),
-    ("PRIMARY SEND PASS-THROUGH", [
-        res("R201", "100", "WET_SEND_L", "PRI_SEND_L"),
-        res("R221", "100", "WET_SEND_R", "PRI_SEND_R"),
+    ("SEND SUMMERS (WET_SEND + FB_RET pre-tank reinjection)", [
+        opa2("U202", 1, {"1": "SEND_MIX_L", "2": "N_SND_L_M", "3": "AGND"}),
+        res("R207", "20k", "WET_SEND_L", "N_SND_L_M"),
+        res("R204", "20k", "FB_RET_L", "N_SND_L_M"),
+        res("R208", "20k", "SEND_MIX_L", "N_SND_L_M"),
+        opa2("U202_B", 2, {"5": "AGND", "6": "N_SND_R_M", "7": "SEND_MIX_R"}),
+        res("R227", "20k", "WET_SEND_R", "N_SND_R_M"),
+        res("R224", "20k", "FB_RET_R", "N_SND_R_M"),
+        res("R228", "20k", "SEND_MIX_R", "N_SND_R_M"),
+    ]),
+    ("PRIMARY SEND (from send summers)", [
+        res("R201", "100", "SEND_MIX_L", "PRI_SEND_L"),
+        res("R221", "100", "SEND_MIX_R", "PRI_SEND_R"),
     ]),
     ("MODE RELAYS (A=engage, B=series/parallel)", [
         relay("K201", {"1": "CTL_EXT_MODE_B", "16": "AGND",
-                       "4": "SEC_SEL_L", "6": "PRI_RET_L", "8": "WET_SEND_L",
+                       "4": "SEC_SEL_L", "6": "PRI_RET_L", "8": "SEND_MIX_L",
                        "13": "NC", "11": "NC", "9": "NC"}),
         relay("K202", {"1": "CTL_EXT_MODE_B", "16": "AGND",
-                       "4": "SEC_SEL_R", "6": "PRI_RET_R", "8": "WET_SEND_R",
+                       "4": "SEC_SEL_R", "6": "PRI_RET_R", "8": "SEND_MIX_R",
                        "13": "NC", "11": "NC", "9": "NC"}),
         relay("K203", {"1": "CTL_EXT_MODE_A", "16": "AGND",
                        "4": "SEC_DRV_L", "6": "NC", "8": "SEC_SEL_L",
@@ -101,20 +121,21 @@ SECTIONS = [
         opa4("U201", 1, {"1": "N_TMIX_L", "2": "N_SUM_L_M", "3": "AGND"}),
         res("R202", "20k", "PRI_RET_L", "N_SUM_L_M"),
         res("R203", "20k", "EXTMIX_L_WIPER", "N_SUM_L_M"),
-        res("R204", "20k", "FB_RET_L", "N_SUM_L_M"),
         res("R209", "20k", "N_TMIX_L", "N_SUM_L_M"),
         res("R205", "100", "N_TMIX_L", "TANK_MIX_L"),
         opa4("U201_B", 2, {"7": "N_TMIX_R", "6": "N_SUM_R_M", "5": "AGND"}),
         res("R222", "20k", "PRI_RET_R", "N_SUM_R_M"),
         res("R223", "20k", "EXTMIX_R_WIPER", "N_SUM_R_M"),
-        res("R224", "20k", "FB_RET_R", "N_SUM_R_M"),
         res("R229", "20k", "N_TMIX_R", "N_SUM_R_M"),
         res("R225", "100", "N_TMIX_R", "TANK_MIX_R"),
     ]),
     ("POWER + DECOUPLING", [
         opa4("U201_P", 5, {"4": "+15VA", "11": "-15VA"}),
+        opa2("U202_P", 3, {"8": "+15VA", "4": "-15VA"}),
         cap("C291", "100n", "+15VA", "AGND"),
         cap("C292", "100n", "-15VA", "AGND"),
+        cap("C296", "100n", "+15VA", "AGND"),
+        cap("C297", "100n", "-15VA", "AGND"),
         cap("C293", "22u", "+15VA", "AGND", fp=g.FP_C1210),
         cap("C294", "22u", "-15VA", "AGND", fp=g.FP_C1210),
         cap("C295", "100n", "+5VAUX", "AGND"),
@@ -195,6 +216,21 @@ XC in3p in3n vp vn out3 OPA1679_1CH
 XD in4p in4n vp vn out4 OPA1679_1CH
 Rq vp vn 7.5k
 .ends OPA1679X4
+
+.subckt OPA1656_1CH inp inn vp vn out
+Rin  inp inn 1e12
+Gd   0 x inp inn 1m
+Rp   x 0 1e8
+Cp   x 0 3p
+Bout xo 0 V = min(max(V(x), V(vn)+1.2), V(vp)-1.2)
+Ro   xo out 20
+.ends OPA1656_1CH
+
+.subckt OPA1656X2 out1 in1n in1p vn in2p in2n out2 vp
+XA in1p in1n vp vn out1 OPA1656_1CH
+XB in2p in2n vp vn out2 OPA1656_1CH
+Rq vp vn 3.75k
+.ends OPA1656X2
 """
 
 def main():

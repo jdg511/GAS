@@ -1,11 +1,12 @@
 RefDes,Qty,MPN,Description,Notes
 U201,1,OPA1679IDR,"Quad audio op amp","Routing buffers, summing, makeup"
+U202,1,OPA1656IDR,"Dual audio op amp","Wet-input send summers; FB_RET reinjects pre-tank with WET_SEND"
 K201-K204,4,G6K-2F-Y-DC5,"DPDT low-signal relay","Off/Series/Parallel routing"
 P201,1,B3B-XH-A,"3-position signal header","Wet input"
 P202,1,B6B-XH-A,"6-position signal header","Primary tank bundle"
 P203,1,B6B-XH-A,"6-position signal header","Secondary tank bundle"
 P204,1,B3B-XH-A,"3-position signal header","Routed output"
-P205,1,B3B-XH-A,"3-position signal header","Feedback reinjection input"
+P205,1,B3B-XH-A,"3-position signal header","Feedback reinjection input (pre-tank, into U202 send summers)"
 P206,1,TBD,"Logical control landing or panel-backplane handoff","Ext amount plus mode-select wiring; freeze against rev-a-control-backplane-definition.md during capture"
 P207,1,B4P-VH-B,"4-position power header","Board power input including +5VAUX"
 R*,1,set,"Unity and summing resistors","20k nominal starting point"

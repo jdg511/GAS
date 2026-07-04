@@ -23,7 +23,8 @@ CONFIGS = {
     "filter-clipper": dict(
         power=["+15VA", "-15VA", "+5VAUX"], power_w=0.8, gnd=["AGND"]),
     "ext-tank-routing": dict(
-        power=["+15VA", "-15VA", "+5VAUX"], power_w=0.8, gnd=["AGND"]),
+        power=["+15VA", "-15VA", "+5VAUX", "AGND"], power_w=0.8, gnd=["AGND"],
+        cut=[]),  # AGND routed as a net (pour-only stranded U201 pad 5)
     "io-board": dict(
         power=["+15VA", "-15VA", "AGND"], power_w=0.8, gnd=["AGND"],
         cut=[]),  # AGND is routed as a net on this board (pours are bonus)

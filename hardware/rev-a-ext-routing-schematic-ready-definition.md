@@ -19,7 +19,8 @@ This definition freezes the first-pass topology as:
 - when the secondary path is engaged, a second shared control line selects whether the secondary send source is:
   - the primary recovery path (`Series`)
   - or the original wet send (`Parallel`)
-- primary return, scaled secondary return, and feedback reinjection are actively summed per channel on this board before handoff to the crossfade board
+- feedback reinjection (`FB_RET_L/R`) is actively summed into the wet send on this board, upstream of the primary send and the parallel-mode source pickoff, so the regenerated signal passes through the spring tanks again
+- primary return and scaled secondary return are actively summed per channel on this board before handoff to the crossfade board; `FB_RET_L/R` must never enter these post-tank summers
 - the secondary amount control is a passive stereo attenuator landing on `P206`, where the high end of each pot track is fed from the corresponding secondary return and the low end returns to `AGND`
 
 This preserves the user-visible meaning from the mode truth table:
@@ -73,6 +74,15 @@ Coil ownership freeze:
 
 - `K203` and `K204` coils are driven by `CTL_EXT_MODE_A`
 - `K201` and `K202` coils are driven by `CTL_EXT_MODE_B`
+
+Added send-summer ownership (feedback pre-tank reinjection):
+
+| Ref | Unit / Pole Ownership | Job |
+| --- | --- | --- |
+| `U202A` | signal channel A | left wet-input send summer (`WET_SEND_L` + `FB_RET_L` -> `SEND_MIX_L`) |
+| `U202B` | signal channel B | right wet-input send summer (`WET_SEND_R` + `FB_RET_R` -> `SEND_MIX_R`) |
+
+`U202` is a dual `OPA1656IDR`, matching the tank-driver board's device family.
 
 ## 4. Connector Pin Ownership
 
@@ -152,8 +162,10 @@ Use these names as local labels or stage notes during capture:
 
 | Node | Meaning |
 | --- | --- |
-| `PRI_SRC_L` | left primary send source from `WET_SEND_L` |
-| `PRI_SRC_R` | right primary send source from `WET_SEND_R` |
+| `SEND_MIX_L` | left send-summer output: inverted sum of `WET_SEND_L` and `FB_RET_L` |
+| `SEND_MIX_R` | right send-summer output: inverted sum of `WET_SEND_R` and `FB_RET_R` |
+| `PRI_SRC_L` | left primary send source from `SEND_MIX_L` |
+| `PRI_SRC_R` | right primary send source from `SEND_MIX_R` |
 | `SEC_SEL_L` | left secondary source selected by `K201` |
 | `SEC_SEL_R` | right secondary source selected by `K202` |
 | `SEC_DRV_L` | left engaged secondary-send drive node into `U201C` |
@@ -172,7 +184,7 @@ Functional job:
 First-pass contact meaning:
 
 - de-energized: `PRI_RET_L` -> `SEC_SEL_L`
-- energized: `WET_SEND_L` -> `SEC_SEL_L`
+- energized: `SEND_MIX_L` -> `SEC_SEL_L` (parallel mode carries the feedback contribution too)
 
 ### K202 Right Source-Select Relay
 
@@ -183,7 +195,7 @@ Functional job:
 First-pass contact meaning:
 
 - de-energized: `PRI_RET_R` -> `SEC_SEL_R`
-- energized: `WET_SEND_R` -> `SEC_SEL_R`
+- energized: `SEND_MIX_R` -> `SEC_SEL_R` (parallel mode carries the feedback contribution too)
 
 ### K203 Left Engage / Bypass Relay
 
@@ -209,13 +221,28 @@ Use the two poles as:
 
 ## 7. Exact First-Pass Active Wiring Intent
 
+### U202A Left Wet-Input Send Summer (feedback pre-tank reinjection)
+
+- inverting active summer
+- `U202A+` to `AGND`
+- `WET_SEND_L` enters through a `20k` input resistor
+- `FB_RET_L` enters through a `20k` input resistor
+- `U202A out` returns through a `20k` feedback resistor
+- output is `SEND_MIX_L`, which drives `PRI_SEND_L` through the `100R` isolator and feeds the `K201` parallel-mode contact
+- polarity note: this stage inverts the wet send; the loop polarity remains user-selectable through `CTL_FB_INV` on the crossfade board, and absolute wet polarity must be re-checked at the I/O blend during bench validation
+
+### U202B Right Wet-Input Send Summer
+
+- same structure as `U202A`
+- output is `SEND_MIX_R`
+
 ### U201A Left Final Sum
 
 - inverting active summer
 - `U201A+` to `AGND`
 - `PRI_RET_L` enters through a `20k` input resistor
 - `EXTMIX_L_WIPER` enters through a `20k` input resistor
-- `FB_RET_L` enters through a `20k` input resistor
+- `FB_RET_L` must NOT enter this stage (it reinjects pre-tank at `U202A`)
 - `U201A out` returns through a `20k` feedback resistor
 - output drives `TANK_MIX_L` through a small isolator resistor
 
@@ -242,10 +269,12 @@ Use the two poles as:
 
 | Ref | Value | From | To | Notes |
 | --- | --- | --- | --- | --- |
-| `R201` | `100R` | `WET_SEND_L` | `PRI_SEND_L` | left primary-send isolator |
+| `R201` | `100R` | `SEND_MIX_L` | `PRI_SEND_L` | left primary-send isolator |
 | `R202` | `20k` | `PRI_RET_L` | `U201A-` | left primary-return summing resistor |
 | `R203` | `20k` | `EXTMIX_L_WIPER` | `U201A-` | left scaled-secondary summing resistor |
-| `R204` | `20k` | `FB_RET_L` | `U201A-` | left feedback reinjection resistor |
+| `R204` | `20k` | `FB_RET_L` | `U202A-` | left feedback reinjection resistor (pre-tank) |
+| `R207` | `20k` | `WET_SEND_L` | `U202A-` | left wet-send summing resistor |
+| `R208` | `20k` | `SEND_MIX_L` | `U202A-` | left send-summer feedback resistor |
 | `R205` | `100R` | `U201A out` | `TANK_MIX_L` | left routed-output isolator |
 | `R206` | `100R` | `U201C out` | `SEC_SEND_L` | left secondary-send isolator |
 | `R209` | `20k` | `U201A out` | `U201A-` | left final-sum feedback resistor |
@@ -255,10 +284,12 @@ Use the two poles as:
 
 | Ref | Value | From | To | Notes |
 | --- | --- | --- | --- | --- |
-| `R221` | `100R` | `WET_SEND_R` | `PRI_SEND_R` | right primary-send isolator |
+| `R221` | `100R` | `SEND_MIX_R` | `PRI_SEND_R` | right primary-send isolator |
 | `R222` | `20k` | `PRI_RET_R` | `U201B-` | right primary-return summing resistor |
 | `R223` | `20k` | `EXTMIX_R_WIPER` | `U201B-` | right scaled-secondary summing resistor |
-| `R224` | `20k` | `FB_RET_R` | `U201B-` | right feedback reinjection resistor |
+| `R224` | `20k` | `FB_RET_R` | `U202B-` | right feedback reinjection resistor (pre-tank) |
+| `R227` | `20k` | `WET_SEND_R` | `U202B-` | right wet-send summing resistor |
+| `R228` | `20k` | `SEND_MIX_R` | `U202B-` | right send-summer feedback resistor |
 | `R225` | `100R` | `U201B out` | `TANK_MIX_R` | right routed-output isolator |
 | `R226` | `100R` | `U201D out` | `SEC_SEND_R` | right secondary-send isolator |
 | `R229` | `20k` | `U201B out` | `U201B-` | right final-sum feedback resistor |
@@ -269,8 +300,8 @@ Use the two poles as:
 | Ref | Value | From | To | Notes |
 | --- | --- | --- | --- | --- |
 | `R241` | `20k` nominal / trim-capable | series-mode gain trim reservation | utility stage or DNP option | reserve only if series mode needs gain recovery |
-| `R242` | `20k` | `FB_RET_L` | left routing node | keep as named feedback entry anchor |
-| `R243` | `20k` | `FB_RET_R` | right routing node | keep as named feedback entry anchor |
+
+`R242`/`R243` (the old "feedback entry anchor" reservations) are retired: `R204`/`R224` at the `U202` send summers are now the authoritative feedback entry points.
 
 Passive pot landing ownership:
 
@@ -301,6 +332,8 @@ When this definition is translated into the actual KiCad page, verify all of the
 5. `TANK_MIX_L/R` always include the primary return path in all three user modes.
 6. `SEC_RET_L/R` are disconnected from the output sum in `Off`.
 7. `SEC_SEND_L/R` are not actively driven in `Off`.
+8. `FB_RET_L/R` reach only the `U202` send summers: they must sum into the wet send upstream of `PRI_SEND_L/R` and the `K201`/`K202` parallel pickoff, and must not appear at the `U201A/B` post-tank summers.
+9. In all three modes, injected feedback reaches the primary tank sends; in `Parallel`, it also reaches the secondary sends.
 
 ## 11. Explicitly Deferred Items
 
