@@ -4,6 +4,12 @@ All six boards passed the gate: **ERC 0 violations, simulation-verified,
 routed, DRC 0 errors / 0 unconnected**. Everything a fab needs is in this
 folder, one subfolder per board.
 
+Re-verified 2026-07-04 pm after the independent pre-order review:
+io-board gerbers/drill/pos re-exported (AGND island fix — discard any
+earlier io-board upload), and **all six BOM CSVs regenerated with the DNP
+column** (five previously lacked it; do not use BOMs dated before
+2026-07-04 pm for assembly).
+
 ## The six boards
 
 | Board | Size (mm) | What it does |
@@ -50,6 +56,11 @@ Each `fab/<board>/` contains:
   R-78E5.0-0.5, JST XH/VH headers.
 - **DNP lines:** the BOM CSVs flag DNP parts (bias-diode reserves, RF caps,
   gain-trim slots) — do not populate them.
+- **Harness/panel note (not a fab item):** the clip-mode rotary's +5V
+  common is fed by a panel jumper from the ext-mode rotary's 5V bus —
+  NOT from filter board P405 pin 9, which is a sourceless spare. See H33
+  in `hardware/rev-a-control-harnesses.md` (recorded 2026-07-04; rev-B
+  PCB fix is open issue #9).
 - **Separate purchases (not on any PCB):** spring tanks 2x 4AB1C1B,
   1x 9EB2C1B, 1x 9EB3C1B (Amplified Parts / tubesandmore), the +30V wall
   adapter, panel pots/switches/jacks per

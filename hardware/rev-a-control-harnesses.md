@@ -213,7 +213,16 @@ Preferred implementation note:
 - to: filter / clipper board `P405` or control backplane landing
 - preferred connector: `JST XH` 4-position
 - conductors:
-  - `+5VAUX`
+  - `+5VAUX` — **source is the panel 5V bus, NOT the filter board.**
+    The filter board's `P405` pin 9 is a spare with no on-board 5V feed
+    (its power input H13/`P404` is ±15V only). Feed the clip rotary common
+    from the same +5VAUX bus that feeds the ext-mode rotary common
+    (arrives at the panel on ext board `P206` pin 7, sourced from
+    power-backplane `P506.4` via `P207.4`). One short panel jumper wire
+    between the two rotary commons is the rev-A wiring.
+    Do not wire `P405` pin 9 as the 5V source — the clip relays would
+    never energize. (Found in the 2026-07-04 pre-order review; a 4-pin
+    `P404`/`P504` power feed is the recorded rev-B fix.)
   - `AGND`
   - `CTL_CLIP_MODE_A`
   - `CTL_CLIP_MODE_B`

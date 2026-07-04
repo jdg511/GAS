@@ -1,7 +1,7 @@
 {
     "$schema": "https://schemas.kicad.org/drc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-07-02T02:37:50",
+    "date": "2026-07-04T13:31:44",
     "ignored_checks": [
         {
             "description": "Footprint has no courtyard defined",
@@ -26,10 +26,312 @@
     ],
     "included_severities": [
         "error",
-        "warning"
+        "warning",
+        "exclusion"
     ],
     "kicad_version": "10.0.3",
-    "schematic_parity": [],
+    "schematic_parity": [
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint D101",
+                    "pos": {
+                        "x": 94.0,
+                        "y": 40.0
+                    },
+                    "uuid": "c3d4f3e5-0068-5125-823f-71755cabc10b"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint D102",
+                    "pos": {
+                        "x": 102.0,
+                        "y": 40.0
+                    },
+                    "uuid": "3372a3c6-f2c9-5025-8cef-cceb121f5769"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint D121",
+                    "pos": {
+                        "x": 94.0,
+                        "y": 68.0
+                    },
+                    "uuid": "24e3b695-1e83-5bde-96a0-75de8aca7422"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint D122",
+                    "pos": {
+                        "x": 102.0,
+                        "y": 68.0
+                    },
+                    "uuid": "d959d26c-d7fd-5efb-bb1c-bf21d5b5ba88"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint Q101",
+                    "pos": {
+                        "x": 76.0,
+                        "y": 56.0
+                    },
+                    "uuid": "8ccad2a2-072a-5fab-8dce-75f7869d8f3d"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint Q102",
+                    "pos": {
+                        "x": 88.0,
+                        "y": 56.0
+                    },
+                    "uuid": "4a2e2ebc-381d-5bca-9141-233336b1ff36"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint Q103",
+                    "pos": {
+                        "x": 76.0,
+                        "y": 80.0
+                    },
+                    "uuid": "a7198601-e961-5775-ab99-e0bb1d1025d2"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint Q104",
+                    "pos": {
+                        "x": 88.0,
+                        "y": 80.0
+                    },
+                    "uuid": "618b5031-7d3b-5bf9-8feb-08db86cb646a"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Device' in footprint",
+            "items": [
+                {
+                    "description": "Footprint R183",
+                    "pos": {
+                        "x": 144.0,
+                        "y": 40.0
+                    },
+                    "uuid": "06f27976-2a23-5b9b-bce8-286be2853807"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Device' in footprint",
+            "items": [
+                {
+                    "description": "Footprint R184",
+                    "pos": {
+                        "x": 144.0,
+                        "y": 62.0
+                    },
+                    "uuid": "85a50c3e-9a32-54bb-8fb2-b42e84ffcd2c"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Device' in footprint",
+            "items": [
+                {
+                    "description": "Footprint R185",
+                    "pos": {
+                        "x": 144.0,
+                        "y": 74.0
+                    },
+                    "uuid": "39ee7e7a-d1a9-5106-a01a-87eda188f312"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Device' in footprint",
+            "items": [
+                {
+                    "description": "Footprint R186",
+                    "pos": {
+                        "x": 144.0,
+                        "y": 96.0
+                    },
+                    "uuid": "696b5330-f398-5318-a6f1-d0effcafd251"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint U101",
+                    "pos": {
+                        "x": 62.0,
+                        "y": 52.0
+                    },
+                    "uuid": "4aeeb57f-cb55-56e5-83c4-aedb27418d68"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint U102",
+                    "pos": {
+                        "x": 62.0,
+                        "y": 96.0
+                    },
+                    "uuid": "cbd676a5-0ad1-5064-9493-faa6b5e2f00e"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint U103",
+                    "pos": {
+                        "x": 148.0,
+                        "y": 52.0
+                    },
+                    "uuid": "25af8668-7bc4-5050-999e-0e4ba2ddb5b4"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint U104",
+                    "pos": {
+                        "x": 148.0,
+                        "y": 86.0
+                    },
+                    "uuid": "c34c939f-444f-5aa0-8555-311e11e5be3d"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H4",
+                    "pos": {
+                        "x": 194.0,
+                        "y": 134.0
+                    },
+                    "uuid": "0048267f-05c6-5fc8-8df2-3543ab8fee55"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H2",
+                    "pos": {
+                        "x": 194.0,
+                        "y": 36.0
+                    },
+                    "uuid": "4a5cbd92-99ee-5a05-a504-b61d4b08d076"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H3",
+                    "pos": {
+                        "x": 36.0,
+                        "y": 134.0
+                    },
+                    "uuid": "8e57d8c7-2a21-58bb-a508-8bdb59f5e9fc"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H1",
+                    "pos": {
+                        "x": 36.0,
+                        "y": 36.0
+                    },
+                    "uuid": "96eafd7a-5d46-5dca-9f46-8bd6451908c4"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        }
+    ],
     "source": "tank-driver-recovery.kicad_pcb",
     "unconnected_items": [],
     "violations": [

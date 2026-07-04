@@ -40,7 +40,7 @@ FilterClipper,P401,Audio input,JST XH,3,H8,"XFADE_OUT_L; AGND; XFADE_OUT_R",Boar
 FilterClipper,P402,Audio output,JST XH,3,H9,"FILTCLIP_OUT_L; AGND; FILTCLIP_OUT_R",BoardMount,"To crossfade/feedback/wet board"
 FilterClipper,P403,Control group A,JST XH,12,Internal,"DRV_HI; DRV_WIPER; DRV_LO; HPF_F_L_HI; HPF_F_L_WIPER; HPF_F_L_LO; HPF_F_R_HI; HPF_F_R_WIPER; HPF_F_R_LO; HPF_Q_L_WIPER; HPF_Q_R_WIPER; AGND",BoardMount,"Drive and HPF control landing; HPF-Q remains a compressed placeholder"
 FilterClipper,P404,Power,JST VH,3,H13,"+15VA; AGND; -15VA",BoardMount,"Audio rails"
-FilterClipper,P405,Control group B,JST XH,12,Internal,"LPF_F_L_HI; LPF_F_L_WIPER; LPF_F_L_LO; LPF_F_R_HI; LPF_F_R_WIPER; LPF_F_R_LO; LPF_Q_L_WIPER; LPF_Q_R_WIPER; +5VAUX; CTL_CLIP_MODE_A; CTL_CLIP_MODE_B; AGND",BoardMount,"LPF and clip-mode control landing; LPF-Q remains a compressed placeholder"
+FilterClipper,P405,Control group B,JST XH,12,Internal,"LPF_F_L_HI; LPF_F_L_WIPER; LPF_F_L_LO; LPF_F_R_HI; LPF_F_R_WIPER; LPF_F_R_LO; LPF_Q_L_WIPER; LPF_Q_R_WIPER; +5VAUX; CTL_CLIP_MODE_A; CTL_CLIP_MODE_B; AGND",BoardMount,"LPF and clip-mode control landing; LPF-Q remains a compressed placeholder; pin 9 (+5VAUX) is a SPARE with no on-board 5V source - feed the clip rotary common from the panel 5V bus (ext P206.7), see H33"
 TankDriverRecovery,P101,Primary routing bundle,JST XH,6,H5,"PRI_SEND_L; PRI_RET_L; AGND; PRI_SEND_R; PRI_RET_R; AGND",BoardMount,"From ext-routing board"
 TankDriverRecovery,P102,Secondary routing bundle,JST XH,6,H6,"SEC_SEND_L; SEC_RET_L; AGND; SEC_SEND_R; SEC_RET_R; AGND",BoardMount,"From ext-routing board"
 TankDriverRecovery,P103,Power,JST VH,3,H11,"+15VA; AGND; -15VA",BoardMount,"Audio rails"

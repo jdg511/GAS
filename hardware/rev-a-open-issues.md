@@ -120,3 +120,27 @@ Status:
 - the crossfade feedback and filter-Q control groups now have explicit schematic-ready definitions, and the new control-backplane companion makes the compressed-placeholder status explicit instead of implicit
 - `U601` is now treated as a reserve-only option until a future revision changes the harness contract
 - the final panel-control landing strategy still needs enclosure-driven freeze
+
+## 9. Clip-Mode +5V Feed (Rev-B PCB Change Recorded)
+
+Found in the 2026-07-04 pre-order review:
+
+- the filter board's clip relays (K401-K403) are energized from `+5VAUX`
+  via the panel clip rotary, but the filter board never receives `+5VAUX`
+  (its H13/`P404` power feed is ±15V only) — `P405` pin 9 is a sourceless
+  spare, and a `PWR_FLAG` masks the undriven-rail ERC error
+- the ext board handles the same pattern correctly (5V in on `P207.4`,
+  exported to its rotary on `P206.7`)
+
+Rev-A resolution (chosen 2026-07-04, no PCB change):
+
+- panel jumper from the ext-mode rotary +5V common to the clip rotary
+  common; `P405.9` left unwired or tied to the same bus (harmless)
+- H33 in [rev-a-control-harnesses.md](rev-a-control-harnesses.md) and the
+  connector schedule now document this explicitly
+
+Rev-B fix (do with the next respin):
+
+- make `P404`/`P504` 4-position VH like `P207`/`P506`, route `+5VAUX` to
+  `P405.9` with local decoupling (mirror ext `C295`), and restore `P405.9`
+  as the true source per the original H33 intent
