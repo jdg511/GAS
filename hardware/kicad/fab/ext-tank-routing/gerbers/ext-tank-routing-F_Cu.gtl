@@ -1,12 +1,12 @@
 %TF.GenerationSoftware,KiCad,Pcbnew,10.0.3*%
-%TF.CreationDate,2026-07-04T10:32:08-05:00*%
+%TF.CreationDate,2026-07-04T15:31:07-05:00*%
 %TF.ProjectId,ext-tank-routing,6578742d-7461-46e6-9b2d-726f7574696e,rev?*%
 %TF.SameCoordinates,Original*%
 %TF.FileFunction,Copper,L1,Top*%
 %TF.FilePolarity,Positive*%
 %FSLAX46Y46*%
 G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
-G04 Created by KiCad (PCBNEW 10.0.3) date 2026-07-04 10:32:08*
+G04 Created by KiCad (PCBNEW 10.0.3) date 2026-07-04 15:31:07*
 %MOMM*%
 %LPD*%
 G01*
@@ -648,7 +648,6 @@ D25*
 %TO.N,AGND*%
 X39379457Y-69935967D03*
 X40620213Y-51503254D03*
-X115999999Y-69999999D03*
 X135010724Y-79354851D03*
 X48296587Y-47347127D03*
 X92885061Y-68198776D03*

@@ -89,11 +89,12 @@ harnesses are built, but it does not affect the PCBs.
 
 ## Carried risks (already documented; restating so they don't get lost)
 
-6. **Wall adapter regulation (open issue #7) is still the top pre-power
-   risk.** The TVS (SMAJ33A, 33 V standoff) protects against transients, not
-   a sustained 34–36 V+ from an unregulated 30 V adapter at light load; the
-   URA2415 tops out at 36 V. Do bench check P-0 before first power, or buy a
-   confirmed-regulated +30 V unit.
+6. **Wall adapter regulation (open issue #7) — RESOLVED `2026-07-04`.**
+   The adapter is now the regulated Triad `WSU240-0750` (+24 V / 0.75 A /
+   18 W, UL 62368-1). Worst case +25.2 V sits far below the URA2415's 36 V
+   input ceiling, so the sustained-overvoltage risk is retired. Keep the
+   P-0 open-circuit receiving check (accept 22.8–25.2 V, reject above 27 V).
+   Jack changes PJ-005B -> PJ-005A (5.5 x 2.1 mm center positive).
 7. **G5V-2 coil variants at order time** (flagged in the datasheet summary):
    confirm DC5 coil current (30 vs 40 mA). Worst case 7 coils energized
    (Parallel + Ge) = 210–280 mA on the 500 mA R-78E — fine either way, but
@@ -162,29 +163,3 @@ harnesses are built, but it does not affect the PCBs.
 - Timestamp-audited every ERC/DRC/gerber artifact against its source file.
 - Not covered here: audio-quality judgments (filter values, clip voicing),
   enclosure/endcap mechanics, and anything requiring powered hardware.
-
----
-
-## Resolution log (2026-07-04 pm)
-
-1. **io-board AGND island — FIXED.** Orphan via at (117.102, 96.479)
-   removed; both AGND zones set island-removal = always; refilled via
-   pcbnew; DRC 0 errors / 0 unconnected; independent copper audit: all 42
-   nets single components; gerbers/drill/pos re-exported, zip rebuilt.
-   Diff vs old packet: only F_Cu / B_Cu / drill changed (the drill lost
-   exactly the removed via's hit; island flash gone from F_Cu).
-2. **BOM DNP flags — FIXED.** kicad-cli flags calibrated to byte-match the
-   known-good ext BOM, then all six BOMs regenerated. DNP sets now match
-   the schematics exactly (io C1-C4; tdr C175-C178 + D101/D102/D121/D122;
-   ext R241/R251; filter C405/C425; xfade C321/C322; power none).
-3. **Clip-mode 5V — Option A chosen** (panel jumper from ext-mode rotary
-   5V bus to clip rotary common). H33, connector schedule, ORDER-PACKET
-   updated; rev-B PCB fix recorded as open issue #9.
-4. **Gate refreshed** on all six boards (KiCad 10.0.3, --severity-all,
-   --schematic-parity): ERC 0, DRC 0 errors, 0 unconnected everywhere;
-   85 warnings total, all silk/co-located-hole cosmetics; parity warnings
-   are field-mirror and mounting-hole nags only. tank-driver ERC staleness
-   resolved (re-run clean against the current schematic).
-5. **Stale reports archived** to kicad/archive/superseded-reports/;
-   abandoned top-level (GAS-Hardware.*) moved to
-   kicad/archive/abandoned-top-level/.

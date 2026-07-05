@@ -30,7 +30,7 @@ Current package status:
    - service-endcap DC barrel jack
    - user-supplied enclosure tube
 
-Note: rev A no longer carries any mains-side circuitry. The internal `Mean Well RT-50C` AC/DC module is gone; DC arrives via an external `+30VDC` wall-adapter strategy and is converted to `+/-15V / +5V` on the power-backplane PCB by an isolated DC-DC + small +5V switching regulator. The currently user-preferred `Jameco DDU300050E9340` page still has to be treated as an unverified adapter candidate because the live listing describes it as an unregulated linear adapter. See [rev-a-external-dc-power.md](rev-a-external-dc-power.md). This eliminates the IEC inlet, fuse holder, mains creepage rules, and the chassis-bond safety-test step that earlier revisions of this document called out.
+Note: rev A no longer carries any mains-side circuitry. The internal `Mean Well RT-50C` AC/DC module is gone; DC arrives via an external `+24VDC` wall-adapter strategy and is converted to `+/-15V / +5V` on the power-backplane PCB by an isolated DC-DC + small +5V switching regulator. The adapter is the regulated `Triad WSU240-0750` (`+24 VDC / 750 mA / 18 W`, UL 62368-1, selected `2026-07-04`), which retired the earlier unverified Jameco candidate. See [rev-a-external-dc-power.md](rev-a-external-dc-power.md). This eliminates the IEC inlet, fuse holder, mains creepage rules, and the chassis-bond safety-test step that earlier revisions of this document called out.
 4. Perform bench tuning on the tank send/recovery and filter sections
 5. Only then freeze the production BOM
 

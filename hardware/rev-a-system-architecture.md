@@ -30,17 +30,17 @@ Rev A is the first buildable analog hardware interpretation of the current JUCE 
 
 Rev A should keep mains outside the enclosure.
 
-- external wall-adapter candidate:
-  - Jameco `DDU300050E9340`
-  - nominal `+30 VDC`
-  - `500 mA`
-  - `15 W`
-  - current live page must be treated as unverified for regulation status until bench-checked
+- external wall adapter (selected `2026-07-04`):
+  - Triad Magnetics `WSU240-0750`
+  - nominal `+24 VDC`, regulated SMPS
+  - `750 mA`
+  - `18 W`
+  - UL 62368-1 listed; P-0 open-circuit receiving check retained at first power-up
 - on-board conversion:
   - isolated DC-DC to `+15VA / -15VA`
   - local `+5VAUX` generation for relays and control support
 
-This keeps every custom board low-voltage only and aligns with the user's request to keep the dangerous `110 VAC` side at the wall outlet, but the exact Jameco SKU still needs verification or replacement with a confirmed regulated alternate before it should be frozen for production handoff.
+This keeps every custom board low-voltage only and aligns with the user's request to keep the dangerous `110 VAC` side at the wall outlet, and the regulated Triad `WSU240-0750` choice (`2026-07-04`) removes the earlier unverified-regulation concern from the production-handoff path.
 
 ### Capacitor Strategy
 
@@ -266,7 +266,7 @@ Locked in this document:
 - analog-only architecture
 - tank choices
 - board split
-- external `+30 VDC` wall-adapter plus on-board conversion strategy
+- external `+24 VDC` wall-adapter plus on-board conversion strategy
 - core active devices
 - relay-based ext-tank routing approach
 - cylindrical one-endcap service format

@@ -39,7 +39,7 @@ These are the parts most suitable for JLCPCB, PCBWay, or MacroFab sourcing and p
 | Signal relay | `G6K-2F-Y-DC5` | 4 | `4.89` each | [Mouser](https://www.mouser.com/ProductDetail/Omron-Electronics/G6K-2F-Y-DC5?qs=SXIVkn%252Bm38kNKs%252BIzeJTSg%3D%3D) |
 | Primary send NPN | `BD139-16` | 2 | `1.44` each | [DigiKey](https://www.digikey.com/en/products/detail/stmicroelectronics/BD139-16/2529325) |
 | Primary send PNP | `BD140-16` | 2 | `1.57` each | [DigiKey](https://www.digikey.com/en/products/detail/stmicroelectronics/BD140-16/3945995) |
-| Isolated DC-DC | `URB2415YMD-10WR3` | 1 | `9.27` | [DigiKey](https://www.digikey.com/en/products/detail/mornsun-america-llc/URB2415YMD-10WR3/13160913) |
+| Isolated DC-DC | `URA2415YMD-10WR3` | 1 | `9.27` | [DigiKey](https://www.digikey.com/en/products/detail/mornsun-america-llc/URA2415YMD-10WR3/13160913) |
 | +5V regulator | `R-78E5.0-0.5` | 1 | `3.37` | [DigiKey](https://www.digikey.com/en/products/detail/recom-power/R-78E5-0-0-5/2834904) |
 | Optional relay driver | `ULN2003ADR` | 1 | `0.91` | [DigiKey](https://www.digikey.com/en/products/detail/texas-instruments/ULN2003ADR/277011) |
 
@@ -56,8 +56,8 @@ These are the preferred parts for panel assembly or manual install after SMT:
 | Item | MPN | Qty | Snapshot Price | Vendor |
 |---|---|---:|---:|---|
 | Combo XLR/TRS jack | `NCJ6FI-S` | 4 | `4.71` each | [Mouser](https://www.mouser.com/ProductDetail/Neutrik/NCJ6FI-S?qs=2AuUxvzm3x9XIIQSbwRdvA%3D%3D) |
-| Panel DC jack | `PJ-005B` | 1 | `3.17` | [DigiKey](https://www.digikey.com/en/products/detail/same-sky-formerly-cui-devices/PJ-005B/275425) |
-| External wall adapter candidate | `DDU300050E9340` | 1 | `7.00` | [Jameco](https://www.jameco.com/z/DDU300050E9340-Jameco-ReliaPro-AC-to-DC-Wall-Adapter-Transformer-Single-Output-30-Volt-500mA-15-Watt_199523.html) |
+| Panel DC jack | `PJ-005A` | 1 | `3.07` | [DigiKey](https://www.digikey.com/en/products/detail/same-sky-formerly-cui-devices/PJ-005A/165838) |
+| External wall adapter | `WSU240-0750` | 1 | `12.43` | [DigiKey](https://www.digikey.com/en/products/detail/triad-magnetics/WSU240-0750/3094933) |
 
 The panel controls remain tracked in:
 
@@ -90,8 +90,8 @@ Most important alternates:
 
 - `OPA1644AIDR` -> `2x OPA1642AIDR` as the practical immediate-order path when the quad is not stocked cleanly
 - `OPA1679IDR` -> `OPA1664AIDR` if availability moves again
-- `URB2415YMD-10WR3` -> `REC10-2415DZ/H1/A/M` or `JTD1024S15`
-- the exact `DDU300050E9340` Jameco SKU should be treated as a bench-verified candidate only; if the live-page-described unregulated behavior is confirmed, replace it with a regulated `+30VDC` SMPS before freezing production sourcing
+- `URA2415YMD-10WR3` -> `REC10-2415DZ/H1/A/M` or `JTD1024S15`
+- the wall adapter is now the regulated `Triad WSU240-0750` (`+24VDC` SMPS, UL 62368-1, selected `2026-07-04`); the earlier unregulated-Jameco concern is retired, keep only the P-0 open-circuit receiving check
 
 ## Recommended Buying Pattern
 

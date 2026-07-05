@@ -17,7 +17,7 @@ This folder is the starting point for turning the JUCE spring-reverb simulation 
   - Primary tanks: `4AB1C1B` left and `4AB1C1B` right
   - Secondary tanks: `9EB2C1B` left and `9EB3C1B` right
 - Plan around `+15VA / -15VA`, but prefer parts that can tolerate at least `+18V / -18V` wherever practical.
-- Mains conversion lives in an **external `+30 VDC` wall-adapter strategy** (`500 mA / 15 W`, Jameco `DDU300050E9340` candidate or approved regulated alternate). The chassis takes DC at a barrel jack and generates `+15V / -15V / +5V` on-board from that single DC input. No mains-side circuitry inside the enclosure. Do not assume the exact Jameco SKU is regulated without the bench check in [rev-a-external-dc-power.md](rev-a-external-dc-power.md).
+- Mains conversion lives in an **external `+24 VDC` wall-adapter strategy** (`750 mA / 18 W`, Triad Magnetics `WSU240-0750` regulated SMPS from DigiKey, selected `2026-07-04`). The chassis takes DC at a barrel jack and generates `+15V / -15V / +5V` on-board from that single DC input. No mains-side circuitry inside the enclosure. The Triad unit is a regulated SMPS; the P-0 receiving check in [rev-a-external-dc-power.md](rev-a-external-dc-power.md) still applies at first power-up.
 
 ## Board Roadmap
 
@@ -95,4 +95,4 @@ If you are picking this package up to actually build a unit, start here:
 - One spec per board
 - Schematic packets with stage ownership and pin-level harness maps
 - Control-law and circuit-value tables that track the current plugin behavior
-- Remaining audio-sheet pin-level wiring, ERC cleanup, and PCB layout in the chosen EDA tool
+- Remaining audio-sheet pin-level 

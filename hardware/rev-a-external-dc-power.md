@@ -6,18 +6,22 @@ This file is the authority for the new power topology. The earlier internal-PSU 
 
 ## Wall Adapter Choice
 
-- **Jameco ReliaPro DDU300050E9340 candidate**
-  - single output `+30 VDC`
-  - `500 mA`
-  - `15 W` total
-  - `5.5 mm OD / 2.5 mm ID` barrel plug, center positive per the Jameco listing snapshot from `2026-06-29`
-  - current live Jameco page text describes the SKU as an `unregulated linear wall adapter`
-  - source: [Jameco DDU300050E9340 product page](https://www.jameco.com/z/DDU300050E9340-Jameco-ReliaPro-AC-to-DC-Wall-Adapter-Transformer-Single-Output-30-Volt-500mA-15-Watt_199523.html)
+- **Triad Magnetics WSU240-0750 (selected `2026-07-04`)**
+  - single output `+24 VDC`, regulated SMPS
+  - `750 mA` / `18 W`
+  - regulation (line and load combined): `+/-5%`; output ripple `150 mVpp` max
+  - UL 62368-1 Class II double-insulated (UL file `E345519`), DOE Level VI, 5-year warranty
+  - `5.5 mm OD / 2.1 mm ID` center-positive barrel plug
+  - source: [DigiKey WSU240-0750](https://www.digikey.com/en/products/detail/triad-magnetics/WSU240-0750/3094933), `USD 12.43` at qty 1, `>1000` in stock on `2026-07-04`
+  - datasheet: [Triad WSU240-0750 PDF](https://catalog.triadmagnetics.com/Asset/WSU240-0750.pdf)
 
-Approved alternates for sourcing resilience (same `+30 VDC` nominal output, equal or higher current rating):
+This supersedes the earlier Jameco `DDU300050E9340` `+30 VDC` candidate, whose live product page described an **unregulated linear** adapter. Moving to a confirmed-regulated `+24 VDC` SMPS closes that open item and puts the input at the DC-DC module's nominal design-center voltage. The P-0 open-circuit measurement is retained as a receiving check.
 
-- Jameco DDU300100xxx series at `1 A` if available
-- Any UL/CE-listed `+30 VDC` regulated SMPS wall adapter with `>= 500 mA` capability and matching barrel polarity
+Approved alternates for sourcing resilience (same `+24 VDC` nominal, regulated SMPS, equal or higher current rating):
+
+- Tri-Mag `L6R20-240` (`24 V / 0.83 A / 20 W`, UL 62368-1, [DigiKey listing](https://www.digikey.com/en/products/detail/tri-mag-llc/L6R20-240/13538149))
+- Triad `WSU240-1000` (`24 V / 1 A / 24 W`) if extra headroom is ever wanted, no design change needed
+- Any UL/CE-listed regulated `+24 VDC` SMPS wall adapter with `>= 750 mA` capability and a `5.5 x 2.1 mm` center-positive plug
 
 ## Rail Generation Strategy
 
@@ -26,23 +30,23 @@ The audio design still requires three rails:
 - `+15VA` and `-15VA` for the analog signal path
 - `+5VAUX` for the routing relays and any control overhead
 
-These are generated **on-board** from the external `+30 VDC` input by a small "power entry and conversion" section that replaces the old `RT-50C` block on the power-backplane PCB.
+These are generated **on-board** from the external `+24 VDC` input by a small "power entry and conversion" section that replaces the old `RT-50C` block on the power-backplane PCB.
 
 ### Stage 1: Input protection and fusing
 
-- DC barrel jack on the **service endcap**; use a `5.5 mm OD / 2.5 mm ID` compatible jack and confirm polarity matches the Jameco adapter
+- DC barrel jack on the **service endcap**: Same Sky `PJ-005A` (`5.5 mm OD / 2.1 mm ID`, center positive, 5 A, same mounting hole and hardware as the previously specified `PJ-005B`); confirm polarity matches the Triad adapter
 - **Series Schottky** for reverse-polarity protection (`SS34` or equivalent, 40 V / 3 A SMD). Voltage drop is roughly `0.4 V` at the rev-A max current, which is acceptable
 - **Polyfuse** at the input as belt-and-suspenders against board shorts (Bourns `MF-R100`, 1 A hold). The adapter's own current limit is the primary protection
 - Bulk input cap, 220-470 uF electrolytic, low-ESR
 - TVS for surge protection (SMAJ33A or similar, 33 V standoff)
 
-### Stage 2: +30 V to ±15 V isolated DC-DC
+### Stage 2: +24 V to ±15 V isolated DC-DC
 
-- **Recommended:** Mornsun `URB2415YMD-10WR3` (18-36 V in, +/-15 V out, 10 W)
+- **Recommended:** Mornsun `URA2415YMD-10WR3` (9-36 V in, 24 V nominal, +/-15 V dual out, 10 W) — the URA dual-output variant is what the captured schematic and priced BOM carry; the URB suffix in earlier revisions of this file was the single-output variant and was corrected per [kicad/datasheet_cache/ura2415ymd.summary.md](kicad/datasheet_cache/ura2415ymd.summary.md)
 - **Alternate:** RECOM `REC10-2415DZ/H1/A/M` (18-36 V in, +/-15 V out, 10 W) at higher cost / better stock
 - **Alternate:** XP Power `JTD1024S15` (18-36 V in, +/-15 V out, 10 W)
 
-All three are isolated dual-output modules with input range that comfortably brackets `+30 V` and rated output power above the rev-A `7.5 W` worst-case analog load. The Mornsun is the lowest-cost current pick; RECOM is the highest-stock alternate per [rev-a-supply-watch.md](bom/rev-a-supply-watch.md).
+All three are isolated dual-output modules whose input range brackets `+24 V` — for the Mornsun, `+24 V` is the nominal design-center input — and rated output power is above the rev-A `7.5 W` worst-case analog load. The Mornsun is the lowest-cost current pick; RECOM is the highest-stock alternate per [rev-a-supply-watch.md](bom/rev-a-supply-watch.md).
 
 ### Stage 3: Post-DC-DC ripple filter on each analog rail
 
@@ -57,29 +61,29 @@ Per rail (`+15VA` and `-15VA`), at the output of the DC-DC and before any audio 
 
 This is a passive LC + bead network, no linear post-regulator. Target rail ripple at the power-backplane output to the audio harness: under `5 mVpp` at any frequency, matching the previous internal-PSU spec in [rev-a-bench-test-procedures.md](rev-a-bench-test-procedures.md).
 
-If bench measurement at the P-0 step in [rev-a-bench-test-procedures.md](rev-a-bench-test-procedures.md) shows the LC filter alone cannot meet `5 mVpp`, fall back to linear post-regulation with `LM7815CT` / `LM7915CT` and a `+30 V` to `+/-18 V` DC-DC module instead. This is documented as a contingency, not the rev-A default.
+If bench measurement at the P-0 step in [rev-a-bench-test-procedures.md](rev-a-bench-test-procedures.md) shows the LC filter alone cannot meet `5 mVpp`, fall back to linear post-regulation with `LM7815CT` / `LM7915CT` and a `+24 V` to `+/-18 V` DC-DC module instead. This is documented as a contingency, not the rev-A default.
 
 ### Stage 4: +5VAUX generation
 
 - **Recommended:** RECOM `R-78E5.0-0.5` switching regulator (7-28 V in, 5 V at 500 mA out, 7805 pinout, no heatsink required)
-- Fed from the `+15VA` rail, not directly from the `+30 V` input, to keep the input voltage inside the regulator's max range and to share the DC-DC's filtering
+- Fed from the `+15VA` rail, not directly from the `+24 V` input, to keep the input voltage inside the regulator's max range and to share the DC-DC's filtering
 - Add `47 uF` electrolytic plus `100 nF` X7R at the output
 - Local decoupling on the ext-routing board where relay coils land remains unchanged
 
 ## Updated Rail Block Diagram
 
 ```
-[Jameco DDU300050E9340 wall adapter]
+[Triad WSU240-0750 wall adapter]
    |
-   |  +30 VDC, 500 mA max
+   |  +24 VDC, 750 mA max
    v
-[DC barrel jack on service endcap]
+[PJ-005A DC barrel jack on service endcap, 5.5 x 2.1 mm center positive]
    |
    v
 [SS34 reverse-polarity Schottky] -> [MF-R100 polyfuse] -> [220 uF bulk + SMAJ33A TVS]
    |
    v
-[Mornsun URB2415YMD-10WR3 isolated DC-DC]
+[Mornsun URA2415YMD-10WR3 isolated DC-DC]
    |
    +--> +15VA  -> [ferrite + 100 uF + 10 uF + 100 nF] -> harness to audio boards
    +--> -15VA  -> [ferrite + 100 uF + 10 uF + 100 nF] -> harness to audio boards
@@ -99,10 +103,10 @@ If bench measurement at the P-0 step in [rev-a-bench-test-procedures.md](rev-a-b
 | DC-DC + +5V reg losses (~15 percent) |  | ~1.3 W |
 | Schottky + polyfuse drop |  | ~0.2 W |
 | **Wall-side total** |  | **~10.3 W** |
-| Adapter capacity |  | 15 W |
-| Headroom |  | **~31 percent** |
+| Adapter capacity |  | 18 W |
+| Headroom |  | **~43 percent** |
 
-The 15 W adapter is adequate. The 1 A variant of the same Jameco family doubles the headroom if desired later, with no design change.
+The 18 W adapter is adequate. Input current at the worst-case `10.3 W` wall-side load is about `0.43 A` against the adapter's `0.75 A` rating. The `WSU240-1000` (`24 W / 1 A`) variant of the same Triad family adds further headroom if desired later, with no design change.
 
 ## Grounding
 
@@ -132,13 +136,14 @@ The power backplane is now a low-voltage-only board. Practical effects, called o
 
 These are added to the front of [rev-a-bench-test-procedures.md](rev-a-bench-test-procedures.md) at step P-0:
 
-1. **Regulated vs unregulated adapter check.** Measure open-circuit voltage at the barrel plug with no load. Should read `+29 V` to `+31 V`. If it reads above `+34 V`, the adapter is unregulated and must be replaced with a regulated SMPS variant before powering any DC-DC module
+1. **Adapter receiving check.** Measure open-circuit voltage at the barrel plug with no load. The regulated `WSU240-0750` should read `+22.8 V` to `+25.2 V` (`24 V +/-5%`). If it reads above `+27 V`, the unit is not the intended regulated adapter (wrong SKU or counterfeit) and must not be connected to the power backplane
 2. Polarity sanity check at the jack vs adapter; reverse-polarity Schottky must reverse-bias safely on opposite polarity (verify by measuring `0 V` downstream when the plug is flipped)
-3. Bulk cap inrush: scope the input rail during plug-in; should settle to `+30 V` within 100 ms with no overshoot above `+35 V`
+3. Bulk cap inrush: scope the input rail during plug-in; should settle to `+24 V` within 100 ms with no overshoot above `+30 V`
 4. DC-DC output ripple per rail at full load: under `5 mVpp` at any frequency at the harness output (after the LC filter), measured per the existing P-0 procedure
 
 ## Open Items For This Topology
 
-- **Regulated-vs-unregulated confirmation on the exact Jameco SKU.** Jameco's listing language still uses "wall adapter transformer" wording, so the first physical sample must be checked before any DC-DC module is powered. If verification step 1 above fails, substitute a confirmed regulated `+30 VDC` adapter before continuing
+- **KiCad net names still say `+30V_RAW` / `+30V_F`.** The captured power-backplane schematic predates the `2026-07-04` adapter change; those nets now carry `+24 V` nominal. Rename to `+VIN_RAW` / `+VIN_F` (or `+24V_RAW` / `+24V_F`) at the next schematic capture pass before layout freeze
+- `PJ-005A` footprint pin map needs the same datasheet-to-footprint sanity pass previously flagged for `PJ-005B` (same mechanical family, but confirm before layout freeze)
 - Final ferrite bead part number freezes after the first DC-DC module sample is bench-measured for its actual ripple spectrum
-- If a future revision wants `+/-18 V` rails for extra headroom, the `+30 V` source supports that with a different DC-DC module choice and no chassis-side change
+- If a future revision wants `+/-18 V` rails for extra headroom, the `+24 V` source supports that with a different DC-DC module choice and no chassis-side change

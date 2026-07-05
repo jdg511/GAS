@@ -2,6 +2,30 @@
 
 This file keeps the remaining unresolved items visible so they do not get mistaken for completed design decisions.
 
+## 0. io-board: Vias in SMD Pads (rev-B layout item)
+
+Recorded `2026-07-04` from the NextPCB HQDFM report on the io-board fab package.
+
+Open issue:
+
+- four `AGND` vias sit inside SMD pads: `C92.2`, `C94.2` (100n decoupler pads, 0.4 mm drill) and `U2.5`, `U4.5` (OPA1656 pads, 0.3 mm drill)
+- during reflow, solder can wick down the via barrel and starve the joint (tombstoning / weak fillet risk)
+- automated relocation was attempted and rejected: with the rev-A 0.2 mm design rules there is no compliant off-pad landing within 3.2 mm of any of the four pads (nearest candidate: 0.21 mm margin to a `-15VA` rail at `U2`) — a proper fix needs interactive re-routing
+
+Status:
+
+- rev A: accepted for the 5-board prototype run; order with bottom-side solder-mask plugged vias if offered, and bench-inspect these four joints on arrival (all reworkable by hand, all `AGND`)
+- rev B: relocate the four vias off-pad during the next layout pass, when re-routing is on the table anyway
+- HQDFM false alarms noted for the record: "Missing THT holes x9 / pad count mismatch x9" is the tool matching `J1-J4` to the 9-terminal Neutrik panel jack instead of the board-mounted JST `B3B-XH-A`; all 37 through-hole pads verified present in the drill file on `2026-07-04`. "Open/Shorts (IPC): Fail" reflects the absent IPC-D-356 netlist, not a detected fault.
+
+All-board HQDFM triage (`2026-07-04`, reports on the other five boards):
+
+- drill files verified complete on **all six boards**: every through-hole pad and via in each `.kicad_pcb` has a matching hit in its `.drl`; every "missing THT hole / pad count mismatch" flag traces to the same JST-vs-library matching artifact (flagged refs: `P301`, `P201`, `P501` area, `J101`, `P402`)
+- **filter-clipper had 9 duplicated AGND vias** (8 stacked at identical coordinates, one pair 8 um apart). Fixed in the fab output on `2026-07-04`: duplicate drill hits removed from `filter-clipper.drl` (loose and in-zip; 118 -> 109 hits), verified zero duplicates and full pad/via coverage after the edit; original zip preserved in the session backup. The duplicate via objects still exist in `filter-clipper.kicad_pcb` — deduplicate there during the rev-B pass
+- further via-in-pad instances to relocate in rev B (accepted for rev A): ext-tank-routing `C297` area (x2), power-backplane `C505` (via only 11.75% on pad — barely touching), tank-driver-recovery `R153` area (x2)
+- power-backplane "NPTH attribute PTH" flag: no drill hit exists at the flagged location (nearest holes are the `P502`/`P503`/`P504` 1.7 mm PTH pads >=1.4 mm away); with KiCad merged drill files fabs plate all holes by default, so no unplated-signal-hole risk exists. Noise
+- minor footprint-quality notes for rev B, no rev-A action: "heel distance F_Flat_Lead" x1 on four boards (same footprint signature), "oversized chip pads" x2 on filter-clipper (tombstone-risk warning), "side distance C_C_Bend" x1 on power-backplane, no fiducials on any board (fab adds panel fiducials for assembly; consider 3 local fiducials per board in rev B)
+
 ## 1. Combo Jack Output Convention
 
 The project requirement is combo `XLR / TRS` jacks for both input and output.
@@ -85,24 +109,20 @@ Status:
 - the latest contained cleanup pass was on the I/O board, where removal of accidental center-short stubs reduced that child sheet from `404` to `376` local violations and dropped its multiple-net-name collisions from `8` to `2`
 - actual pin-level wiring, footprint confirmation, ERC cleanup, and PCB layout are still the next major phase
 
-## 7. External Wall Adapter: Regulated vs Unregulated Confirmation
+## 7. External Wall Adapter: Regulated vs Unregulated Confirmation — RESOLVED `2026-07-04`
 
-Current rev-A direction:
+Resolution:
 
-- external `+30 VDC` wall-adapter strategy, with `Jameco DDU300050E9340` currently the user-preferred candidate at 500 mA / 15 W
-- on-board DC-DC + +5V regulator generate the audio rails per [rev-a-external-dc-power.md](rev-a-external-dc-power.md)
+- the wall adapter is now the **Triad Magnetics `WSU240-0750`**: regulated SMPS, `+24 VDC / 750 mA / 18 W`, UL 62368-1 (file `E345519`), DOE Level VI, purchased from DigiKey
+- this retires the unregulated-adapter damage risk: worst case with the Triad's combined `+/-5%` regulation is `+25.2 V`, far inside the `URA2415YMD-10WR3` input range (`9-36 V`, `24 V` nominal)
+- barrel plug changes from `5.5 x 2.5 mm` to `5.5 x 2.1 mm`; the service-endcap jack changes from `PJ-005B` to `PJ-005A` (same mounting hole and hardware)
+- full topology update in [rev-a-external-dc-power.md](rev-a-external-dc-power.md)
 
-Open issue:
+Remaining follow-ups (also tracked in the rev-a-external-dc-power.md open items):
 
-- the current live Jameco page for `DDU300050E9340` explicitly describes the SKU as an `unregulated linear wall adapter`
-- if the received sample is unregulated, open-circuit voltage at light load can exceed `+34 V` and damage the `URB2415YMD-10WR3` DC-DC module (rated 36 V max input)
-- the current `2026-06-29` source snapshot still indicates a `5.5 x 2.5 mm` barrel plug, which means all power-entry jack references must stay on that size unless the adapter choice changes
-- the checked-in KiCad power page now assumes the current barrel-jack and DC-DC-module pin ordering, but the exact `PJ-005B` footprint pin map and the `PS500` enable-pin treatment still need one final datasheet-to-footprint sanity pass before layout freeze
-
-Status:
-
-- first-sample verification step is documented in [rev-a-bench-test-procedures.md](rev-a-bench-test-procedures.md) at P-0
-- if verification fails on the first sample, substitute a confirmed-regulated `+30 VDC` wall adapter from the approved-alternate list before powering the DC-DC
+- P-0 receiving check at first power-up: open-circuit `+22.8 V` to `+25.2 V`, reject above `+27 V`
+- KiCad net names `+30V_RAW` / `+30V_F` are historical labels that now carry `+24 V` nominal; rename at the next schematic capture pass before layout freeze
+- the exact `PJ-005A` footprint pin map and the `PS500` enable-pin treatment still need one final datasheet-to-footprint sanity pass before layout freeze
 
 ## 8. Control Backplane Versus Direct Panel Wiring
 
@@ -117,30 +137,4 @@ Status:
 
 - the audio harness map is now stable
 - the ext-routing control landing is now electrically frozen with the raw stereo amount pot plus encoded two-bit mode control
-- the crossfade feedback and filter-Q control groups now have explicit schematic-ready definitions, and the new control-backplane companion makes the compressed-placeholder status explicit instead of implicit
-- `U601` is now treated as a reserve-only option until a future revision changes the harness contract
-- the final panel-control landing strategy still needs enclosure-driven freeze
-
-## 9. Clip-Mode +5V Feed (Rev-B PCB Change Recorded)
-
-Found in the 2026-07-04 pre-order review:
-
-- the filter board's clip relays (K401-K403) are energized from `+5VAUX`
-  via the panel clip rotary, but the filter board never receives `+5VAUX`
-  (its H13/`P404` power feed is ±15V only) — `P405` pin 9 is a sourceless
-  spare, and a `PWR_FLAG` masks the undriven-rail ERC error
-- the ext board handles the same pattern correctly (5V in on `P207.4`,
-  exported to its rotary on `P206.7`)
-
-Rev-A resolution (chosen 2026-07-04, no PCB change):
-
-- panel jumper from the ext-mode rotary +5V common to the clip rotary
-  common; `P405.9` left unwired or tied to the same bus (harmless)
-- H33 in [rev-a-control-harnesses.md](rev-a-control-harnesses.md) and the
-  connector schedule now document this explicitly
-
-Rev-B fix (do with the next respin):
-
-- make `P404`/`P504` 4-position VH like `P207`/`P506`, route `+5VAUX` to
-  `P405.9` with local decoupling (mirror ext `C295`), and restore `P405.9`
-  as the true source per the original H33 intent
+- the crossfade feedback and filter-Q control groups now have explicit schematic-ready definitions, and the new control-backplane companion makes the compressed-placeholder status expl

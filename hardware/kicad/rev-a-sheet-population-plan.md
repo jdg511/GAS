@@ -73,7 +73,7 @@ Still to do on this sheet:
 
 - explicit star-ground / chassis-bond network
 - post-conversion ripple-decoupling part capture around the `FB500/FB501` cleanup stage
-- exact `PJ-005B` symbol/footprint pin mapping freeze and the final `PS500` enable-pin handling decision
+- exact `PJ-005A` symbol/footprint pin mapping freeze (jack changed from `PJ-005B` on `2026-07-04`; same mounting family, 2.1 mm center pin) and the final `PS500` enable-pin handling decision
 - final power-sheet ERC cleanup
 - `P610-P614` style control-landings if the control-backplane path is retained
 

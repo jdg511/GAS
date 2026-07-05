@@ -11,7 +11,7 @@ Concrete bench procedures for each board, run in the order given in [rev-a-bring
 - Dummy load: two `600 ohm 1 W` non-inductive resistors plus two `10 kohm 1/4 W` resistors
 - Bench power supply rated at least `+/-20 V` at 250 mA for pre-installation rail injection
 - Two pairs of audio cables: balanced XLR/TRS, plus internal harness adapters per [rev-a-interconnect-pin-map.md](rev-a-interconnect-pin-map.md)
-- Bench DMM probe or breakout for the external `+30 VDC` wall adapter plug
+- Bench DMM probe or breakout for the external `+24 VDC` wall adapter plug
 
 ## Reference signal definitions
 
@@ -25,7 +25,7 @@ Concrete bench procedures for each board, run in the order given in [rev-a-bring
 
 Equipment: DMM, scope.
 
-1. Verify the wall adapter is the intended `+30 VDC` model and that the barrel polarity matches the service-endcap jack before any board is connected.
+1. Verify the wall adapter is the intended `Triad WSU240-0750` `+24 VDC` model (open-circuit `+22.8 V` to `+25.2 V`, reject above `+27 V`) and that the barrel polarity matches the service-endcap jack before any board is connected.
 2. Apply the wall adapter with all downstream board connectors unmated.
 2. Measure each rail at the backplane test points:
    - `+15VA` to `AGND`: `+14.85 V` to `+15.30 V`, ripple under `5 mVpp` at 100 kHz scope bandwidth
@@ -88,6 +88,12 @@ Pass condition: bias stable, send and recovery levels in range, tanks audibly ex
 
 Equipment: signal generator, audio analyzer, scope.
 
+0. Relay receiving check (at parts arrival, review W2 / pre-order double-check item 7)
+   - Before installing any relay, measure each `G5V-2` coil resistance with the DMM and record it.
+   - DC5 coils (`K201-K204` here): confirm which coil-current variant arrived (30 vs 40 mA class) and that the `+5VAUX` relay allowance in [rev-a-power-budget.md](rev-a-power-budget.md) still holds for 7 coils worst-case.
+   - DC12 coil (`K301`, crossfade board): if the coil measures as the `720R` variant, change `R351` from `240R` to `150R` before assembly, per the pre-order double-check.
+   - Also bench-confirm NC/NO orientation on one relay before final panel labeling (symbol-orientation risk noted in review W2).
+
 1. Quiescent off state
    - Set the `MODE` rotary to `Off`. Apply `REF-DBU+4` at the wet input. Measure the secondary send output: should be at the analyzer noise floor (under `-80 dBu`).
 2. Series mode
@@ -131,10 +137,12 @@ Equipment: signal generator, audio analyzer, scope.
    - Apply `REF-DBU+4` to wet input with `FEEDBACK` near zero. Toggle `FB PHASE`. The mixer output at `1 kHz` must invert polarity cleanly with no level change greater than `0.3 dB`.
 3. Feedback stability
    - Slowly raise `FEEDBACK` with `MODE` in `Off` and the filter passing signal. Verify the rev-A feedback maximum stays below self-oscillation when `FILTER` is set to its rev-A nominal narrow band. Document the position where oscillation onsets with the real tanks installed.
-4. Mixer summing
+4. Feedback loop-sense labeling check (added `2026-07-04`, review finding W6)
+   - The `2026-07-04` ext-routing re-spin moved feedback reinjection pre-tank through inverting send summers (`U202`), which changes the net loop sign versus the earlier topology. With the real tanks installed, raise `FEEDBACK` moderately in each `FB PHASE` position and identify which position gives regenerative build-up (blooming decay) versus damping. If the behavior is swapped relative to the panel legend, swap the panel labeling (function is unaffected; the selector covers both senses).
+5. Mixer summing
    - Apply matched `REF-DBU+4` to all summing inputs in turn. Total mixer output must scale per rev-A gain plan in [rev-a-capture-value-tables.md](rev-a-capture-value-tables.md).
 
-Pass condition: crossfade endpoints clean, phase invert exact, feedback stable below rev-A documented threshold.
+Pass condition: crossfade endpoints clean, phase invert exact, feedback stable below rev-A documented threshold, and the `FB PHASE` legend matched to observed loop behavior per step 4.
 
 ## S-1  Full System Audio Validation
 

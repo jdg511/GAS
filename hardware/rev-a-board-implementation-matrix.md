@@ -11,7 +11,7 @@ This file turns the architecture into concrete board ownership so schematic capt
 | Ext Tank Routing | Off/Series/Parallel routing and secondary mix | `4x G6K-2F-Y-DC5`, `1x OPA1679IDR` | Ext Mode, Ext Mix | relay routing around sensitive recovery nodes |
 | Crossfade / Feedback / Wet Summing | Stereo crossfade, feedback, wet handoff | `1x OPA1679IDR` | Crossfade, Feedback, Feedback Invert | loop stability |
 | Filter / Clipping | HPF, drive, clipping, LPF | `2x OPA1679IDR` | Drive, HPF F/Q, LPF F/Q, Clip Mode | stereo tracking and clip switching artifacts |
-| Power / Backplane | DC entry, rail conversion, star ground, harnessing | `1x URB2415YMD-10WR3`, `1x R-78E5.0-0.5` | none | ripple control and grounding |
+| Power / Backplane | DC entry, rail conversion, star ground, harnessing | `1x URA2415YMD-10WR3`, `1x R-78E5.0-0.5` | none | ripple control and grounding |
 
 ## Input / Output Board Allocation
 

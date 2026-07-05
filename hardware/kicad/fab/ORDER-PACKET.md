@@ -15,7 +15,7 @@ column** (five previously lacked it; do not use BOMs dated before
 | Board | Size (mm) | What it does |
 | --- | --- | --- |
 | tank-driver-recovery | 170 x 110 | Drives the four spring tanks, recovers their returns |
-| power-backplane | 120 x 80 | +30V wall-adapter entry -> isolated +/-15V + 5V rails |
+| power-backplane | 120 x 80 | +24V wall-adapter entry -> isolated +/-15V + 5V rails |
 | crossfade-feedback-wet | 100 x 70 | Crossfade summers, wet handoff, feedback phase relay |
 | filter-clipper | 140 x 90 | HPF, drive, 4-mode clip networks, LPF, output buffers |
 | ext-tank-routing | 120 x 80 | Off/Series/Parallel external tank relay routing |
@@ -61,16 +61,4 @@ Each `fab/<board>/` contains:
   NOT from filter board P405 pin 9, which is a sourceless spare. See H33
   in `hardware/rev-a-control-harnesses.md` (recorded 2026-07-04; rev-B
   PCB fix is open issue #9).
-- **Separate purchases (not on any PCB):** spring tanks 2x 4AB1C1B,
-  1x 9EB2C1B, 1x 9EB3C1B (Amplified Parts / tubesandmore), the +30V wall
-  adapter, panel pots/switches/jacks per
-  `hardware/bom/rev-a-panel-and-mechanical-reference-bom.csv`, and harness
-  wire/crimps per `hardware/rev-a-harness-map.md`.
-
-## Known cosmetic items (do not block fab)
-
-- Silkscreen warnings (~10-20 per board): reference text overlapping
-  connector outlines. Fabs print these fine; they are readability nits.
-- The tank cable landings are JST XH 2-pin (the tanks' RCA leads get
-  crimped into XH plugs); the RCA-vs-XH choice was left open by the spec
-  and XH was chosen for stock footprints and cost.
+- **Separate purchases (not on any PCB):** spring tanks 2x 4AB1C

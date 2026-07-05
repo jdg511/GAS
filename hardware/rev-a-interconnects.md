@@ -13,7 +13,7 @@ This file turns the board briefs into concrete board-to-board connector intent.
 
 Source:
 
-- external `+30 VDC` wall adapter into the power-backplane board
+- external `+24 VDC` wall adapter into the power-backplane board
 - on-board conversion to:
   - `+15VA`
   - `-15VA`

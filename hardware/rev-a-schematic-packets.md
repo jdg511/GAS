@@ -434,7 +434,7 @@ This board has too many controls for several small JST tails to be elegant. Rev 
 
 ### Functional Summary
 
-- low-voltage distribution from the external `+30 VDC` input
+- low-voltage distribution from the external `+24 VDC` input
 - isolated conversion to `+15VA / -15VA`
 - local `+5VAUX` generation
 - controlled `AGND` to `CHASSIS` bond
@@ -444,12 +444,12 @@ This board has too many controls for several small JST tails to be elegant. Rev 
 
 ### Core Parts
 
-- `J500` service-endcap `5.5 x 2.5 mm` DC-jack landing
+- `J500` service-endcap `5.5 x 2.1 mm` DC-jack landing
 - `D500` reverse-polarity protection
 - `F500` low-voltage polyfuse
 - `TVS500` input surge clamp
 - `C500` bulk input cap
-- `PS500` `URB2415YMD-10WR3`
+- `PS500` `URA2415YMD-10WR3`
 - `PS501` `R-78E5.0-0.5`
 - rail bulk and local decoupling capacitors
 

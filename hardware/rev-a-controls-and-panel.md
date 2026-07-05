@@ -21,7 +21,7 @@ Rev A uses combo `XLR / TRS` connectors for balanced line I/O.
 - `J2` right input combo jack
 - `J3` left output combo jack
 - `J4` right output combo jack
-- `J5` DC power jack for the external `+30 VDC` wall adapter
+- `J5` DC power jack for the external `+24 VDC` wall adapter
 
 ### Electrical Intent
 
@@ -141,4 +141,4 @@ The simple local exceptions are:
 - `Wet / Dry`
 - `Mono -> Stereo`
 
-Further endcap zoning detail lives in [rev-a-endcap-panel-layout.md](C:/Users/Jason/GAS-build/repo/hardware/rev-a-endcap-panel-layout.md:1).
+Further endcap zoning detail lives in [rev-a-endcap-panel-layout.md](C:/U

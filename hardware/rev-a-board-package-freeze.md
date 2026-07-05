@@ -17,7 +17,7 @@ The goal is not to replace the board briefs. It is to freeze the minimum board f
 - External panel connectors are combo `XLR / TRS` jacks.
 - The real tank set is `4AB1C1B x2`, `9EB2C1B x1`, `9EB3C1B x1`.
 - Predelay and convolution remain software-only study tools and do not appear on the PCB set.
-- Main supply architecture is external `+30 VDC` wall adapter into on-board conversion for `+15VA`, `-15VA`, and `+5VAUX`.
+- Main supply architecture is external `+24 VDC` wall adapter into on-board conversion for `+15VA`, `-15VA`, and `+5VAUX`.
 - The main cylindrical enclosure tube is user-supplied.
 
 ## Board Freeze Table
@@ -25,7 +25,7 @@ The goal is not to replace the board briefs. It is to freeze the minimum board f
 | Board | Target Envelope | Placement Zone | Main Active Set | Power | Main Connectors | Controls | Install Scope |
 |---|---|---|---|---|---|---|---|
 | Input / Output | `160 x 75 mm` | `25-100 mm` from service endcap | `1x OPA1644AIDR`, `3x OPA1656IDR` | `+15VA`, `AGND`, `-15VA` | `J1-J4`, `P1-P6` | wet/dry, mono-to-stereo | SMT core plus panel-handwired combo jacks |
-| Power / Control Backplane | `150 x 95 mm` | `105-200 mm` | `1x URB2415YMD-10WR3`, `1x R-78E5.0-0.5`, optional `ULN2003ADR` | `+30VDC` input, generates `+15VA`, `-15VA`, `+5VAUX` | `J500`, `P501-P506`, optional `P601`, `P610-P614` | none directly; preferred control landing | mixed-tech or SMT plus handwired panel DC jack |
+| Power / Control Backplane | `150 x 95 mm` | `105-200 mm` | `1x URA2415YMD-10WR3`, `1x R-78E5.0-0.5`, optional `ULN2003ADR` | `+24VDC` input, generates `+15VA`, `-15VA`, `+5VAUX` | `J500`, `P501-P506`, optional `P601`, `P610-P614` | none directly; preferred control landing | mixed-tech or SMT plus handwired panel DC jack |
 | Ext Tank Routing | `120 x 80 mm` | `225-305 mm` | `4x G6K-2F-Y-DC5`, `1x OPA1679IDR` | `+15VA`, `AGND`, `-15VA`, `+5VAUX` | `P201-P207` | ext mode, ext amount | SMT board, controls via backplane or local wiring |
 | Crossfade / Feedback / Wet | `100 x 70 mm` | `325-395 mm` | `1x OPA1679IDR` | `+15VA`, `AGND`, `-15VA` | `P301-P307` | crossfade, feedback, feedback invert | SMT board, controls via backplane or local wiring |
 | Filter / Clipper | `140 x 90 mm` | `415-505 mm` | `2x OPA1679IDR` | `+15VA`, `AGND`, `-15VA` | `P401-P405` | drive, HPF F/Q, LPF F/Q, clip mode | SMT board plus film-cap-heavy analog section |
@@ -48,7 +48,7 @@ Placement zones above come from:
 ### Power / Control Backplane
 
 - No mains circuitry on-board.
-- DC entry is `5.5 x 2.5 mm` barrel.
+- DC entry is `5.5 x 2.1 mm` barrel (PJ-005A, Triad WSU240-0750 adapter).
 - One controlled `AGND` to `CHASSIS` bond only.
 - This board is the preferred landing zone for dense front-panel controls if the panel is not directly board-mounted.
 - `U601` remains reserve-only under the current frozen 2-bit ext-mode interface and should not be assumed populated in the fixed rev-A BOM.

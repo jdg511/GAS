@@ -29,7 +29,7 @@ Notes:
 - includes the preferred direct-coupled primary send transistor pair
 - still includes the `LM386MX-1/NOPB` only as a fallback reference
 - the fixed-part pricing snapshot was refreshed on `2026-06-29`; the main delta versus the prior snapshot is `OPA1644AIDR` moving to `USD 4.65`
-- the internal `Mean Well RT-50C` AC/DC module is gone; replaced by a `+30VDC` external wall-adapter strategy plus the on-board conversion stack: `Jameco DDU300050E9340` adapter candidate (`+7.00` current `2026-06-29` live page), `Mornsun URB2415YMD-10WR3` DC-DC (`+9.27`), `RECOM R-78E5.0-0.5` +5V regulator (`+3.37`), and `Same Sky PJ-005B` DC jack (`+3.17`). The exact Jameco SKU currently needs bench verification or replacement because the live page describes it as an unregulated linear adapter. See [rev-a-external-dc-power.md](../rev-a-external-dc-power.md)
+- the internal `Mean Well RT-50C` AC/DC module is gone; replaced by a `+24VDC` external wall-adapter strategy plus the on-board conversion stack: `Triad WSU240-0750` regulated adapter (`+12.43`, DigiKey `2026-07-04`), `Mornsun URA2415YMD-10WR3` DC-DC (`+9.27`), `RECOM R-78E5.0-0.5` +5V regulator (`+3.37`), and `Same Sky PJ-005A` DC jack (`+3.07`). Net `+5.33` versus the `2026-06-29` power-entry snapshot; rollup totals below not yet refreshed for this delta. See [rev-a-external-dc-power.md](../rev-a-external-dc-power.md)
 
 ## Connector / Harness Reference BOM
 

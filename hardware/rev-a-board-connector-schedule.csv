@@ -9,7 +9,7 @@ InputOutput,P3,Wet return in,JST XH,3,H4,"WET_SUM_L; AGND; WET_SUM_R",BoardMount
 InputOutput,P4,Dry distribution,JST XH,3,H3,"DRY_L; AGND; DRY_R",BoardMount,"Reserved dry-distribution landing"
 InputOutput,P5,Wet/dry control,JST XH,6,H21,"WD_L_HI; WD_L_WIPER; WD_L_LO; WD_R_HI; WD_R_WIPER; WD_R_LO",BoardMount,"May land at control backplane instead"
 InputOutput,P6,Mono switch,JST XH,3,H22,"MONO_A; MONO_C; MONO_B",BoardMount,"Dedicated rev-A mono-input to stereo function"
-PowerBackplane,J500,External DC entry,BarrelJack,1,Panel,"+30VDC; 0V",HandInstall,"5.5 x 2.5 mm center-positive assumption"
+PowerBackplane,J500,External DC entry,BarrelJack,1,Panel,"+24VDC; 0V",HandInstall,"5.5 x 2.1 mm center-positive (PJ-005A, matches Triad WSU240-0750)"
 PowerBackplane,P501,I/O power out,JST VH,3,H1,"+15VA; AGND; -15VA",BoardMount,"To input/output board"
 PowerBackplane,P502,Tank board power out,JST VH,3,H11,"+15VA; AGND; -15VA",BoardMount,"To tank driver/recovery board"
 PowerBackplane,P503,Crossfade board power out,JST VH,3,H12,"+15VA; AGND; -15VA",BoardMount,"To crossfade/feedback/wet board"
@@ -51,4 +51,4 @@ TankDriverRecovery,J104,Primary right return,RCA or shielded landing,1,T2,"PRI_R
 TankDriverRecovery,J105,Secondary left send,RCA or shielded landing,1,T3,"SEC_SEND_L; SHIELD",HandInstall,"Use quiet tank cable method"
 TankDriverRecovery,J106,Secondary left return,RCA or shielded landing,1,T3,"SEC_RET_L; SHIELD",HandInstall,"Recovery-side shield strategy governs bond"
 TankDriverRecovery,J107,Secondary right send,RCA or shielded landing,1,T4,"SEC_SEND_R; SHIELD",HandInstall,"Use quiet tank cable method"
-TankDriverRecovery,J108,Secondary right return,RCA or shielded landing,1,T4,"SEC_RET_R; SHIELD",HandInstall,"Recovery-side shield strategy governs bond"
+TankDriverRecovery,J108,S

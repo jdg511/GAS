@@ -6,12 +6,12 @@ This is the first-pass low-voltage power budget for the analog design.
 
 Rev A now sources DC externally and converts on-board. See [rev-a-external-dc-power.md](rev-a-external-dc-power.md) for the full topology and parts.
 
-- External wall-adapter strategy: `Jameco DDU300050E9340` candidate or approved regulated alternate, nominal `+30 VDC`, 500 mA / 15 W
-- On-board isolated DC-DC: `Mornsun URB2415YMD-10WR3` generates `+15VA` and `-15VA`
+- External wall adapter: `Triad Magnetics WSU240-0750` (selected `2026-07-04`), regulated SMPS, `+24 VDC`, 750 mA / 18 W, UL 62368-1, from DigiKey
+- On-board isolated DC-DC: `Mornsun URA2415YMD-10WR3` (9-36 V in, 24 V nominal) generates `+15VA` and `-15VA`
 - On-board switching regulator: `RECOM R-78E5.0-0.5` generates `+5VAUX` from `+15VA`
 - Per-rail LC ripple filter (ferrite + bulk + film) between the DC-DC and the audio harness
 
-Audio-side rail budget below is unchanged from the original analysis; the new wall-side total is `~10.3 W` against the adapter's 15 W capacity, leaving ~31 percent headroom.
+Audio-side rail budget below is unchanged from the original analysis; the wall-side total is `~10.3 W` against the adapter's 18 W capacity, leaving ~43 percent headroom (`~0.43 A` draw against the `0.75 A` rating).
 
 ## Datasheet-Based Quiescent Current Inputs
 
@@ -55,13 +55,14 @@ Estimated quiescent total:
 ### Ext Tank Routing Board
 
 - `1x OPA1679IDR` = `4 channels x 2.0 mA` = `8 mA`
+- `1x OPA1656IDR` (U202 send summers, added in the `2026-07-04` re-spin) = `2 channels x 3.9 mA` = `7.8 mA`
 - `4x G6K-2F-Y-DC5` relay coils
   - driven from `+5VAUX`
   - only energized according to selected mode
 
 Estimated analog quiescent total:
 
-- about `8 mA` from the split analog rails
+- about `15.8 mA` from the split analog rails
 
 Estimated relay coil budget:
 
@@ -80,7 +81,7 @@ Estimated relay coil budget:
 Ignoring signal-drive load and assuming relays are active:
 
 - analog split rails:
-  - about `30.6 + (51.2 to 91.2) + 8 + 8 + 16 = 113.8 to 153.8 mA`
+  - about `30.6 + (51.2 to 91.2) + 15.8 + 8 + 16 = 121.6 to 161.6 mA` (updated `2026-07-04` for the ext-routing U202 addition)
 - auxiliary `+5V`:
   - allocate roughly `100 mA` for relays and control overhead
 

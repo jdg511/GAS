@@ -66,7 +66,7 @@ Planned child sheets:
 
 ### Power / Backplane Sheet
 
-- external `+30 VDC` entry
+- external `+24 VDC` entry
 - isolated DC-DC conversion
 - local `+5VAUX` generation
 - `+15VA`, `-15VA`, `+5VAUX`, `AGND`, `CHASSIS`
@@ -130,7 +130,7 @@ Planned child sheets:
 - `J500`
   - service-endcap DC input landing
 - `PS500`
-  - `URB2415YMD-10WR3`
+  - `URA2415YMD-10WR3`
 - `PS501`
   - `R-78E5.0-0.5`
 - `P501-P5xx`

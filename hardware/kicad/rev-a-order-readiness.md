@@ -50,7 +50,21 @@ Updated 2026-07-04 (pm), after the independent pre-order review
 | ext-tank-routing | 0 | yes (tran, mode states, pre-tank FB verified) | 0 | 0 | yes (2026-07-04) |
 | io-board | 0 | yes (tran, balanced I/O) | 0 | 0 | yes (2026-07-04 pm) |
 
-Remaining violations are silkscreen-class warnings only (cosmetic).
+Remaining violations are silkscreen-class warnings only (cosmetic). The four
+same-net drill warnings flagged by the final pre-order review (W5) were
+**fixed 2026-07-04 15:30**: offending vias removed on io-board and
+ext-tank-routing, DRC re-run (0 errors / 0 unconnected / 0 hole warnings,
+`rebuild/io-drc.json` + `rebuild/ext-drc.json` T15:30), gerbers + drill
+re-exported and re-zipped at 15:31. **Upload only zips dated 2026-07-04
+15:31 or later for these two boards.**
+
+**Final pre-order schematic review (2026-07-04, `schematic_review.md`):**
+gerbers OK to upload after the W5 via cleanup; parts order OK — the input
+electrolytics were re-spec'd to 50 V (F3) and the PTC docs-BOM entry
+corrected to the on-board MF-MSMF110 in
+`../bom/rev-a-power-backplane-preliminary-bom.csv`. New U202 send summers
+reviewed and passing (`review_outputs/ext-U202-send-summers.md`); power
+entry re-reviewed at +24 V (`review_outputs/pwr-entry-path-24v.md`).
 
 ## Where everything lives
 

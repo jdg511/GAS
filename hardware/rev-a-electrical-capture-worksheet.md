@@ -239,7 +239,7 @@ Current companion:
 
 | Ref | Job |
 | --- | --- |
-| `J500` | receives external `+30VDC` from the wall adapter at the service endcap |
+| `J500` | receives external `+24VDC` from the wall adapter at the service endcap |
 | `F500` | input overcurrent protection |
 | `D500` | reverse-polarity protection |
 | `TVS500` | input surge clamp |

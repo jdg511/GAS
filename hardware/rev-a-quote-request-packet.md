@@ -184,7 +184,7 @@ Buy these directly, not through the assembler, because they are panel/mechanical
 | Spring tanks (`4AB1C1B` x2, `9EB2C1B`, `9EB3C1B`) | user-procured separately | call out in [rev-a-manufacturing.md](rev-a-manufacturing.md) and [bom/rev-a-procurement-snapshot.md](bom/rev-a-procurement-snapshot.md) |
 | Vacuum tubes, if used | user-supplied | keep outside assembler sourcing; current fixed PCB BOM has no tube SKUs |
 | Combo XLR/TRS jacks (`NCJ6FI-S` x4) | DigiKey or Mouser | [rev-a-panel-and-mechanical-reference-bom.csv](bom/rev-a-panel-and-mechanical-reference-bom.csv) |
-| `5.5 x 2.5 mm` panel DC jack | DigiKey | [rev-a-panel-and-mechanical-reference-bom.csv](bom/rev-a-panel-and-mechanical-reference-bom.csv) |
+| `5.5 x 2.1 mm` panel DC jack | DigiKey | [rev-a-panel-and-mechanical-reference-bom.csv](bom/rev-a-panel-and-mechanical-reference-bom.csv) |
 | Panel pots and toggles | DigiKey and Mouser per row | [rev-a-panel-controls-priced-bom.csv](bom/rev-a-panel-controls-priced-bom.csv) |
 | Rotary mode switches | Mouser EU per row | [rev-a-panel-controls-priced-bom.csv](bom/rev-a-panel-controls-priced-bom.csv) |
 | Knobs (12-14, depending on final panel count) | DigiKey | tracked under panel/mechanical reference |

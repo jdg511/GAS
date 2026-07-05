@@ -47,7 +47,7 @@ The rev-A board set is now defined at the architecture and schematic-ready level
 
 ### 2. Bench-verify the external DC strategy
 
-- Confirm whether the preferred Jameco `DDU300050E9340` sample behaves as a regulated supply
+- ~~Confirm whether the preferred Jameco `DDU300050E9340` sample behaves as a regulated supply~~ Resolved `2026-07-04`: adapter is now the regulated Triad `WSU240-0750` (`+24 VDC`); keep the open-circuit receiving check
 - Verify barrel polarity and open-circuit voltage
 - Measure post-filter `+/-15VA` ripple at realistic load
 
@@ -55,4 +55,4 @@ The rev-A board set is now defined at the architecture and schematic-ready level
 
 1. Continue converting the remaining placeholder KiCad pages into real first-pass circuits
 2. Re-run ERC after each contained sheet-level pass instead of destabilizing the top-level shell
-3. Move to PCB layout only after the passive starting values and connector ownership are frozen
+3. Move to PCB layout only after the passive starting values and con
