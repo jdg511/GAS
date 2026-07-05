@@ -1,0 +1,6 @@
+Board,RefDes,Qty,Manufacturer,MPN,Description,UnitPrice,Currency,Supplier,ExtPrice,BuyURL,AssemblyScope,Notes
+Tank Driver/Recovery,U101-U104,4,Texas Instruments,OPA1656IDR,"Dual audio op amp",2.99,USD,DigiKey,11.96,https://www.digikey.com/en/products/detail/texas-instruments/OPA1656IDR/10715414,SMD,"Primary send predrivers, secondary sends, and all four recovery stages"
+Tank Driver/Recovery,Q101-Q103,2,STMicroelectronics,BD139-16,"NPN transistor, TO-126",1.44,USD,DigiKey,2.88,https://www.digikey.com/en/products/detail/stmicroelectronics/BD139-16/2529325,TH,"Primary left/right NPN output devices"
+Tank Driver/Recovery,Q102-Q104,2,STMicroelectronics,BD140-16,"PNP transistor, TO-126",1.57,USD,DigiKey,3.14,https://www.digikey.com/en/products/detail/stmicroelectronics/BD140-16/3945995,TH,"Primary left/right PNP output devices"
+Tank Driver/Recovery,P101-P102,2,JST Sales America Inc.,B6B-XH-A,"6-position 2.50mm through-hole header",0.24,USD,DigiKey,0.48,https://www.digikey.com/en/products/detail/jst-sales-america-inc/B6B-XH-A/1000381,TH,"Primary and secondary tank bundles"
+Tank Driver/Recovery,P103,1,JST Sales America Inc.,B3P-VH-B,"3-position 3.96mm through-hole header",0.23,USD,DigiKey,0.23,https://www.digikey.com/en/products/detail/jst-sales-america-inc/B3P-VH-B/9924220,TH,"Board power input"

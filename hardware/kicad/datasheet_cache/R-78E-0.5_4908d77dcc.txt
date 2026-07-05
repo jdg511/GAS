@@ -1,0 +1,247 @@
+--- Page 1 ---
+www.recom-power.com REV.:  9/2025 I-1
+Features
+Switching
+Regulator
+• Low cost switching regulator
+• High start-up current capability
+• Efficiency up to 95%
+• Short circuit protection
+• Pin compatible with 78 series regulators
+• Non isolated DC-DC converter
+• IEC/EN60950-1+ AM2 certified R-78E-0.5
+Description
+The R-78E series is a switching regulator module that has been designed to offer all the advantages of a
+switching regulator (high efficiency, wide input range, accurate output voltage regulation) but with a low 
+cost for production quantities. Due to the R-78E’s high efficiency of up to 95% no heat-sink is required. 
+The compact TO-220 compatible SIP3 package measures only 11.6 x 8.5 x 10.4mm, so it saves  
+precious board space. 
+DC/DC Converter
+0.5 Amp
+SIP3
+Single Output
+3
+IEC60950-1 certified
+EN60950-1 certified
+RECOM CONVERTERS
+COM
+PLIANT PRODUCTS
+RoHS
+2
+ +
+compliant
+10 from 10
+RECOM CONVERTERS
+COM
+PLIANT PRODUCTS
+REACH
+compliant
+Specifications (measured @ Ta= 25°C, full load, nominal input voltage and after warm-up)
+BASIC CHARACTERISTICS
+Parameter Condition Min. Typ. Max.
+Input Voltage Range nom. Vin = 24VDC 6VDC 24VDC 28VDC
+Quiescent Current 1.5mA
+Minimum Load (3) 2%
+Internal Operating Frequency 570kHz
+Output Ripple and Noise (4) 20MHz BW 3.3, 5, 9Vout
+12, 15Vout
+50mVp-p
+70mVp-p
+continued on next page
+Notes:
+ Note3:  recommend to use with more than 2% load, if not, the ripple of the product may exceeds the 
+   specification, but doesn’t affect the reliability of the product
+ Note4:  Measurements are made with a 100nF MLCC across output (low ESR)
+Notes:
+ Note1: Efficiency is tested at full load at +25°C ambient
+ Note2: Max. Cap Load is tested by nominal input and full resistive load
+Model Numbering
+Output Voltage Output  Current
+R-78E__-0.5
+Selection Guide
+Part
+Number
+Input
+Voltage Range 
+[VDC]
+Output
+Voltage
+[VDC]             
+Output
+Current
+[A]
+Efficiency (1) max. Capacitive
+Load (2)
+[µF]
+@ min. Vin
+[%]
+@ max. Vin
+[%]
+R-78E3.3-0.5 6-28 3.3 0.5 88 75 220
+R-78E5.0-0.5 7-28 5 0.5 92 82 220
+R-78E9.0-0.5 12-28 9 0.5 94 89 220
+R-78E12-0.5 15-28 12 0.5 95 92 220
+R-78E15-0.5 18-28 15 0.5 95 93 220
+
+--- Page 2 ---
+www.recom-power.com REV.:  9/2025 I-2
+DC/DC Converter
+Specifications (measured @ Ta= 25°C, full load, nominal input voltage and after warm-up)
+R-78E-0.5
+Series
+ENVIRONMENTAL
+Parameter Condition Value 
+Operating Temperature Range natural convection and with derating (see graph) -40°C to +85°C
+Maximum Case Temperature 100°C
+Vibration 10-55Hz, 2G, 30min along X,Y,Z
+MTBF according to MIL-HDBK-217F, G.B. +25°C
++70°C
+7976 x 103 hours
+2182 x 103 hours
+-40 -20 0 20 40 70
+85
+60-30 -10 10 30 50 80 90 100
+100
+80
+60
+40
+90
+70
+50
+30
+20
+10
+0
+Output Load [%]
+Ambient Temperature [°C]
+Derating Graph
+REGULATIONS
+Parameter Condition Value
+Output Accuracy ±3.0% typ.
+Line Regulation low line to high line, full load ±0.5% typ.
+Load Regulation 10% to 100% load ±1.0% typ.
+PROTECTIONS
+Parameter Condition Value
+Short Circuit Protection (SCP)  continuous, automatic recovery
+Efficiency vs Load R-78E5.0-0.5
+0 10 20 30 40 50 60 70 80 90 100
+100
+80
+60
+40
+90
+70
+50
+30
+20
+10
+0
+Efficiency [%]
+Output Load [%]
+7Vin
+12Vin
+24Vin
+28Vin
+
+--- Page 3 ---
+www.recom-power.com REV.:  9/2025 I-3
+DC/DC Converter
+Specifications (measured @ Ta= 25°C, full load, nominal input voltage and after warm-up)
+R-78E-0.5
+Series
+SAFETY AND CERTIFICATIONS
+Certificate Type (Safety) Report / File Number Standard  
+Information Technology Equipment, General Requirements for Safety 1603123 IEC60950-1:2005, 2nd Edition + AM 2:2013
+EN60950-1:2006 + AM2:2013
+EAC RU-AT.49.09571 TP TC 004/2011
+RoHs 2+ RoHS 2011/65/EU + AM2015/863
+EMC Compliance Condition Standard / Criterion
+Electromagnetic compatibility of multimedia equipment -
+Emission requirements
+with external filter
+(see filter suggestion below) EN55032, Class A and B
+DIMENSION and PHYSICAL CHARACTERISTICS
+Parameter Condition Value
+Material case
+potting
+non-conductive black plastic, (UL94 V-0)
+silicone, (UL94 V-0)
+Package Dimension (LxWxH) 11.6 x 8.5 x 10.4mm
+Package Weight 2g typ.
+EMC Filter Suggestion according to EN55032
+R-78Exx-0.5
+C1
+C2
+GND
++Vout+Vin
+GND
++Vout
+GND
++Vin
+L1
+Component List Class A Component List Class B
+MODEL C1 C2 L1
+R-78E3.3-0.5
+10µF 4.7µF 12µH choke 
+RLS-126R-78E5.0-0.5
+R-78E15-0.5
+MODEL C1 L1
+R-78E3.3-0.5
+4.7µF 3.9µH choke 
+RLS-397R-78E5.0-0.5
+R-78E15-0.5
+Bottom View
+Top View
+embossed logo
+321 321
+2.00
+8.511.6
+0.50+0.10/-0.05
+3.21 5.08
+10.44.10
+0.51
+0.25±0.05
+Marking
+2.54
+2.54
+Dimension Drawing (mm)
+Pin Connections
+ Pin # Function
+ 1 +Vin
+ 2 GND
+ 3 +Vout
+Tolerance: xx.x=  ±0.50mm
+              xx.xx= ±0.25mm
+Recommended Footprint Details
+Notes:
+       Note5:  Filter suggestions are valid for indicated part numbers only. For other part numbers, please contact RECOM tech support for advice
+
+--- Page 4 ---
+www.recom-power.com REV.:  9/2025 I-4
+DC/DC Converter
+Specifications (measured @ Ta= 25°C, full load, nominal input voltage and after warm-up)
+R-78E-0.5
+Series
+INSTALLATION AND APPLICATION
+PACKAGING INFORMATION
+Parameter Type Value
+Packaging Dimension (LxWxH) tube 520.0 x 11.2 x 18.2mm
+Packaging Quantity 42pcs
+Storage Temperature Range -55°C to +125°C
+10µF MLCC
+(optional)
+10µF MLCC
+(optional)
+C1 C2
++VIN
+GND
++VOUT
+GND
+R-78Exx-0.5
+Standard Application
+Notes:
+ Note6:  The R-78Exx-0.5 can not be used as positive to negative converter
+The product information and speciﬁcations may be subject to changes even without prior written notice.The product has been designed for various applications; its suitability lies in the responsibility of each customer. The products 
+are not authorized for use in safety-critical applications without RECOM’s explicit written consent. A safety-critical application is an application where a failure may reasonably be expected to endanger or cause loss of life, inﬂict 
+bodily harm or damage property. The applicant shall indemnify and hold harmless RECOM, its afﬁliated companies and its representatives against any damage claims in connection with the unauthorized use of RECOM
+products in such safety-critical applications.

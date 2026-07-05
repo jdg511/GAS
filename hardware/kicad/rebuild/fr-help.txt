@@ -1,0 +1,3 @@
+2026-07-02 02:02:18.322 INFO   Freerouting v2.2.4 (build-date: 2026-05-13)
+2026-07-02 02:02:18.347 WARN   Unknown command line argument: --help
+2026-07-02 02:02:19.808 INFO   New version available: v2.2.4

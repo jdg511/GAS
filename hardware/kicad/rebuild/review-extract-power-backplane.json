@@ -1,0 +1,3859 @@
+{
+  "file": "power-backplane.kicad_sch",
+  "version": "20250114",
+  "generator": "eeschema",
+  "uuid": "afb0f8c4-bf37-5c17-978a-b0f2cc7e01bd",
+  "paper": "A2",
+  "counts": {
+    "components": 36,
+    "lib_symbols": 13,
+    "wires": 77,
+    "junctions": 0,
+    "labels": 0,
+    "global_labels": 77,
+    "hierarchical_labels": 0,
+    "no_connects": 1,
+    "sheets": 0
+  },
+  "components": [
+    {
+      "lib_id": "Connector_Generic:Conn_01x02",
+      "reference": "P500",
+      "value": "P500",
+      "footprint": "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "P500",
+        "Value": "P500",
+        "Footprint": "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical",
+        "Datasheet": ""
+      },
+      "position": [
+        50.8,
+        40.64
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "Pin_1",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            45.72,
+            40.64
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "Pin_2",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            45.72,
+            43.18
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Device:D_Schottky",
+      "reference": "D500",
+      "value": "SS34",
+      "footprint": "Diode_SMD:D_SMA",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "D500",
+        "Value": "SS34",
+        "Footprint": "Diode_SMD:D_SMA",
+        "Datasheet": ""
+      },
+      "position": [
+        88.9,
+        40.64
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "K",
+          "pin_type": "passive",
+          "net": "+30V_D",
+          "position": [
+            85.09,
+            40.64
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "A",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            92.71,
+            40.64
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Device:Polyfuse",
+      "reference": "F500",
+      "value": "1.1A PTC MF-MSMF110",
+      "footprint": "Fuse:Fuse_1812_4532Metric",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "F500",
+        "Value": "1.1A PTC MF-MSMF110",
+        "Footprint": "Fuse:Fuse_1812_4532Metric",
+        "Datasheet": ""
+      },
+      "position": [
+        127.0,
+        40.64
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_D",
+          "position": [
+            127.0,
+            36.83
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            127.0,
+            44.45
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Device:C_Polarized",
+      "reference": "C500",
+      "value": "220u",
+      "footprint": "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "C500",
+        "Value": "220u",
+        "Footprint": "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm",
+        "Datasheet": "",
+        "Voltage": "50V"
+      },
+      "position": [
+        165.1,
+        40.64
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            165.1,
+            36.83
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            165.1,
+            44.45
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Device:D_TVS",
+      "reference": "TVS500",
+      "value": "SMAJ33A",
+      "footprint": "Diode_SMD:D_SMA",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "TVS500",
+        "Value": "SMAJ33A",
+        "Footprint": "Diode_SMD:D_SMA",
+        "Datasheet": ""
+      },
+      "position": [
+        203.2,
+        40.64
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "A1",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            199.39,
+            40.64
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "A2",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            207.01,
+            40.64
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Device:C_Polarized",
+      "reference": "C509",
+      "value": "100u",
+      "footprint": "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "C509",
+        "Value": "100u",
+        "Footprint": "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm",
+        "Datasheet": "",
+        "Voltage": "50V"
+      },
+      "position": [
+        241.3,
+        40.64
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            241.3,
+            36.83
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            241.3,
+            44.45
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Device:R",
+      "reference": "R500",
+      "value": "0",
+      "footprint": "Resistor_SMD:R_1206_3216Metric",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "R500",
+        "Value": "0",
+        "Footprint": "Resistor_SMD:R_1206_3216Metric",
+        "Datasheet": ""
+      },
+      "position": [
+        279.4,
+        40.64
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            279.4,
+            36.83
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            279.4,
+            44.45
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Connector_Generic:Conn_01x06",
+      "reference": "PS500",
+      "value": "URA2415YMD-10WR3",
+      "footprint": "GAS:URA_YMD-10WR3",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "PS500",
+        "Value": "URA2415YMD-10WR3",
+        "Footprint": "GAS:URA_YMD-10WR3",
+        "Datasheet": ""
+      },
+      "position": [
+        50.8,
+        111.76
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "Pin_1",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            45.72,
+            106.68
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "Pin_2",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            45.72,
+            109.22
+          ]
+        },
+        {
+          "pin_number": "3",
+          "pin_name": "Pin_3",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            45.72,
+            111.76
+          ]
+        },
+        {
+          "pin_number": "4",
+          "pin_name": "Pin_4",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            45.72,
+            114.3
+          ]
+        },
+        {
+          "pin_number": "5",
+          "pin_name": "Pin_5",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            45.72,
+            116.84
+          ]
+        },
+        {
+          "pin_number": "6",
+          "pin_name": "Pin_6",
+          "pin_type": "passive",
+          "net": "__unnamed_3",
+          "position": [
+            45.72,
+            119.38
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Device:C_Polarized",
+      "reference": "C510",
+      "value": "10u",
+      "footprint": "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "C510",
+        "Value": "10u",
+        "Footprint": "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm",
+        "Datasheet": "",
+        "Voltage": "25V"
+      },
+      "position": [
+        88.9,
+        111.76
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            88.9,
+            107.95
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            88.9,
+            115.57
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Device:C_Polarized",
+      "reference": "C511",
+      "value": "10u",
+      "footprint": "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "C511",
+        "Value": "10u",
+        "Footprint": "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm",
+        "Datasheet": "",
+        "Voltage": "25V"
+      },
+      "position": [
+        127.0,
+        111.76
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            127.0,
+            107.95
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            127.0,
+            115.57
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Device:FerriteBead",
+      "reference": "FB500",
+      "value": "BLM18PG471SN1",
+      "footprint": "Inductor_SMD:L_0603_1608Metric",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "FB500",
+        "Value": "BLM18PG471SN1",
+        "Footprint": "Inductor_SMD:L_0603_1608Metric",
+        "Datasheet": "",
+        "Sim.Library": "gas-power-models.lib",
+        "Sim.Name": "BEAD600",
+        "Sim.Device": "SUBCKT",
+        "Sim.Pins": "1=a 2=b"
+      },
+      "position": [
+        50.8,
+        182.88
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            50.8,
+            179.07
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            50.8,
+            186.69
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Device:C_Polarized",
+      "reference": "C501",
+      "value": "100u",
+      "footprint": "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "C501",
+        "Value": "100u",
+        "Footprint": "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm",
+        "Datasheet": "",
+        "Voltage": "25V"
+      },
+      "position": [
+        88.9,
+        182.88
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            88.9,
+            179.07
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            88.9,
+            186.69
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Device:C",
+      "reference": "C502",
+      "value": "10u",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "C502",
+        "Value": "10u",
+        "Footprint": "Capacitor_SMD:C_1206_3216Metric",
+        "Datasheet": ""
+      },
+      "position": [
+        127.0,
+        182.88
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            127.0,
+            179.07
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            127.0,
+            186.69
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Device:C",
+      "reference": "C503",
+      "value": "100n",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "C503",
+        "Value": "100n",
+        "Footprint": "Capacitor_SMD:C_1206_3216Metric",
+        "Datasheet": ""
+      },
+      "position": [
+        165.1,
+        182.88
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            165.1,
+            179.07
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            165.1,
+            186.69
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Device:FerriteBead",
+      "reference": "FB501",
+      "value": "BLM18PG471SN1",
+      "footprint": "Inductor_SMD:L_0603_1608Metric",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "FB501",
+        "Value": "BLM18PG471SN1",
+        "Footprint": "Inductor_SMD:L_0603_1608Metric",
+        "Datasheet": "",
+        "Sim.Library": "gas-power-models.lib",
+        "Sim.Name": "BEAD600",
+        "Sim.Device": "SUBCKT",
+        "Sim.Pins": "1=a 2=b"
+      },
+      "position": [
+        203.2,
+        182.88
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            203.2,
+            179.07
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            203.2,
+            186.69
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Device:C_Polarized",
+      "reference": "C504",
+      "value": "100u",
+      "footprint": "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "C504",
+        "Value": "100u",
+        "Footprint": "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm",
+        "Datasheet": "",
+        "Voltage": "25V"
+      },
+      "position": [
+        241.3,
+        182.88
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            241.3,
+            179.07
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            241.3,
+            186.69
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Device:C",
+      "reference": "C505",
+      "value": "10u",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "C505",
+        "Value": "10u",
+        "Footprint": "Capacitor_SMD:C_1206_3216Metric",
+        "Datasheet": ""
+      },
+      "position": [
+        279.4,
+        182.88
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            279.4,
+            179.07
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            279.4,
+            186.69
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Device:C",
+      "reference": "C506",
+      "value": "100n",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "C506",
+        "Value": "100n",
+        "Footprint": "Capacitor_SMD:C_1206_3216Metric",
+        "Datasheet": ""
+      },
+      "position": [
+        50.8,
+        228.6
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            50.8,
+            224.79
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            50.8,
+            232.41
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Converter_DCDC:R-78E5.0-0.5",
+      "reference": "PS501",
+      "value": "R-78E5.0-0.5",
+      "footprint": "Converter_DCDC:Converter_DCDC_RECOM_R-78E-0.5_THT",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "PS501",
+        "Value": "R-78E5.0-0.5",
+        "Footprint": "Converter_DCDC:Converter_DCDC_RECOM_R-78E-0.5_THT",
+        "Datasheet": ""
+      },
+      "position": [
+        50.8,
+        299.72
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "IN",
+          "pin_type": "power_in",
+          "net": "+30V_RAW",
+          "position": [
+            43.18,
+            299.72
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "GND",
+          "pin_type": "power_in",
+          "net": "+30V_RAW",
+          "position": [
+            50.8,
+            307.34
+          ]
+        },
+        {
+          "pin_number": "3",
+          "pin_name": "OUT",
+          "pin_type": "power_out",
+          "net": "+5VAUX",
+          "position": [
+            58.42,
+            299.72
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Device:C_Polarized",
+      "reference": "C507",
+      "value": "47u",
+      "footprint": "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "C507",
+        "Value": "47u",
+        "Footprint": "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm",
+        "Datasheet": "",
+        "Voltage": "16V"
+      },
+      "position": [
+        88.9,
+        299.72
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+5VAUX",
+          "position": [
+            88.9,
+            295.91
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            88.9,
+            303.53
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Device:C",
+      "reference": "C508",
+      "value": "100n",
+      "footprint": "Capacitor_SMD:C_0805_2012Metric",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "C508",
+        "Value": "100n",
+        "Footprint": "Capacitor_SMD:C_0805_2012Metric",
+        "Datasheet": ""
+      },
+      "position": [
+        127.0,
+        299.72
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+5VAUX",
+          "position": [
+            127.0,
+            295.91
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            127.0,
+            303.53
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Connector_Generic:Conn_01x03",
+      "reference": "P501",
+      "value": "P501",
+      "footprint": "Connector_JST:JST_VH_B3P-VH_1x03_P3.96mm_Vertical",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "P501",
+        "Value": "P501",
+        "Footprint": "Connector_JST:JST_VH_B3P-VH_1x03_P3.96mm_Vertical",
+        "Datasheet": ""
+      },
+      "position": [
+        50.8,
+        370.84
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "Pin_1",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            45.72,
+            368.3
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "Pin_2",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            45.72,
+            370.84
+          ]
+        },
+        {
+          "pin_number": "3",
+          "pin_name": "Pin_3",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            45.72,
+            373.38
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Connector_Generic:Conn_01x03",
+      "reference": "P502",
+      "value": "P502",
+      "footprint": "Connector_JST:JST_VH_B3P-VH_1x03_P3.96mm_Vertical",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "P502",
+        "Value": "P502",
+        "Footprint": "Connector_JST:JST_VH_B3P-VH_1x03_P3.96mm_Vertical",
+        "Datasheet": ""
+      },
+      "position": [
+        88.9,
+        370.84
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "Pin_1",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            83.82,
+            368.3
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "Pin_2",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            83.82,
+            370.84
+          ]
+        },
+        {
+          "pin_number": "3",
+          "pin_name": "Pin_3",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            83.82,
+            373.38
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Connector_Generic:Conn_01x03",
+      "reference": "P503",
+      "value": "P503",
+      "footprint": "Connector_JST:JST_VH_B3P-VH_1x03_P3.96mm_Vertical",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "P503",
+        "Value": "P503",
+        "Footprint": "Connector_JST:JST_VH_B3P-VH_1x03_P3.96mm_Vertical",
+        "Datasheet": ""
+      },
+      "position": [
+        127.0,
+        370.84
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "Pin_1",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            121.92,
+            368.3
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "Pin_2",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            121.92,
+            370.84
+          ]
+        },
+        {
+          "pin_number": "3",
+          "pin_name": "Pin_3",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            121.92,
+            373.38
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Connector_Generic:Conn_01x03",
+      "reference": "P504",
+      "value": "P504",
+      "footprint": "Connector_JST:JST_VH_B3P-VH_1x03_P3.96mm_Vertical",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "P504",
+        "Value": "P504",
+        "Footprint": "Connector_JST:JST_VH_B3P-VH_1x03_P3.96mm_Vertical",
+        "Datasheet": ""
+      },
+      "position": [
+        165.1,
+        370.84
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "Pin_1",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            160.02,
+            368.3
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "Pin_2",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            160.02,
+            370.84
+          ]
+        },
+        {
+          "pin_number": "3",
+          "pin_name": "Pin_3",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            160.02,
+            373.38
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Connector_Generic:Conn_01x03",
+      "reference": "P505",
+      "value": "P505",
+      "footprint": "Connector_JST:JST_VH_B3P-VH_1x03_P3.96mm_Vertical",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "P505",
+        "Value": "P505",
+        "Footprint": "Connector_JST:JST_VH_B3P-VH_1x03_P3.96mm_Vertical",
+        "Datasheet": ""
+      },
+      "position": [
+        203.2,
+        370.84
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "Pin_1",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            198.12,
+            368.3
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "Pin_2",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            198.12,
+            370.84
+          ]
+        },
+        {
+          "pin_number": "3",
+          "pin_name": "Pin_3",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            198.12,
+            373.38
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Connector_Generic:Conn_01x04",
+      "reference": "P506",
+      "value": "P506",
+      "footprint": "Connector_JST:JST_VH_B4P-VH_1x04_P3.96mm_Vertical",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "P506",
+        "Value": "P506",
+        "Footprint": "Connector_JST:JST_VH_B4P-VH_1x04_P3.96mm_Vertical",
+        "Datasheet": ""
+      },
+      "position": [
+        241.3,
+        370.84
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "Pin_1",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            236.22,
+            368.3
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "Pin_2",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            236.22,
+            370.84
+          ]
+        },
+        {
+          "pin_number": "3",
+          "pin_name": "Pin_3",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            236.22,
+            373.38
+          ]
+        },
+        {
+          "pin_number": "4",
+          "pin_name": "Pin_4",
+          "pin_type": "passive",
+          "net": "+5VAUX",
+          "position": [
+            236.22,
+            375.92
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "Connector_Generic:Conn_01x04",
+      "reference": "P601",
+      "value": "P601",
+      "footprint": "Connector_JST:JST_VH_B4P-VH_1x04_P3.96mm_Vertical",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "P601",
+        "Value": "P601",
+        "Footprint": "Connector_JST:JST_VH_B4P-VH_1x04_P3.96mm_Vertical",
+        "Datasheet": ""
+      },
+      "position": [
+        279.4,
+        370.84
+      ],
+      "in_bom": "yes",
+      "on_board": "yes",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "Pin_1",
+          "pin_type": "passive",
+          "net": "+5VAUX",
+          "position": [
+            274.32,
+            368.3
+          ]
+        },
+        {
+          "pin_number": "2",
+          "pin_name": "Pin_2",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            274.32,
+            370.84
+          ]
+        },
+        {
+          "pin_number": "3",
+          "pin_name": "Pin_3",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            274.32,
+            373.38
+          ]
+        },
+        {
+          "pin_number": "4",
+          "pin_name": "Pin_4",
+          "pin_type": "passive",
+          "net": "+30V_RAW",
+          "position": [
+            274.32,
+            375.92
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "power:PWR_FLAG",
+      "reference": "#FLG500",
+      "value": "PWR_FLAG",
+      "footprint": "",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "#FLG500",
+        "Value": "PWR_FLAG",
+        "Footprint": "",
+        "Datasheet": ""
+      },
+      "position": [
+        50.8,
+        441.96
+      ],
+      "in_bom": "no",
+      "on_board": "no",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "power_out",
+          "net": "+30V_RAW",
+          "position": [
+            50.8,
+            441.96
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "power:PWR_FLAG",
+      "reference": "#FLG501",
+      "value": "PWR_FLAG",
+      "footprint": "",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "#FLG501",
+        "Value": "PWR_FLAG",
+        "Footprint": "",
+        "Datasheet": ""
+      },
+      "position": [
+        88.9,
+        441.96
+      ],
+      "in_bom": "no",
+      "on_board": "no",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "power_out",
+          "net": "+30V_RAW",
+          "position": [
+            88.9,
+            441.96
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "power:PWR_FLAG",
+      "reference": "#FLG502",
+      "value": "PWR_FLAG",
+      "footprint": "",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "#FLG502",
+        "Value": "PWR_FLAG",
+        "Footprint": "",
+        "Datasheet": ""
+      },
+      "position": [
+        127.0,
+        441.96
+      ],
+      "in_bom": "no",
+      "on_board": "no",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "power_out",
+          "net": "+30V_RAW",
+          "position": [
+            127.0,
+            441.96
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "power:PWR_FLAG",
+      "reference": "#FLG503",
+      "value": "PWR_FLAG",
+      "footprint": "",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "#FLG503",
+        "Value": "PWR_FLAG",
+        "Footprint": "",
+        "Datasheet": ""
+      },
+      "position": [
+        165.1,
+        441.96
+      ],
+      "in_bom": "no",
+      "on_board": "no",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "power_out",
+          "net": "+30V_RAW",
+          "position": [
+            165.1,
+            441.96
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "power:PWR_FLAG",
+      "reference": "#FLG504",
+      "value": "PWR_FLAG",
+      "footprint": "",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "#FLG504",
+        "Value": "PWR_FLAG",
+        "Footprint": "",
+        "Datasheet": ""
+      },
+      "position": [
+        203.2,
+        441.96
+      ],
+      "in_bom": "no",
+      "on_board": "no",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "power_out",
+          "net": "+30V_RAW",
+          "position": [
+            203.2,
+            441.96
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "power:PWR_FLAG",
+      "reference": "#FLG505",
+      "value": "PWR_FLAG",
+      "footprint": "",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "#FLG505",
+        "Value": "PWR_FLAG",
+        "Footprint": "",
+        "Datasheet": ""
+      },
+      "position": [
+        241.3,
+        441.96
+      ],
+      "in_bom": "no",
+      "on_board": "no",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "power_out",
+          "net": "+30V_RAW",
+          "position": [
+            241.3,
+            441.96
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "power:PWR_FLAG",
+      "reference": "#FLG506",
+      "value": "PWR_FLAG",
+      "footprint": "",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "#FLG506",
+        "Value": "PWR_FLAG",
+        "Footprint": "",
+        "Datasheet": ""
+      },
+      "position": [
+        279.4,
+        441.96
+      ],
+      "in_bom": "no",
+      "on_board": "no",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "power_out",
+          "net": "+30V_RAW",
+          "position": [
+            279.4,
+            441.96
+          ]
+        }
+      ]
+    },
+    {
+      "lib_id": "power:PWR_FLAG",
+      "reference": "#FLG507",
+      "value": "PWR_FLAG",
+      "footprint": "",
+      "datasheet": "",
+      "datasheet_source": "",
+      "part_number": "",
+      "manufacturer": "",
+      "description": "",
+      "properties": {
+        "Reference": "#FLG507",
+        "Value": "PWR_FLAG",
+        "Footprint": "",
+        "Datasheet": ""
+      },
+      "position": [
+        50.8,
+        487.68
+      ],
+      "in_bom": "no",
+      "on_board": "no",
+      "dnp": "no",
+      "pins": [
+        {
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "power_out",
+          "net": "+30V_RAW",
+          "position": [
+            50.8,
+            487.68
+          ]
+        }
+      ]
+    }
+  ],
+  "nets": [
+    {
+      "name": "+30V_D",
+      "aliases": [
+        "+30V_D"
+      ],
+      "pins": [
+        {
+          "component": "D500",
+          "pin_number": "1",
+          "pin_name": "K",
+          "pin_type": "passive"
+        },
+        {
+          "component": "F500",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive"
+        }
+      ]
+    },
+    {
+      "name": "+30V_RAW",
+      "aliases": [
+        "+30V_RAW",
+        "GND_IN",
+        "+30V_F",
+        "AGND",
+        "+15VRAW",
+        "-15VRAW",
+        "+15VA",
+        "-15VA",
+        "PWR_FLAG"
+      ],
+      "pins": [
+        {
+          "component": "P500",
+          "pin_number": "1",
+          "pin_name": "Pin_1",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P500",
+          "pin_number": "2",
+          "pin_name": "Pin_2",
+          "pin_type": "passive"
+        },
+        {
+          "component": "D500",
+          "pin_number": "2",
+          "pin_name": "A",
+          "pin_type": "passive"
+        },
+        {
+          "component": "F500",
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C500",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C500",
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "TVS500",
+          "pin_number": "1",
+          "pin_name": "A1",
+          "pin_type": "passive"
+        },
+        {
+          "component": "TVS500",
+          "pin_number": "2",
+          "pin_name": "A2",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C509",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C509",
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "R500",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "R500",
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "PS500",
+          "pin_number": "1",
+          "pin_name": "Pin_1",
+          "pin_type": "passive"
+        },
+        {
+          "component": "PS500",
+          "pin_number": "2",
+          "pin_name": "Pin_2",
+          "pin_type": "passive"
+        },
+        {
+          "component": "PS500",
+          "pin_number": "3",
+          "pin_name": "Pin_3",
+          "pin_type": "passive"
+        },
+        {
+          "component": "PS500",
+          "pin_number": "4",
+          "pin_name": "Pin_4",
+          "pin_type": "passive"
+        },
+        {
+          "component": "PS500",
+          "pin_number": "5",
+          "pin_name": "Pin_5",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C510",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C510",
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C511",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C511",
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "FB500",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "FB500",
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C501",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C501",
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C502",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C502",
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C503",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C503",
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "FB501",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "FB501",
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C504",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C504",
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C505",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C505",
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C506",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C506",
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "PS501",
+          "pin_number": "1",
+          "pin_name": "IN",
+          "pin_type": "power_in"
+        },
+        {
+          "component": "PS501",
+          "pin_number": "2",
+          "pin_name": "GND",
+          "pin_type": "power_in"
+        },
+        {
+          "component": "C507",
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C508",
+          "pin_number": "2",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P501",
+          "pin_number": "1",
+          "pin_name": "Pin_1",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P501",
+          "pin_number": "2",
+          "pin_name": "Pin_2",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P501",
+          "pin_number": "3",
+          "pin_name": "Pin_3",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P502",
+          "pin_number": "1",
+          "pin_name": "Pin_1",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P502",
+          "pin_number": "2",
+          "pin_name": "Pin_2",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P502",
+          "pin_number": "3",
+          "pin_name": "Pin_3",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P503",
+          "pin_number": "1",
+          "pin_name": "Pin_1",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P503",
+          "pin_number": "2",
+          "pin_name": "Pin_2",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P503",
+          "pin_number": "3",
+          "pin_name": "Pin_3",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P504",
+          "pin_number": "1",
+          "pin_name": "Pin_1",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P504",
+          "pin_number": "2",
+          "pin_name": "Pin_2",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P504",
+          "pin_number": "3",
+          "pin_name": "Pin_3",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P505",
+          "pin_number": "1",
+          "pin_name": "Pin_1",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P505",
+          "pin_number": "2",
+          "pin_name": "Pin_2",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P505",
+          "pin_number": "3",
+          "pin_name": "Pin_3",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P506",
+          "pin_number": "1",
+          "pin_name": "Pin_1",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P506",
+          "pin_number": "2",
+          "pin_name": "Pin_2",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P506",
+          "pin_number": "3",
+          "pin_name": "Pin_3",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P601",
+          "pin_number": "2",
+          "pin_name": "Pin_2",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P601",
+          "pin_number": "3",
+          "pin_name": "Pin_3",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P601",
+          "pin_number": "4",
+          "pin_name": "Pin_4",
+          "pin_type": "passive"
+        },
+        {
+          "component": "#FLG500",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "power_out"
+        },
+        {
+          "component": "#FLG501",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "power_out"
+        },
+        {
+          "component": "#FLG502",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "power_out"
+        },
+        {
+          "component": "#FLG503",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "power_out"
+        },
+        {
+          "component": "#FLG504",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "power_out"
+        },
+        {
+          "component": "#FLG505",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "power_out"
+        },
+        {
+          "component": "#FLG506",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "power_out"
+        },
+        {
+          "component": "#FLG507",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "power_out"
+        }
+      ]
+    },
+    {
+      "name": "+5VAUX",
+      "aliases": [
+        "+5VAUX"
+      ],
+      "pins": [
+        {
+          "component": "PS501",
+          "pin_number": "3",
+          "pin_name": "OUT",
+          "pin_type": "power_out"
+        },
+        {
+          "component": "C507",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "C508",
+          "pin_number": "1",
+          "pin_name": "",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P506",
+          "pin_number": "4",
+          "pin_name": "Pin_4",
+          "pin_type": "passive"
+        },
+        {
+          "component": "P601",
+          "pin_number": "1",
+          "pin_name": "Pin_1",
+          "pin_type": "passive"
+        }
+      ]
+    },
+    {
+      "name": "__unnamed_3",
+      "aliases": [],
+      "pins": [
+        {
+          "component": "PS500",
+          "pin_number": "6",
+          "pin_name": "Pin_6",
+          "pin_type": "passive"
+        }
+      ]
+    }
+  ],
+  "labels": [
+    {
+      "name": "+30V_RAW",
+      "type": "global_label",
+      "position": [
+        40.64,
+        40.64
+      ]
+    },
+    {
+      "name": "GND_IN",
+      "type": "global_label",
+      "position": [
+        40.64,
+        43.18
+      ]
+    },
+    {
+      "name": "+30V_D",
+      "type": "global_label",
+      "position": [
+        80.01,
+        40.64
+      ]
+    },
+    {
+      "name": "+30V_RAW",
+      "type": "global_label",
+      "position": [
+        97.79,
+        40.64
+      ]
+    },
+    {
+      "name": "+30V_D",
+      "type": "global_label",
+      "position": [
+        127.0,
+        31.75
+      ]
+    },
+    {
+      "name": "+30V_F",
+      "type": "global_label",
+      "position": [
+        127.0,
+        49.53
+      ]
+    },
+    {
+      "name": "+30V_F",
+      "type": "global_label",
+      "position": [
+        165.1,
+        31.75
+      ]
+    },
+    {
+      "name": "GND_IN",
+      "type": "global_label",
+      "position": [
+        165.1,
+        49.53
+      ]
+    },
+    {
+      "name": "+30V_F",
+      "type": "global_label",
+      "position": [
+        194.31,
+        40.64
+      ]
+    },
+    {
+      "name": "GND_IN",
+      "type": "global_label",
+      "position": [
+        212.09,
+        40.64
+      ]
+    },
+    {
+      "name": "+30V_F",
+      "type": "global_label",
+      "position": [
+        241.3,
+        31.75
+      ]
+    },
+    {
+      "name": "GND_IN",
+      "type": "global_label",
+      "position": [
+        241.3,
+        49.53
+      ]
+    },
+    {
+      "name": "GND_IN",
+      "type": "global_label",
+      "position": [
+        279.4,
+        31.75
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        279.4,
+        49.53
+      ]
+    },
+    {
+      "name": "GND_IN",
+      "type": "global_label",
+      "position": [
+        40.64,
+        106.68
+      ]
+    },
+    {
+      "name": "+30V_F",
+      "type": "global_label",
+      "position": [
+        40.64,
+        109.22
+      ]
+    },
+    {
+      "name": "+15VRAW",
+      "type": "global_label",
+      "position": [
+        40.64,
+        111.76
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        40.64,
+        114.3
+      ]
+    },
+    {
+      "name": "-15VRAW",
+      "type": "global_label",
+      "position": [
+        40.64,
+        116.84
+      ]
+    },
+    {
+      "name": "+15VRAW",
+      "type": "global_label",
+      "position": [
+        88.9,
+        102.87
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        88.9,
+        120.65
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        127.0,
+        102.87
+      ]
+    },
+    {
+      "name": "-15VRAW",
+      "type": "global_label",
+      "position": [
+        127.0,
+        120.65
+      ]
+    },
+    {
+      "name": "+15VRAW",
+      "type": "global_label",
+      "position": [
+        50.8,
+        173.99
+      ]
+    },
+    {
+      "name": "+15VA",
+      "type": "global_label",
+      "position": [
+        50.8,
+        191.77
+      ]
+    },
+    {
+      "name": "+15VA",
+      "type": "global_label",
+      "position": [
+        88.9,
+        173.99
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        88.9,
+        191.77
+      ]
+    },
+    {
+      "name": "+15VA",
+      "type": "global_label",
+      "position": [
+        127.0,
+        173.99
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        127.0,
+        191.77
+      ]
+    },
+    {
+      "name": "+15VA",
+      "type": "global_label",
+      "position": [
+        165.1,
+        173.99
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        165.1,
+        191.77
+      ]
+    },
+    {
+      "name": "-15VRAW",
+      "type": "global_label",
+      "position": [
+        203.2,
+        173.99
+      ]
+    },
+    {
+      "name": "-15VA",
+      "type": "global_label",
+      "position": [
+        203.2,
+        191.77
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        241.3,
+        173.99
+      ]
+    },
+    {
+      "name": "-15VA",
+      "type": "global_label",
+      "position": [
+        241.3,
+        191.77
+      ]
+    },
+    {
+      "name": "-15VA",
+      "type": "global_label",
+      "position": [
+        279.4,
+        173.99
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        279.4,
+        191.77
+      ]
+    },
+    {
+      "name": "-15VA",
+      "type": "global_label",
+      "position": [
+        50.8,
+        219.71
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        50.8,
+        237.49
+      ]
+    },
+    {
+      "name": "+15VA",
+      "type": "global_label",
+      "position": [
+        38.1,
+        299.72
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        50.8,
+        312.42
+      ]
+    },
+    {
+      "name": "+5VAUX",
+      "type": "global_label",
+      "position": [
+        63.5,
+        299.72
+      ]
+    },
+    {
+      "name": "+5VAUX",
+      "type": "global_label",
+      "position": [
+        88.9,
+        290.83
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        88.9,
+        308.61
+      ]
+    },
+    {
+      "name": "+5VAUX",
+      "type": "global_label",
+      "position": [
+        127.0,
+        290.83
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        127.0,
+        308.61
+      ]
+    },
+    {
+      "name": "+15VA",
+      "type": "global_label",
+      "position": [
+        40.64,
+        368.3
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        40.64,
+        370.84
+      ]
+    },
+    {
+      "name": "-15VA",
+      "type": "global_label",
+      "position": [
+        40.64,
+        373.38
+      ]
+    },
+    {
+      "name": "+15VA",
+      "type": "global_label",
+      "position": [
+        78.74,
+        368.3
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        78.74,
+        370.84
+      ]
+    },
+    {
+      "name": "-15VA",
+      "type": "global_label",
+      "position": [
+        78.74,
+        373.38
+      ]
+    },
+    {
+      "name": "+15VA",
+      "type": "global_label",
+      "position": [
+        116.84,
+        368.3
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        116.84,
+        370.84
+      ]
+    },
+    {
+      "name": "-15VA",
+      "type": "global_label",
+      "position": [
+        116.84,
+        373.38
+      ]
+    },
+    {
+      "name": "+15VA",
+      "type": "global_label",
+      "position": [
+        154.94,
+        368.3
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        154.94,
+        370.84
+      ]
+    },
+    {
+      "name": "-15VA",
+      "type": "global_label",
+      "position": [
+        154.94,
+        373.38
+      ]
+    },
+    {
+      "name": "+15VA",
+      "type": "global_label",
+      "position": [
+        193.04,
+        368.3
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        193.04,
+        370.84
+      ]
+    },
+    {
+      "name": "-15VA",
+      "type": "global_label",
+      "position": [
+        193.04,
+        373.38
+      ]
+    },
+    {
+      "name": "+15VA",
+      "type": "global_label",
+      "position": [
+        231.14,
+        368.3
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        231.14,
+        370.84
+      ]
+    },
+    {
+      "name": "-15VA",
+      "type": "global_label",
+      "position": [
+        231.14,
+        373.38
+      ]
+    },
+    {
+      "name": "+5VAUX",
+      "type": "global_label",
+      "position": [
+        231.14,
+        375.92
+      ]
+    },
+    {
+      "name": "+5VAUX",
+      "type": "global_label",
+      "position": [
+        269.24,
+        368.3
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        269.24,
+        370.84
+      ]
+    },
+    {
+      "name": "+15VA",
+      "type": "global_label",
+      "position": [
+        269.24,
+        373.38
+      ]
+    },
+    {
+      "name": "-15VA",
+      "type": "global_label",
+      "position": [
+        269.24,
+        375.92
+      ]
+    },
+    {
+      "name": "+30V_RAW",
+      "type": "global_label",
+      "position": [
+        50.8,
+        447.04
+      ]
+    },
+    {
+      "name": "+30V_F",
+      "type": "global_label",
+      "position": [
+        88.9,
+        447.04
+      ]
+    },
+    {
+      "name": "GND_IN",
+      "type": "global_label",
+      "position": [
+        127.0,
+        447.04
+      ]
+    },
+    {
+      "name": "AGND",
+      "type": "global_label",
+      "position": [
+        165.1,
+        447.04
+      ]
+    },
+    {
+      "name": "+15VRAW",
+      "type": "global_label",
+      "position": [
+        203.2,
+        447.04
+      ]
+    },
+    {
+      "name": "-15VRAW",
+      "type": "global_label",
+      "position": [
+        241.3,
+        447.04
+      ]
+    },
+    {
+      "name": "+15VA",
+      "type": "global_label",
+      "position": [
+        279.4,
+        447.04
+      ]
+    },
+    {
+      "name": "-15VA",
+      "type": "global_label",
+      "position": [
+        50.8,
+        492.76
+      ]
+    }
+  ],
+  "texts": [
+    {
+      "text": "DC ENTRY + PROTECTION (+30VDC wall adapter)",
+      "position": [
+        25.4,
+        30.48
+      ]
+    },
+    {
+      "text": "ISOLATED +/-15V CONVERSION (URA2415YMD-10WR3)",
+      "position": [
+        25.4,
+        101.6
+      ]
+    },
+    {
+      "text": "RAIL RIPPLE FILTERS (bead + 100u + 10u + 100n per rail)",
+      "position": [
+        25.4,
+        172.72
+      ]
+    },
+    {
+      "text": "+5VAUX (R-78E5.0-0.5 from +15VA)",
+      "position": [
+        25.4,
+        289.56
+      ]
+    },
+    {
+      "text": "POWER FANOUT (P501-P505 audio, P506 ext-routing, P601 control)",
+      "position": [
+        25.4,
+        360.68
+      ]
+    },
+    {
+      "text": "ERC POWER FLAGS",
+      "position": [
+        25.4,
+        431.8
+      ]
+    }
+  ],
+  "wires": [
+    {
+      "points": [
+        [
+          45.72,
+          40.64
+        ],
+        [
+          40.64,
+          40.64
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          45.72,
+          43.18
+        ],
+        [
+          40.64,
+          43.18
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          85.09,
+          40.64
+        ],
+        [
+          80.01,
+          40.64
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          92.71,
+          40.64
+        ],
+        [
+          97.79,
+          40.64
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          127.0,
+          36.83
+        ],
+        [
+          127.0,
+          31.75
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          127.0,
+          44.45
+        ],
+        [
+          127.0,
+          49.53
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          165.1,
+          36.83
+        ],
+        [
+          165.1,
+          31.75
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          165.1,
+          44.45
+        ],
+        [
+          165.1,
+          49.53
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          199.39,
+          40.64
+        ],
+        [
+          194.31,
+          40.64
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          207.01,
+          40.64
+        ],
+        [
+          212.09,
+          40.64
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          241.3,
+          36.83
+        ],
+        [
+          241.3,
+          31.75
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          241.3,
+          44.45
+        ],
+        [
+          241.3,
+          49.53
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          279.4,
+          36.83
+        ],
+        [
+          279.4,
+          31.75
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          279.4,
+          44.45
+        ],
+        [
+          279.4,
+          49.53
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          45.72,
+          106.68
+        ],
+        [
+          40.64,
+          106.68
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          45.72,
+          109.22
+        ],
+        [
+          40.64,
+          109.22
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          45.72,
+          111.76
+        ],
+        [
+          40.64,
+          111.76
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          45.72,
+          114.3
+        ],
+        [
+          40.64,
+          114.3
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          45.72,
+          116.84
+        ],
+        [
+          40.64,
+          116.84
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          88.9,
+          107.95
+        ],
+        [
+          88.9,
+          102.87
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          88.9,
+          115.57
+        ],
+        [
+          88.9,
+          120.65
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          127.0,
+          107.95
+        ],
+        [
+          127.0,
+          102.87
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          127.0,
+          115.57
+        ],
+        [
+          127.0,
+          120.65
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          50.8,
+          179.07
+        ],
+        [
+          50.8,
+          173.99
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          50.8,
+          186.69
+        ],
+        [
+          50.8,
+          191.77
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          88.9,
+          179.07
+        ],
+        [
+          88.9,
+          173.99
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          88.9,
+          186.69
+        ],
+        [
+          88.9,
+          191.77
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          127.0,
+          179.07
+        ],
+        [
+          127.0,
+          173.99
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          127.0,
+          186.69
+        ],
+        [
+          127.0,
+          191.77
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          165.1,
+          179.07
+        ],
+        [
+          165.1,
+          173.99
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          165.1,
+          186.69
+        ],
+        [
+          165.1,
+          191.77
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          203.2,
+          179.07
+        ],
+        [
+          203.2,
+          173.99
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          203.2,
+          186.69
+        ],
+        [
+          203.2,
+          191.77
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          241.3,
+          179.07
+        ],
+        [
+          241.3,
+          173.99
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          241.3,
+          186.69
+        ],
+        [
+          241.3,
+          191.77
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          279.4,
+          179.07
+        ],
+        [
+          279.4,
+          173.99
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          279.4,
+          186.69
+        ],
+        [
+          279.4,
+          191.77
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          50.8,
+          224.79
+        ],
+        [
+          50.8,
+          219.71
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          50.8,
+          232.41
+        ],
+        [
+          50.8,
+          237.49
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          43.18,
+          299.72
+        ],
+        [
+          38.1,
+          299.72
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          50.8,
+          307.34
+        ],
+        [
+          50.8,
+          312.42
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          58.42,
+          299.72
+        ],
+        [
+          63.5,
+          299.72
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          88.9,
+          295.91
+        ],
+        [
+          88.9,
+          290.83
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          88.9,
+          303.53
+        ],
+        [
+          88.9,
+          308.61
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          127.0,
+          295.91
+        ],
+        [
+          127.0,
+          290.83
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          127.0,
+          303.53
+        ],
+        [
+          127.0,
+          308.61
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          45.72,
+          368.3
+        ],
+        [
+          40.64,
+          368.3
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          45.72,
+          370.84
+        ],
+        [
+          40.64,
+          370.84
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          45.72,
+          373.38
+        ],
+        [
+          40.64,
+          373.38
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          83.82,
+          368.3
+        ],
+        [
+          78.74,
+          368.3
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          83.82,
+          370.84
+        ],
+        [
+          78.74,
+          370.84
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          83.82,
+          373.38
+        ],
+        [
+          78.74,
+          373.38
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          121.92,
+          368.3
+        ],
+        [
+          116.84,
+          368.3
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          121.92,
+          370.84
+        ],
+        [
+          116.84,
+          370.84
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          121.92,
+          373.38
+        ],
+        [
+          116.84,
+          373.38
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          160.02,
+          368.3
+        ],
+        [
+          154.94,
+          368.3
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          160.02,
+          370.84
+        ],
+        [
+          154.94,
+          370.84
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          160.02,
+          373.38
+        ],
+        [
+          154.94,
+          373.38
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          198.12,
+          368.3
+        ],
+        [
+          193.04,
+          368.3
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          198.12,
+          370.84
+        ],
+        [
+          193.04,
+          370.84
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          198.12,
+          373.38
+        ],
+        [
+          193.04,
+          373.38
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          236.22,
+          368.3
+        ],
+        [
+          231.14,
+          368.3
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          236.22,
+          370.84
+        ],
+        [
+          231.14,
+          370.84
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          236.22,
+          373.38
+        ],
+        [
+          231.14,
+          373.38
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          236.22,
+          375.92
+        ],
+        [
+          231.14,
+          375.92
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          274.32,
+          368.3
+        ],
+        [
+          269.24,
+          368.3
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          274.32,
+          370.84
+        ],
+        [
+          269.24,
+          370.84
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          274.32,
+          373.38
+        ],
+        [
+          269.24,
+          373.38
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          274.32,
+          375.92
+        ],
+        [
+          269.24,
+          375.92
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          50.8,
+          441.96
+        ],
+        [
+          50.8,
+          447.04
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          88.9,
+          441.96
+        ],
+        [
+          88.9,
+          447.04
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          127.0,
+          441.96
+        ],
+        [
+          127.0,
+          447.04
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          165.1,
+          441.96
+        ],
+        [
+          165.1,
+          447.04
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          203.2,
+          441.96
+        ],
+        [
+          203.2,
+          447.04
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          241.3,
+          441.96
+        ],
+        [
+          241.3,
+          447.04
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          279.4,
+          441.96
+        ],
+        [
+          279.4,
+          447.04
+        ]
+      ]
+    },
+    {
+      "points": [
+        [
+          50.8,
+          487.68
+        ],
+        [
+          50.8,
+          492.76
+        ]
+      ]
+    }
+  ],
+  "junctions": [],
+  "no_connects": [
+    [
+      45.72,
+      119.38
+    ]
+  ],
+  "extraction_notes": [
+    "Pin positions are computed from embedded lib_symbols and symbol placement.",
+    "Net mapping joins wires, labels, power symbols, junctions, and pins using coordinate matching.",
+    "Hierarchical sheet connectivity is not fully resolved by this lightweight extractor; spot-check multi-sheet critical nets."
+  ]
+}

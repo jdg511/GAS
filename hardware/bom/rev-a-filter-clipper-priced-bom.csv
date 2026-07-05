@@ -1,0 +1,4 @@
+Board,RefDes,Qty,Manufacturer,MPN,Description,UnitPrice,Currency,Supplier,ExtPrice,BuyURL,AssemblyScope,Notes
+Filter/Clipper,U401-U402,2,Texas Instruments,OPA1679IDR,"Quad audio op amp",1.52,USD,DigiKey,3.04,https://www.digikey.com/en/products/detail/texas-instruments/OPA1679IDR/7034963,SMD,"HPF drive clipping LPF and output buffers"
+Filter/Clipper,P401-P402,2,JST Sales America Inc.,B3B-XH-A,"3-position 2.50mm through-hole header",0.15,USD,DigiKey,0.30,https://www.digikey.com/en/products/detail/jst-sales-america-inc/B3B-XH-A/1651046,TH,"Signal input and output"
+Filter/Clipper,P404,1,JST Sales America Inc.,B3P-VH-B,"3-position 3.96mm through-hole header",0.23,USD,DigiKey,0.23,https://www.digikey.com/en/products/detail/jst-sales-america-inc/B3P-VH-B/9924220,TH,"Board power input"

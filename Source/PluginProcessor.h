@@ -67,11 +67,6 @@ public:
     bool shouldShowUnavailableTankControls() const;
     bool isCrossfadeAvailableForCurrentLayout() const;
 
-    static constexpr auto inputModeParameterID = "inputMode";
-
-    enum class InputMode { stereo = 0, monoL, monoR };
-    InputMode getInputMode() const;
-
     bool loadPlaybackFile (const juce::File& file);
     void setPlaybackActive (bool shouldPlay);
     bool isPlaybackActive() const;
@@ -102,10 +97,15 @@ public:
 
     void setParameterPlainValue (const juce::String& parameterID, float plainValue);
 
-    void loadPreset (int presetIndex);
-    static juce::StringArray getPresetNames();
+    bool loadPreset (int presetIndex);
+    juce::StringArray getPresetNames() const;
+    bool saveUserPreset (const juce::String& presetName);
 
 private:
+    juce::ValueTree createStateTree();
+    bool applyPresetState (juce::ValueTree restoredState, const juce::String& presetName);
+    juce::File getUserPresetDirectory() const;
+    juce::Array<juce::File> getUserPresetFiles() const;
     juce::File getCurrentModuleBinaryFile() const;
     juce::Array<juce::File> getSpringIrSearchDirectories() const;
     juce::File resolveSpringIrFile (const juce::String& storedPath) const;
@@ -178,9 +178,10 @@ private:
     double playbackReadPosition = 0.0;
     double predelayLfoPhase = 0.0;
     int currentMaximumBlockSize = 512;
-    // Four independent predelay lanes, each wandering within its own range:
-    //   0 = primary L, 1 = primary R   (20-30 ms)
-    //   2 = 2nd-tank L, 3 = 2nd-tank R (30-42 ms)
+    // Four independent predelay lanes, each wandering within its own range.
+    // In the simulation, predelay + convolution act as the spring-tank model:
+    //   0 = primary L, 1 = primary R   -> hardware target: 4AB1C1B / 4AB1C1B
+    //   2 = 2nd-tank L, 3 = 2nd-tank R -> hardware target: 9EB2C1B / 9EB3C1B
     std::array<juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear>, 4> predelayMsSmoothed;
     std::array<float, 4> predelayTargetMs { { 25.0f, 25.0f, 36.0f, 36.0f } };
     juce::Random predelayRandom;

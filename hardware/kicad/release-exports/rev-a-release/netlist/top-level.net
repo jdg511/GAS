@@ -1,0 +1,354 @@
+(export
+	(version "E")
+	(design
+		(source "C:\\Users\\Jason\\GAS-build\\repo\\hardware\\kicad\\GAS-Hardware.kicad_sch")
+		(date "2026-07-01T14:38:18")
+		(tool "Eeschema 10.0.3")
+		(textvar
+			(name "PROJECT_NAME") "GAS Hardware Rev A")
+		(textvar
+			(name "PROJECT_NOTE") "Analog spring reverb hardware derived from the JUCE simulation")
+		(sheet
+			(number "1")
+			(name "/")
+			(tstamps "/")
+			(title_block
+				(title "GAS Hardware Rev A")
+				(company "Illicit Apothecary")
+				(rev)
+				(date)
+				(source "GAS-Hardware.kicad_sch")
+				(comment
+					(number "1")
+					(value "Top-level hierarchical schematic scaffold")
+				)
+				(comment
+					(number "2")
+					(value "See hardware/kicad/rev-a-sheet-population-plan.md for capture order")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+		(sheet
+			(number "2")
+			(name "/input-output/")
+			(tstamps "/0e6d5c95-0f1f-46a8-82f0-760db7d7b101/")
+			(title_block
+				(title "GAS Rev A - Input Output Board")
+				(company "Illicit Apothecary")
+				(rev)
+				(date)
+				(source "io-board.kicad_sch")
+				(comment
+					(number "1")
+					(value "Balanced I/O, mono-to-stereo, wet/dry mix")
+				)
+				(comment
+					(number "2")
+					(value "First-pass functional wiring capture")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+		(sheet
+			(number "3")
+			(name "/tank-driver-recovery/")
+			(tstamps "/0e6d5c95-0f1f-46a8-82f0-760db7d7b102/")
+			(title_block
+				(title "GAS Rev A - Tank Driver Recovery Board")
+				(company "Illicit Apothecary")
+				(rev)
+				(date)
+				(source "tank-driver-recovery.kicad_sch")
+				(comment
+					(number "1")
+					(value "Primary and secondary tank send/recovery")
+				)
+				(comment
+					(number "2")
+					(value "First-pass symbol population entered; driver and recovery wiring still pending")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+		(sheet
+			(number "4")
+			(name "/ext-tank-routing/")
+			(tstamps "/0e6d5c95-0f1f-46a8-82f0-760db7d7b103/")
+			(title_block
+				(title "GAS Rev A - Ext Tank Routing Board")
+				(company "Illicit Apothecary")
+				(rev)
+				(date)
+				(source "ext-tank-routing.kicad_sch")
+				(comment
+					(number "1")
+					(value "Off / Series / Parallel routing")
+				)
+				(comment
+					(number "2")
+					(value "First-pass relay/contact wiring entered; active summing network still pending")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+		(sheet
+			(number "5")
+			(name "/crossfade-feedback-wet/")
+			(tstamps "/0e6d5c95-0f1f-46a8-82f0-760db7d7b104/")
+			(title_block
+				(title "GAS Rev A - Crossfade Feedback Wet Board")
+				(company "Illicit Apothecary")
+				(rev)
+				(date)
+				(source "crossfade-feedback-wet.kicad_sch")
+				(comment
+					(number "1")
+					(value "Stereo crossfade, feedback, wet summing")
+				)
+				(comment
+					(number "2")
+					(value "First-pass symbol population entered; wet-loop wiring still pending")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+		(sheet
+			(number "6")
+			(name "/filter-clipper/")
+			(tstamps "/0e6d5c95-0f1f-46a8-82f0-760db7d7b105/")
+			(title_block
+				(title "GAS Rev A - Filter Clipper Board")
+				(company "Illicit Apothecary")
+				(rev)
+				(date)
+				(source "filter-clipper.kicad_sch")
+				(comment
+					(number "1")
+					(value "HPF, drive, clipping, LPF")
+				)
+				(comment
+					(number "2")
+					(value "First-pass symbol population entered; filter and clipper wiring still pending")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+		(sheet
+			(number "7")
+			(name "/power-backplane/")
+			(tstamps "/0e6d5c95-0f1f-46a8-82f0-760db7d7b106/")
+			(title_block
+				(title "GAS Rev A - Power Backplane")
+				(company "Illicit Apothecary")
+				(rev)
+				(date)
+				(source "power-backplane.kicad_sch")
+				(comment
+					(number "1")
+					(value "External 30V DC entry, conversion, and rail distribution")
+				)
+				(comment
+					(number "2")
+					(value "First-pass power wiring entered; rail decoupling expansion still pending")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+	)
+	(components)
+	(groups)
+	(variants)
+	(libparts)
+	(libraries)
+	(nets)
+)

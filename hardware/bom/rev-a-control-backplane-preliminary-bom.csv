@@ -1,0 +1,10 @@
+RefDes,Qty,MPN,Description,Notes
+U601,1,ULN2003ADR,"7-channel Darlington relay/driver array","Reserve only under the current rev-A harness; do not populate unless a later revision adds real coil-drive ownership to the backplane"
+P601,1,B4P-VH-B,"4-position power header","Backplane power input"
+P610,1,B9B-XH-A,"9-position control header","I/O controls group"
+P611,1,B10B-XH-A,"10-position control header","Ext-routing controls group"
+P612,1,B10B-XH-A,"10-position control header","Crossfade/feedback controls group"
+P613,1,B12B-XH-A,"12-position control header","Filter/clipper controls group A"
+P614,1,B12B-XH-A,"12-position control header","Filter/clipper controls group B"
+R*,1,set,"Pull resistors and small-signal support parts","Use for mode-encoding, optional local endpoint generation, and future indicator options"
+C*,1,set,"Power-only support capacitors","Local decoupling only; not in the audio path"

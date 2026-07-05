@@ -6,6 +6,9 @@ namespace
 {
 using Theme = TheGreatAmericanSpringAudioProcessorEditor::Theme;
 
+constexpr int presetMenuItemBaseId = 1001;
+constexpr int savePresetMenuItemId = 9001;
+
 struct ThemeStyle
 {
     juce::String title;
@@ -589,35 +592,29 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
         btn->getProperties().set ("gasInverted", true);
     }
 
-    inputModeLabel.setText ("Input", juce::dontSendNotification);
-    inputModeLabel.setJustificationType (juce::Justification::centredLeft);
-    addAndMakeVisible (inputModeLabel);
-
-    inputModeComboBox.addItem ("Stereo",  1);
-    inputModeComboBox.addItem ("Mono L",  2);
-    inputModeComboBox.addItem ("Mono R",  3);
-    inputModeComboBox.onChange = [this] { refreshOptionControls(); };
-    addAndMakeVisible (inputModeComboBox);
-
-    inputModeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (
-        audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::inputModeParameterID, inputModeComboBox);
-
     presetLabel.setText ("Preset", juce::dontSendNotification);
     presetLabel.setJustificationType (juce::Justification::centredLeft);
     addAndMakeVisible (presetLabel);
 
-    presetComboBox.addItemList (TheGreatAmericanSpringAudioProcessor::getPresetNames(), 1);
-    presetComboBox.setSelectedItemIndex (0, juce::dontSendNotification);
     presetComboBox.onChange = [this]
     {
-        const auto index = presetComboBox.getSelectedItemIndex();
-        if (index >= 0)
-            audioProcessor.loadPreset (index);
+        const auto selectedId = presetComboBox.getSelectedId();
+
+        if (selectedId == savePresetMenuItemId)
+        {
+            promptToSaveUserPreset();
+            return;
+        }
+
+        const auto presetIndex = selectedId - presetMenuItemBaseId;
+
+        if (presetIndex >= 0 && audioProcessor.loadPreset (presetIndex))
+            currentPresetSelection = presetComboBox.getText();
     };
     addAndMakeVisible (presetComboBox);
+    refreshPresetOptions();
 
     monoSourceToStereoButton.setButtonText ("Mono Source To Stereo");
-    monoSourceToStereoButton.onClick = [this] { refreshOptionControls(); };
     addAndMakeVisible (monoSourceToStereoButton);
     monoSourceToStereoAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (
         audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::monoSourceToStereoParameterID, monoSourceToStereoButton);
@@ -805,9 +802,12 @@ void TheGreatAmericanSpringAudioProcessorEditor::resized()
     // ── Preset row ────────────────────────────────────────────────────────────
     {
         auto row = centreRow (area.removeFromTop (26), contentWidth);
+        row = centreRow (row, 562);
         presetLabel.setBounds (row.removeFromLeft (50));
         row.removeFromLeft (8);
-        presetComboBox.setBounds (row.removeFromLeft (180));
+        presetComboBox.setBounds (row.removeFromLeft (220));
+        row.removeFromLeft (24);
+        monoSourceToStereoButton.setBounds (row.removeFromLeft (260));
     }
 
     area.removeFromTop (pad);
@@ -828,20 +828,6 @@ void TheGreatAmericanSpringAudioProcessorEditor::resized()
         feedbackPhaseLabel.setBounds (row.removeFromLeft (104));
         feedbackPhaseNormalButton.setBounds (row.removeFromLeft (84));
         feedbackPhaseInvertButton.setBounds (row.removeFromLeft (76));
-    }
-
-    area.removeFromTop (pad);
-
-    // ── Input + Mono Source row ──────────────────────────────────────────────
-    // Shares contentWidth so it stays centre-aligned with the row above.
-    {
-        auto row = centreRow (area.removeFromTop (28), contentWidth);
-
-        inputModeLabel.setBounds (row.removeFromLeft (44));
-        inputModeComboBox.setBounds (row.removeFromLeft (130));
-        row.removeFromLeft (24);
-
-        monoSourceToStereoButton.setBounds (row.removeFromLeft (310));
     }
 
     area.removeFromTop (pad + 4);
@@ -943,6 +929,64 @@ void TheGreatAmericanSpringAudioProcessorEditor::configureRotarySlider (juce::Sl
     addAndMakeVisible (slider);
 }
 
+void TheGreatAmericanSpringAudioProcessorEditor::refreshPresetOptions()
+{
+    const auto presetNames = audioProcessor.getPresetNames();
+    presetComboBox.clear (juce::dontSendNotification);
+
+    for (int index = 0; index < presetNames.size(); ++index)
+        presetComboBox.addItem (presetNames[index], presetMenuItemBaseId + index);
+
+    if (presetNames.size() > 2)
+        presetComboBox.addSeparator();
+
+    presetComboBox.addItem ("Save Current Preset...", savePresetMenuItemId);
+
+    const auto selectedIndex = presetNames.indexOf (currentPresetSelection);
+
+    if (selectedIndex >= 0)
+        presetComboBox.setSelectedId (presetMenuItemBaseId + selectedIndex, juce::dontSendNotification);
+    else if (presetNames.isEmpty())
+        presetComboBox.setText (currentPresetSelection, juce::dontSendNotification);
+    else
+        presetComboBox.setSelectedId (presetMenuItemBaseId, juce::dontSendNotification);
+}
+
+void TheGreatAmericanSpringAudioProcessorEditor::promptToSaveUserPreset()
+{
+    auto safeThis = juce::Component::SafePointer<TheGreatAmericanSpringAudioProcessorEditor> (this);
+    auto* savePresetWindow = new juce::AlertWindow ("Save Preset",
+                                                    "Save the current settings as a user preset.",
+                                                    juce::MessageBoxIconType::NoIcon,
+                                                    this);
+    savePresetWindow->addTextEditor ("presetName", currentPresetSelection, "Preset name");
+    savePresetWindow->addButton ("Save", 1, juce::KeyPress (juce::KeyPress::returnKey));
+    savePresetWindow->addButton ("Cancel", 0, juce::KeyPress (juce::KeyPress::escapeKey));
+    savePresetWindow->enterModalState (true,
+                                       juce::ModalCallbackFunction::create (
+                                           [safeThis, savePresetWindow] (int result)
+                                           {
+                                               std::unique_ptr<juce::AlertWindow> cleanup (savePresetWindow);
+
+                                               if (safeThis == nullptr)
+                                                   return;
+
+                                               if (result == 1)
+                                               {
+                                                   const auto presetName = savePresetWindow->getTextEditorContents ("presetName").trim();
+
+                                                   if (safeThis->audioProcessor.saveUserPreset (presetName))
+                                                   {
+                                                       safeThis->currentPresetSelection = presetName.retainCharacters (
+                                                           "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-()").trim();
+                                                   }
+                                               }
+
+                                               safeThis->refreshPresetOptions();
+                                           }),
+                                       true);
+}
+
 void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
 {
     currentTheme = newTheme;
@@ -977,7 +1021,6 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
     styleComboBox (modeComboBox);
     styleComboBox (ir2RoutingComboBox);
     styleComboBox (playbackSourceComboBox);
-    styleComboBox (inputModeComboBox);
     styleComboBox (presetComboBox);
 
     const auto styleControlLabel = [&style] (juce::Label& label)
@@ -992,9 +1035,6 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
     {
         styleControlLabel (*label);
     }
-
-    inputModeLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
-    inputModeLabel.setColour (juce::Label::textColourId, style.textPrimary);
 
     presetLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
     presetLabel.setColour (juce::Label::textColourId, style.textPrimary);
@@ -1078,12 +1118,8 @@ void TheGreatAmericanSpringAudioProcessorEditor::refreshOptionControls()
     }
 
     targetEditorHeight = showTankControls ? 900 : 694;
-
-    // "Mono Source To Stereo" only applies to a mono input. Enable it when the
-    // input is Mono L / Mono R; grey it out for Stereo (not applicable).
-    const bool isMono = inputModeComboBox.getSelectedItemIndex() > 0;
-    monoSourceToStereoButton.setEnabled (isMono);
-    monoSourceToStereoButton.setAlpha (isMono ? 1.0f : 0.45f);
+    monoSourceToStereoButton.setEnabled (true);
+    monoSourceToStereoButton.setAlpha (1.0f);
 }
 
 void TheGreatAmericanSpringAudioProcessorEditor::updateExpandedTankControlsAnimation()
@@ -1227,6 +1263,7 @@ void TheGreatAmericanSpringAudioProcessorEditor::changeListenerCallback (juce::C
     if (source == &audioProcessor)
     {
         refreshTankLabels();
+        refreshPresetOptions();
         refreshX2VisualState();
         refreshPlaybackLabel();
     }

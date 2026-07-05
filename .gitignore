@@ -12,3 +12,7 @@ out/
 *.exp
 *.log
 *_artefacts/
+
+.history/
+*.lck
+fsm*.log

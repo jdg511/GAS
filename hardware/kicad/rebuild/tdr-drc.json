@@ -1,0 +1,730 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-07-04T13:31:44",
+    "ignored_checks": [
+        {
+            "description": "Footprint has no courtyard defined",
+            "key": "missing_courtyard"
+        },
+        {
+            "description": "Track endpoint not centered on via",
+            "key": "track_not_centered_on_via"
+        },
+        {
+            "description": "Tuning profile track geometries",
+            "key": "tuning_profile_track_geometries"
+        },
+        {
+            "description": "Footprint doesn't match symbol's footprint filters",
+            "key": "footprint_filters_mismatch"
+        },
+        {
+            "description": "Footprint component type doesn't match footprint pads",
+            "key": "footprint_type_mismatch"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.3",
+    "schematic_parity": [
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint D101",
+                    "pos": {
+                        "x": 94.0,
+                        "y": 40.0
+                    },
+                    "uuid": "c3d4f3e5-0068-5125-823f-71755cabc10b"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint D102",
+                    "pos": {
+                        "x": 102.0,
+                        "y": 40.0
+                    },
+                    "uuid": "3372a3c6-f2c9-5025-8cef-cceb121f5769"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint D121",
+                    "pos": {
+                        "x": 94.0,
+                        "y": 68.0
+                    },
+                    "uuid": "24e3b695-1e83-5bde-96a0-75de8aca7422"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint D122",
+                    "pos": {
+                        "x": 102.0,
+                        "y": 68.0
+                    },
+                    "uuid": "d959d26c-d7fd-5efb-bb1c-bf21d5b5ba88"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint Q101",
+                    "pos": {
+                        "x": 76.0,
+                        "y": 56.0
+                    },
+                    "uuid": "8ccad2a2-072a-5fab-8dce-75f7869d8f3d"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint Q102",
+                    "pos": {
+                        "x": 88.0,
+                        "y": 56.0
+                    },
+                    "uuid": "4a2e2ebc-381d-5bca-9141-233336b1ff36"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint Q103",
+                    "pos": {
+                        "x": 76.0,
+                        "y": 80.0
+                    },
+                    "uuid": "a7198601-e961-5775-ab99-e0bb1d1025d2"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint Q104",
+                    "pos": {
+                        "x": 88.0,
+                        "y": 80.0
+                    },
+                    "uuid": "618b5031-7d3b-5bf9-8feb-08db86cb646a"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Device' in footprint",
+            "items": [
+                {
+                    "description": "Footprint R183",
+                    "pos": {
+                        "x": 144.0,
+                        "y": 40.0
+                    },
+                    "uuid": "06f27976-2a23-5b9b-bce8-286be2853807"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Device' in footprint",
+            "items": [
+                {
+                    "description": "Footprint R184",
+                    "pos": {
+                        "x": 144.0,
+                        "y": 62.0
+                    },
+                    "uuid": "85a50c3e-9a32-54bb-8fb2-b42e84ffcd2c"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Device' in footprint",
+            "items": [
+                {
+                    "description": "Footprint R185",
+                    "pos": {
+                        "x": 144.0,
+                        "y": 74.0
+                    },
+                    "uuid": "39ee7e7a-d1a9-5106-a01a-87eda188f312"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Device' in footprint",
+            "items": [
+                {
+                    "description": "Footprint R186",
+                    "pos": {
+                        "x": 144.0,
+                        "y": 96.0
+                    },
+                    "uuid": "696b5330-f398-5318-a6f1-d0effcafd251"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint U101",
+                    "pos": {
+                        "x": 62.0,
+                        "y": 52.0
+                    },
+                    "uuid": "4aeeb57f-cb55-56e5-83c4-aedb27418d68"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint U102",
+                    "pos": {
+                        "x": 62.0,
+                        "y": 96.0
+                    },
+                    "uuid": "cbd676a5-0ad1-5064-9493-faa6b5e2f00e"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint U103",
+                    "pos": {
+                        "x": 148.0,
+                        "y": 52.0
+                    },
+                    "uuid": "25af8668-7bc4-5050-999e-0e4ba2ddb5b4"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint U104",
+                    "pos": {
+                        "x": 148.0,
+                        "y": 86.0
+                    },
+                    "uuid": "c34c939f-444f-5aa0-8555-311e11e5be3d"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H4",
+                    "pos": {
+                        "x": 194.0,
+                        "y": 134.0
+                    },
+                    "uuid": "0048267f-05c6-5fc8-8df2-3543ab8fee55"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H2",
+                    "pos": {
+                        "x": 194.0,
+                        "y": 36.0
+                    },
+                    "uuid": "4a5cbd92-99ee-5a05-a504-b61d4b08d076"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H3",
+                    "pos": {
+                        "x": 36.0,
+                        "y": 134.0
+                    },
+                    "uuid": "8e57d8c7-2a21-58bb-a508-8bdb59f5e9fc"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H1",
+                    "pos": {
+                        "x": 36.0,
+                        "y": 36.0
+                    },
+                    "uuid": "96eafd7a-5d46-5dca-9f46-8bd6451908c4"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        }
+    ],
+    "source": "tank-driver-recovery.kicad_pcb",
+    "unconnected_items": [],
+    "violations": [
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Segment of P103 on F.Silkscreen",
+                    "pos": {
+                        "x": 34.19,
+                        "y": 122.86
+                    },
+                    "uuid": "1a2a504b-cb4a-4522-9fb1-ca53e4185d17"
+                },
+                {
+                    "description": "Reference field of P103",
+                    "pos": {
+                        "x": 33.1,
+                        "y": 118.04
+                    },
+                    "uuid": "ded628f4-f4f4-492c-9c25-04432bacca07"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of J108",
+                    "pos": {
+                        "x": 189.55,
+                        "y": 124.25
+                    },
+                    "uuid": "5d473c4c-d970-46a5-a213-227fcc7e8a7d"
+                },
+                {
+                    "description": "Rectangle of J108 on F.Silkscreen",
+                    "pos": {
+                        "x": 188.45,
+                        "y": 123.75
+                    },
+                    "uuid": "e4e6f705-d1be-4a88-8c43-6e19cf15f623"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of J107",
+                    "pos": {
+                        "x": 189.55,
+                        "y": 113.25
+                    },
+                    "uuid": "2df785ad-f429-4de7-b5fa-64c0fc412720"
+                },
+                {
+                    "description": "Rectangle of J107 on F.Silkscreen",
+                    "pos": {
+                        "x": 188.45,
+                        "y": 112.75
+                    },
+                    "uuid": "7e75b7ef-4143-4507-9dce-391f12876d8e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of J106",
+                    "pos": {
+                        "x": 189.55,
+                        "y": 102.25
+                    },
+                    "uuid": "34668ead-82a7-4b7e-91eb-3622399d39c4"
+                },
+                {
+                    "description": "Rectangle of J106 on F.Silkscreen",
+                    "pos": {
+                        "x": 188.45,
+                        "y": 101.75
+                    },
+                    "uuid": "a4f6d9e9-3fc1-4bff-ab37-3c458ec0589c"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of J101 on F.Silkscreen",
+                    "pos": {
+                        "x": 188.45,
+                        "y": 46.75
+                    },
+                    "uuid": "7086cd41-0d20-4590-94ed-2b4f0b271910"
+                },
+                {
+                    "description": "Reference field of J101",
+                    "pos": {
+                        "x": 189.55,
+                        "y": 47.25
+                    },
+                    "uuid": "eccacdaf-22af-4cf8-836f-17bbd198cbbb"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of R206",
+                    "pos": {
+                        "x": 191.17,
+                        "y": 86.0
+                    },
+                    "uuid": "7993541e-7d34-4637-8100-4ecce19b1d07"
+                },
+                {
+                    "description": "Segment of R206 on F.Silkscreen",
+                    "pos": {
+                        "x": 192.09,
+                        "y": 86.727064
+                    },
+                    "uuid": "92aca0a1-2d95-45e6-b19d-25d976cdbd0d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of J105 on F.Silkscreen",
+                    "pos": {
+                        "x": 188.45,
+                        "y": 90.75
+                    },
+                    "uuid": "39b508f5-b35e-4b4a-9119-0f8d2df1cd2e"
+                },
+                {
+                    "description": "Reference field of J105",
+                    "pos": {
+                        "x": 189.55,
+                        "y": 91.25
+                    },
+                    "uuid": "3e5101c5-555e-4e55-8fa9-3504e62cf853"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of J104",
+                    "pos": {
+                        "x": 189.55,
+                        "y": 80.25
+                    },
+                    "uuid": "2832ce79-d5f8-4fa6-bba1-8351e2a89179"
+                },
+                {
+                    "description": "Rectangle of J104 on F.Silkscreen",
+                    "pos": {
+                        "x": 188.45,
+                        "y": 79.75
+                    },
+                    "uuid": "f25ded8a-bb8f-4236-b4bc-7bf61241a3b4"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of R205",
+                    "pos": {
+                        "x": 191.17,
+                        "y": 64.0
+                    },
+                    "uuid": "3ae3ebd4-ec19-4417-a389-3ffcb2387ac3"
+                },
+                {
+                    "description": "Segment of R205 on F.Silkscreen",
+                    "pos": {
+                        "x": 192.09,
+                        "y": 64.727064
+                    },
+                    "uuid": "59f3f713-47fb-48d3-804a-2cf1a5ed09c8"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of J102 on F.Silkscreen",
+                    "pos": {
+                        "x": 188.45,
+                        "y": 57.75
+                    },
+                    "uuid": "2c025000-2fd4-48be-9157-cdd9f88cba08"
+                },
+                {
+                    "description": "Reference field of J102",
+                    "pos": {
+                        "x": 189.55,
+                        "y": 58.25
+                    },
+                    "uuid": "5a9360e3-b14e-4b02-952f-192718d0ca0f"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of J103 on F.Silkscreen",
+                    "pos": {
+                        "x": 188.45,
+                        "y": 68.75
+                    },
+                    "uuid": "c42d66f5-1c9b-4752-b4b3-ffda63351f12"
+                },
+                {
+                    "description": "Reference field of J103",
+                    "pos": {
+                        "x": 189.55,
+                        "y": 69.25
+                    },
+                    "uuid": "fdb3cbfa-9de1-43c5-810f-ff25dacd847f"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of P101 on F.Silkscreen",
+                    "pos": {
+                        "x": 35.54,
+                        "y": 57.56
+                    },
+                    "uuid": "093558b6-91c8-49d8-9c8b-660c86ea4894"
+                },
+                {
+                    "description": "Reference field of P101",
+                    "pos": {
+                        "x": 34.45,
+                        "y": 48.75
+                    },
+                    "uuid": "8c4a1b18-43d8-4fd1-9208-bc149e02d453"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of P101 on F.Silkscreen",
+                    "pos": {
+                        "x": 35.55,
+                        "y": 54.25
+                    },
+                    "uuid": "6c8f6850-3e56-44f9-bf23-6f34424bee62"
+                },
+                {
+                    "description": "Reference field of P101",
+                    "pos": {
+                        "x": 34.45,
+                        "y": 48.75
+                    },
+                    "uuid": "8c4a1b18-43d8-4fd1-9208-bc149e02d453"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of P102",
+                    "pos": {
+                        "x": 34.45,
+                        "y": 83.75
+                    },
+                    "uuid": "4d7cea6c-6ef8-43d1-9f75-ba31b5873954"
+                },
+                {
+                    "description": "Rectangle of P102 on F.Silkscreen",
+                    "pos": {
+                        "x": 35.55,
+                        "y": 89.25
+                    },
+                    "uuid": "f36a170c-d332-4685-a535-acf036ccb7dd"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of P102",
+                    "pos": {
+                        "x": 34.45,
+                        "y": 83.75
+                    },
+                    "uuid": "4d7cea6c-6ef8-43d1-9f75-ba31b5873954"
+                },
+                {
+                    "description": "Rectangle of P102 on F.Silkscreen",
+                    "pos": {
+                        "x": 35.54,
+                        "y": 92.56
+                    },
+                    "uuid": "645d30ab-cf45-4d21-b844-3602f453becb"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Reference field of C191",
+                    "pos": {
+                        "x": 191.32,
+                        "y": 75.0
+                    },
+                    "uuid": "d7754137-6e67-4ef3-a3c3-a6e5b3f65362"
+                },
+                {
+                    "description": "Pad 1 [TANK_SHIELD_RET] of C191 on F.Cu",
+                    "pos": {
+                        "x": 193.0,
+                        "y": 75.95
+                    },
+                    "uuid": "1acac7ad-8ee6-5e62-987f-608fb0eceab4"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Reference field of C191",
+                    "pos": {
+                        "x": 191.32,
+                        "y": 75.0
+                    },
+                    "uuid": "d7754137-6e67-4ef3-a3c3-a6e5b3f65362"
+                },
+                {
+                    "description": "Pad 2 [AGND] of C191 on F.Cu",
+                    "pos": {
+                        "x": 193.0,
+                        "y": 74.05
+                    },
+                    "uuid": "635026c1-fed8-5509-89f0-d9c528d8dd0e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        }
+    ]
+}

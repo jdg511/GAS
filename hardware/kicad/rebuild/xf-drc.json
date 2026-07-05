@@ -1,0 +1,367 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-07-04T13:31:55",
+    "ignored_checks": [
+        {
+            "description": "Footprint has no courtyard defined",
+            "key": "missing_courtyard"
+        },
+        {
+            "description": "Track endpoint not centered on via",
+            "key": "track_not_centered_on_via"
+        },
+        {
+            "description": "Tuning profile track geometries",
+            "key": "tuning_profile_track_geometries"
+        },
+        {
+            "description": "Footprint doesn't match symbol's footprint filters",
+            "key": "footprint_filters_mismatch"
+        },
+        {
+            "description": "Footprint component type doesn't match footprint pads",
+            "key": "footprint_type_mismatch"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.3",
+    "schematic_parity": [
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint U301",
+                    "pos": {
+                        "x": 70.0,
+                        "y": 52.0
+                    },
+                    "uuid": "cd31b05a-21c3-5e7d-8617-a9aaf0e0418a"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H2",
+                    "pos": {
+                        "x": 124.0,
+                        "y": 36.0
+                    },
+                    "uuid": "5c6e19f1-b44e-5383-a622-765584ee24b0"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H4",
+                    "pos": {
+                        "x": 124.0,
+                        "y": 94.0
+                    },
+                    "uuid": "75f98a6a-05f3-5c72-b0d5-d2d38671525a"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H1",
+                    "pos": {
+                        "x": 36.0,
+                        "y": 36.0
+                    },
+                    "uuid": "add7c60f-5ab0-5603-862d-5d11fc0644a9"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H3",
+                    "pos": {
+                        "x": 36.0,
+                        "y": 94.0
+                    },
+                    "uuid": "db7513cf-4d94-57b5-a804-2a42910877b0"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        }
+    ],
+    "source": "crossfade-feedback-wet.kicad_pcb",
+    "unconnected_items": [],
+    "violations": [
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of P301",
+                    "pos": {
+                        "x": 34.45,
+                        "y": 47.5
+                    },
+                    "uuid": "52aaa69f-1902-4b2a-8551-0c0fe23e2a9d"
+                },
+                {
+                    "description": "Rectangle of P301 on F.Silkscreen",
+                    "pos": {
+                        "x": 35.54,
+                        "y": 52.56
+                    },
+                    "uuid": "998adde7-1b31-4053-b8d3-ec8a1ad9a00f"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of P301",
+                    "pos": {
+                        "x": 34.45,
+                        "y": 47.5
+                    },
+                    "uuid": "52aaa69f-1902-4b2a-8551-0c0fe23e2a9d"
+                },
+                {
+                    "description": "Rectangle of P301 on F.Silkscreen",
+                    "pos": {
+                        "x": 35.55,
+                        "y": 49.25
+                    },
+                    "uuid": "660aa5c7-b372-4350-a68c-29c0ea042564"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of P306",
+                    "pos": {
+                        "x": 33.1,
+                        "y": 78.04
+                    },
+                    "uuid": "122ddac9-d162-421f-915b-c4650bcbd9b3"
+                },
+                {
+                    "description": "Segment of P306 on F.Silkscreen",
+                    "pos": {
+                        "x": 34.19,
+                        "y": 82.86
+                    },
+                    "uuid": "3da2a461-c594-4992-884c-abae1aa6807d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of P303",
+                    "pos": {
+                        "x": 34.45,
+                        "y": 63.5
+                    },
+                    "uuid": "95d69cb3-db9e-47a5-b8bb-a1259422274e"
+                },
+                {
+                    "description": "Rectangle of P303 on F.Silkscreen",
+                    "pos": {
+                        "x": 35.54,
+                        "y": 68.56
+                    },
+                    "uuid": "ab11f95f-a613-464f-b677-cb05ca8afa4a"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of P303 on F.Silkscreen",
+                    "pos": {
+                        "x": 35.55,
+                        "y": 65.25
+                    },
+                    "uuid": "7347446e-3dc6-40c6-a298-c97fb8e33555"
+                },
+                {
+                    "description": "Reference field of P303",
+                    "pos": {
+                        "x": 34.45,
+                        "y": 63.5
+                    },
+                    "uuid": "95d69cb3-db9e-47a5-b8bb-a1259422274e"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of P304",
+                    "pos": {
+                        "x": 125.55,
+                        "y": 66.5
+                    },
+                    "uuid": "4005ff84-e763-4471-a4d3-5ac12357a2a7"
+                },
+                {
+                    "description": "Rectangle of P304 on F.Silkscreen",
+                    "pos": {
+                        "x": 124.45,
+                        "y": 64.75
+                    },
+                    "uuid": "e5b939b1-c187-458a-9add-3e6513c7d309"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of P304",
+                    "pos": {
+                        "x": 125.55,
+                        "y": 66.5
+                    },
+                    "uuid": "4005ff84-e763-4471-a4d3-5ac12357a2a7"
+                },
+                {
+                    "description": "Rectangle of P304 on F.Silkscreen",
+                    "pos": {
+                        "x": 124.46,
+                        "y": 61.44
+                    },
+                    "uuid": "7dc8ffcf-b9c1-4728-99d7-29959aa391c4"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Rectangle of P302 on F.Silkscreen",
+                    "pos": {
+                        "x": 124.45,
+                        "y": 48.75
+                    },
+                    "uuid": "a0ac533d-80b5-4af5-ba0d-cf06f99a91d5"
+                },
+                {
+                    "description": "Reference field of P302",
+                    "pos": {
+                        "x": 125.55,
+                        "y": 50.5
+                    },
+                    "uuid": "bd6657e2-a2d3-45a6-a3b6-d521716636fc"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of P302",
+                    "pos": {
+                        "x": 125.55,
+                        "y": 50.5
+                    },
+                    "uuid": "bd6657e2-a2d3-45a6-a3b6-d521716636fc"
+                },
+                {
+                    "description": "Rectangle of P302 on F.Silkscreen",
+                    "pos": {
+                        "x": 124.46,
+                        "y": 45.44
+                    },
+                    "uuid": "f2824d57-3ab3-438e-8cfe-fd5e30ab04e7"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of P305",
+                    "pos": {
+                        "x": 125.55,
+                        "y": 82.5
+                    },
+                    "uuid": "8eb13715-45cb-4529-a99d-9ca11870b235"
+                },
+                {
+                    "description": "Rectangle of P305 on F.Silkscreen",
+                    "pos": {
+                        "x": 124.46,
+                        "y": 77.44
+                    },
+                    "uuid": "e1ecb892-3cca-46a6-86ba-fcf576d0ed04"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        },
+        {
+            "description": "Silkscreen clearance",
+            "items": [
+                {
+                    "description": "Reference field of P305",
+                    "pos": {
+                        "x": 125.55,
+                        "y": 82.5
+                    },
+                    "uuid": "8eb13715-45cb-4529-a99d-9ca11870b235"
+                },
+                {
+                    "description": "Rectangle of P305 on F.Silkscreen",
+                    "pos": {
+                        "x": 124.45,
+                        "y": 80.75
+                    },
+                    "uuid": "ad2ff3ab-5104-45ab-9c66-fddc2318b707"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        }
+    ]
+}

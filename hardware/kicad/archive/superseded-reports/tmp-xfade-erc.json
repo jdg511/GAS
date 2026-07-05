@@ -1,0 +1,608 @@
+{
+    "$schema": "https://schemas.kicad.org/erc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-06-29T13:00:07",
+    "ignored_checks": [
+        {
+            "description": "Global label only appears once in the schematic",
+            "key": "single_global_label"
+        },
+        {
+            "description": "Four connection points are joined together",
+            "key": "four_way_junction"
+        },
+        {
+            "description": "SPICE model issue",
+            "key": "simulation_model_issue"
+        },
+        {
+            "description": "Assigned footprint doesn't match footprint filters",
+            "key": "footprint_filter"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.3",
+    "sheets": [
+        {
+            "path": "/",
+            "uuid_path": "/0e6d5c95-0f1f-46a8-82f0-760db7d7a005",
+            "violations": [
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'TANK_MIX_L'",
+                            "pos": {
+                                "x": 0.2032,
+                                "y": 0.2794
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000001"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'TANK_MIX_L' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'TANK_MIX_L'",
+                            "pos": {
+                                "x": 0.2032,
+                                "y": 0.2794
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000001"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'TANK_MIX_R'",
+                            "pos": {
+                                "x": 0.2032,
+                                "y": 0.3302
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000002"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'TANK_MIX_R' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'TANK_MIX_R'",
+                            "pos": {
+                                "x": 0.2032,
+                                "y": 0.3302
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000002"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'XFADE_OUT_L'",
+                            "pos": {
+                                "x": 0.2032,
+                                "y": 0.4064
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000003"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'XFADE_OUT_L' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'XFADE_OUT_L'",
+                            "pos": {
+                                "x": 0.2032,
+                                "y": 0.4064
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000003"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'XFADE_OUT_R'",
+                            "pos": {
+                                "x": 0.2032,
+                                "y": 0.4572
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000004"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'XFADE_OUT_R' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'XFADE_OUT_R'",
+                            "pos": {
+                                "x": 0.2032,
+                                "y": 0.4572
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000004"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'FILTCLIP_OUT_L'",
+                            "pos": {
+                                "x": 0.2032,
+                                "y": 0.5334
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000005"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'FILTCLIP_OUT_L' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'FILTCLIP_OUT_L'",
+                            "pos": {
+                                "x": 0.2032,
+                                "y": 0.5334
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000005"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'FILTCLIP_OUT_R'",
+                            "pos": {
+                                "x": 0.2032,
+                                "y": 0.5842
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000006"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'FILTCLIP_OUT_R' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'FILTCLIP_OUT_R'",
+                            "pos": {
+                                "x": 0.2032,
+                                "y": 0.5842
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000006"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'WET_SUM_L'",
+                            "pos": {
+                                "x": 0.2032,
+                                "y": 0.6604
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000007"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'WET_SUM_L' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'WET_SUM_L'",
+                            "pos": {
+                                "x": 0.2032,
+                                "y": 0.6604
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000007"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'WET_SUM_R'",
+                            "pos": {
+                                "x": 0.2032,
+                                "y": 0.7112
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000008"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'WET_SUM_R' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'WET_SUM_R'",
+                            "pos": {
+                                "x": 0.2032,
+                                "y": 0.7112
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000008"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'FB_RET_L'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.2794
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000009"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'FB_RET_L' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'FB_RET_L'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.2794
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000009"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'FB_RET_R'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.3302
+                            },
+                            "uuid": "55555555-5555-4555-8555-00000000000a"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'FB_RET_R' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'FB_RET_R'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.3302
+                            },
+                            "uuid": "55555555-5555-4555-8555-00000000000a"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'XFD_L_HI'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.4318
+                            },
+                            "uuid": "55555555-5555-4555-8555-00000000000b"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'XFD_L_HI' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'XFD_L_HI'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.4318
+                            },
+                            "uuid": "55555555-5555-4555-8555-00000000000b"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'XFD_L_WIPER'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.4826
+                            },
+                            "uuid": "55555555-5555-4555-8555-00000000000c"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'XFD_L_WIPER' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'XFD_L_WIPER'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.4826
+                            },
+                            "uuid": "55555555-5555-4555-8555-00000000000c"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'XFD_L_LO'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.5334
+                            },
+                            "uuid": "55555555-5555-4555-8555-00000000000d"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'XFD_L_LO' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'XFD_L_LO'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.5334
+                            },
+                            "uuid": "55555555-5555-4555-8555-00000000000d"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'XFD_R_HI'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.5842
+                            },
+                            "uuid": "55555555-5555-4555-8555-00000000000e"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'XFD_R_HI' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'XFD_R_HI'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.5842
+                            },
+                            "uuid": "55555555-5555-4555-8555-00000000000e"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'XFD_R_WIPER'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.635
+                            },
+                            "uuid": "55555555-5555-4555-8555-00000000000f"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'XFD_R_WIPER' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'XFD_R_WIPER'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.635
+                            },
+                            "uuid": "55555555-5555-4555-8555-00000000000f"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'XFD_R_LO'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.6858
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000010"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'XFD_R_LO' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'XFD_R_LO'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.6858
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000010"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'FB_L_WIPER'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.762
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000011"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'FB_L_WIPER' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'FB_L_WIPER'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.762
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000011"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'FB_R_WIPER'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.8128
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000012"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'FB_R_WIPER' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'FB_R_WIPER'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.8128
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000012"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                },
+                {
+                    "description": "Label not connected",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'CTL_FB_INV'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.889
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000013"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "label_dangling"
+                },
+                {
+                    "description": "Hierarchical label 'CTL_FB_INV' in root sheet cannot be connected to non-existent parent sheet",
+                    "items": [
+                        {
+                            "description": "Hierarchical Label 'CTL_FB_INV'",
+                            "pos": {
+                                "x": 1.016,
+                                "y": 0.889
+                            },
+                            "uuid": "55555555-5555-4555-8555-000000000013"
+                        }
+                    ],
+                    "severity": "error",
+                    "type": "pin_not_connected"
+                }
+            ]
+        }
+    ],
+    "source": "crossfade-feedback-wet.kicad_sch"
+}

@@ -1,0 +1,302 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-07-04T15:30:16",
+    "ignored_checks": [
+        {
+            "description": "Footprint has no courtyard defined",
+            "key": "missing_courtyard"
+        },
+        {
+            "description": "Track endpoint not centered on via",
+            "key": "track_not_centered_on_via"
+        },
+        {
+            "description": "Tuning profile track geometries",
+            "key": "tuning_profile_track_geometries"
+        },
+        {
+            "description": "Footprint doesn't match symbol's footprint filters",
+            "key": "footprint_filters_mismatch"
+        },
+        {
+            "description": "Footprint component type doesn't match footprint pads",
+            "key": "footprint_type_mismatch"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.3",
+    "schematic_parity": [
+        {
+            "description": "Missing symbol field 'Tolerance' in footprint",
+            "items": [
+                {
+                    "description": "Footprint R11",
+                    "pos": {
+                        "x": 46.0,
+                        "y": 54.0
+                    },
+                    "uuid": "d2463898-b0a1-50fc-83f8-bdc734facf2b"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Tolerance' in footprint",
+            "items": [
+                {
+                    "description": "Footprint R12",
+                    "pos": {
+                        "x": 53.0,
+                        "y": 54.0
+                    },
+                    "uuid": "f1051a27-caae-55c5-a289-18c70841e9b6"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Tolerance' in footprint",
+            "items": [
+                {
+                    "description": "Footprint R13",
+                    "pos": {
+                        "x": 60.0,
+                        "y": 54.0
+                    },
+                    "uuid": "3645f8c2-b11f-598c-9642-5ec9a0eaf2d7"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Tolerance' in footprint",
+            "items": [
+                {
+                    "description": "Footprint R14",
+                    "pos": {
+                        "x": 67.0,
+                        "y": 54.0
+                    },
+                    "uuid": "2dca3812-e5bc-5cc5-8ccf-8689df71a90e"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Tolerance' in footprint",
+            "items": [
+                {
+                    "description": "Footprint R15",
+                    "pos": {
+                        "x": 76.0,
+                        "y": 54.0
+                    },
+                    "uuid": "388b89a7-8276-5021-bef3-d0c7b0a52854"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Tolerance' in footprint",
+            "items": [
+                {
+                    "description": "Footprint R16",
+                    "pos": {
+                        "x": 83.0,
+                        "y": 54.0
+                    },
+                    "uuid": "7d7574c7-e85f-50f1-9191-62f2da189049"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Tolerance' in footprint",
+            "items": [
+                {
+                    "description": "Footprint R17",
+                    "pos": {
+                        "x": 90.0,
+                        "y": 54.0
+                    },
+                    "uuid": "41e4eade-51df-59b4-a384-bd1ccee7fc92"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Tolerance' in footprint",
+            "items": [
+                {
+                    "description": "Footprint R18",
+                    "pos": {
+                        "x": 97.0,
+                        "y": 54.0
+                    },
+                    "uuid": "28579872-63c9-5f59-841c-8835c42e2660"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint U1",
+                    "pos": {
+                        "x": 66.0,
+                        "y": 60.0
+                    },
+                    "uuid": "ac04cece-9593-5770-9fa7-5e9324d558d3"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint U2",
+                    "pos": {
+                        "x": 100.0,
+                        "y": 72.0
+                    },
+                    "uuid": "58b99a7d-e4ec-5fe7-8f66-e88f74356bc3"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint U3",
+                    "pos": {
+                        "x": 134.0,
+                        "y": 58.0
+                    },
+                    "uuid": "e1bdffb4-5d4e-5493-b679-83bcb093ec1e"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Missing symbol field 'Sim.Library' in footprint",
+            "items": [
+                {
+                    "description": "Footprint U4",
+                    "pos": {
+                        "x": 162.0,
+                        "y": 58.0
+                    },
+                    "uuid": "a9f21c58-dea4-58da-8b53-771a8287c428"
+                }
+            ],
+            "severity": "warning",
+            "type": "footprint_symbol_field_mismatch"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H3",
+                    "pos": {
+                        "x": 36.0,
+                        "y": 99.0
+                    },
+                    "uuid": "147549e9-a609-5545-b037-284c99a74e3d"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H2",
+                    "pos": {
+                        "x": 184.0,
+                        "y": 36.0
+                    },
+                    "uuid": "16547791-48a5-51ac-ba32-915425f71fa1"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H4",
+                    "pos": {
+                        "x": 184.0,
+                        "y": 99.0
+                    },
+                    "uuid": "52b83b56-2e11-5c14-a59a-eeb9cd6e5573"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        },
+        {
+            "description": "Extra footprint",
+            "items": [
+                {
+                    "description": "Footprint H1",
+                    "pos": {
+                        "x": 36.0,
+                        "y": 36.0
+                    },
+                    "uuid": "b15c6c10-28b5-5bca-916b-43fd16276708"
+                }
+            ],
+            "severity": "warning",
+            "type": "extra_footprint"
+        }
+    ],
+    "source": "io-board.kicad_pcb",
+    "unconnected_items": [],
+    "violations": [
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Reference field of U1",
+                    "pos": {
+                        "x": 66.0,
+                        "y": 54.72
+                    },
+                    "uuid": "018e48b3-3d94-4cc8-8516-04346a2e97d8"
+                },
+                {
+                    "description": "Pad 1 [N_U1A_P] of R14 on F.Cu",
+                    "pos": {
+                        "x": 66.0875,
+                        "y": 54.0
+                    },
+                    "uuid": "03075b78-ba11-5a73-9f89-2ba4aeb36f29"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        }
+    ]
+}
