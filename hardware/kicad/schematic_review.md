@@ -194,3 +194,42 @@ Accepted cosmetics (hand-nudge in the KiCad UI at leisure; no electrical content
 All six boards re-verified after the text/paper edits: parser clean, only the 13
 intended aliases, component counts unchanged. Three review passes now complete:
 (1) ERC + raw label sweep, (2) independent geometry extraction, (3) visual.
+
+---
+
+## PCB routing — 2026-07-31 (all six boards, 2-layer)
+
+Per Jason's go-ahead ("start routing nonstop", 2-layer, components movable, edge
+connectors stay on their edges). Pipeline per board: design rules (0.2 clearance /
+0.25 track / 0.8-0.4 via, Power netclass 0.6 track already in each .kicad_pro) →
+AGND copper pours on **both** F.Cu and B.Cu (0.3 clearance, inset 0.5 mm) →
+Freerouting 2.2.4 → KiCad DRC → **independent connectivity check** (`pcb_check.py`,
+a from-scratch parser that unions every pad/track/via per net and confirms no net
+is left in disconnected islands — the PCB equivalent of the pass-2 schematic parser).
+
+| Board | Tracks | Vias | DRC errors | DRC warnings | Connectivity |
+|---|---|---|---|---|---|
+| power-backplane | 80 | 3 | 0 | 0 | all nets complete |
+| crossfade-feedback-wet | 218 | 19 | 0 | 10 silk-over-copper | all nets complete |
+| ext-tank-routing | 297 | 24 | 0 | 40 silk-over-copper | all nets complete |
+| filter-clipper | 374 | 41 | 0 | 30 silk-over-copper | all nets complete |
+| io-board | 408 | 43 | 0 | 0 | all nets complete |
+| tank-driver-recovery | 946 | 128 | 0 | 8 lib-footprint-mismatch | all nets complete |
+
+Warning notes (all cosmetic, zero electrical impact):
+- *silk-over-copper*: reference-designator text printed over copper/pads. Fix by
+  nudging silk text in the KiCad UI if desired; fabs accept these as-is.
+- *lib-footprint-mismatch* (tank board): the 8 RCA jack copies on the board differ
+  from the GAS_Parts library file only in text/format normalization introduced by
+  the sync — pads, drills and outlines are identical.
+
+Both AGND pours act as ground planes; the AGND net is carried by the planes plus
+stitching vias rather than discrete traces. Freerouting's per-pass "N unrouted"
+log lines refer to mid-run state; the imported result was verified complete by
+KiCad DRC (0 unconnected-items errors) **and** the independent parser on every board.
+
+Leftover `.dsn` / `.ses` files beside each board are the autorouter's
+export/import artifacts — safe to delete or keep.
+
+Still open (unchanged): TQ2 relay NC/NO + coil-polarity one-relay bench continuity
+check when parts arrive.
