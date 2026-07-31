@@ -12,3 +12,8 @@ out/
 *.exp
 *.log
 *_artefacts/
+
+# editor local-history caches (embedded git repos)
+**/.history/
+__pycache__/
+*_drc_violations.json

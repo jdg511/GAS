@@ -1,36 +1,47 @@
-name: Build macOS Plugins
+name: Build GAS macOS Plugin
 
 on:
   push:
-    branches:
-      - main
-      - 'claude/**'
+    branches: [ claude/refactor, main ]
+  pull_request:
+    branches: [ claude/refactor, main ]
   workflow_dispatch:
 
 jobs:
   build-macos:
-    name: macOS Release
-    runs-on: macos-15
-
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [ arm64, x86_64 ]
     steps:
-      - name: Check out GAS
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Configure
-        run: >
-          cmake
-          -S .
-          -B build-macos
-          -G Xcode
-          -DCMAKE_BUILD_TYPE=Release
-          -DSCC_BASE_PLUGIN_FORMATS="AU;AUv3;Standalone;VST3"
+      - name: Install CMake
+        run: brew install cmake ninja
+
+      - name: Fetch JUCE
+        run: |
+          mkdir -p ~/.juce
+          cd ~/.juce
+          git clone --depth 1 --branch 8.0.12 https://github.com/juce-framework/JUCE.git
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B cmake-out-macos \
+            -G "Xcode" \
+            -DSCC_BASE_PLUGIN_FORMATS="Standalone;VST3;AU;LV2" \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET="10.13" \
+            -DCMAKE_OSX_ARCHITECTURES="${{ matrix.arch }}" \
+            -DJUCE_SOURCE_DIR="${HOME}/.juce/JUCE"
 
       - name: Build
-        run: cmake --build build-macos --config Release
+        run: |
+          cmake --build cmake-out-macos --config Release --target TheGreatAmericanSpring_Standalone TheGreatAmericanSpring_VST3 TheGreatAmericanSpring_AU TheGreatAmericanSpring_LV2 --parallel $(sysctl -n hw.ncpu)
 
-      - name: Upload macOS artifacts
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: The-Great-American-Spring-macOS
-          path: build-macos/TheGreatAmericanSpring_artefacts/Release
-          retention-days: 14
+          name: gas-macos-${{ matrix.arch }}
+          path: cmake-out-macos/**/*_artefacts/**
+          retention-days: 30

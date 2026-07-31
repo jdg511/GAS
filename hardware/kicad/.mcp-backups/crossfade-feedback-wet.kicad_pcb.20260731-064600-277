@@ -4330,7 +4330,7 @@
 	(footprint "Capacitor_SMD:CP_Elec_5x5.8"
 		(layer "F.Cu")
 		(uuid "add1dc45-8794-4699-8ef2-14dfb15d430a")
-		(at 14 65)
+		(at 10 65)
 		(descr "SMD capacitor, aluminum electrolytic, Panasonic, 5.0x5.8mm")
 		(tags "capacitor electrolytic")
 		(property "Reference" "C393"
@@ -5211,7 +5211,7 @@
 	(footprint "Capacitor_SMD:CP_Elec_5x5.8"
 		(layer "F.Cu")
 		(uuid "b67efcea-ceca-40a7-9391-198deaaeffd3")
-		(at 24 65)
+		(at 20 65)
 		(descr "SMD capacitor, aluminum electrolytic, Panasonic, 5.0x5.8mm")
 		(tags "capacitor electrolytic")
 		(property "Reference" "C394"

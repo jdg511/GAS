@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GAS Rev A — 3D Board Viewer — Illicit Apothecary</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+<style>
+  :root { --bg:#14161a; --panel:#1e2128; --accent:#e0a52c; --text:#e8e6df; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: "Segoe UI", system-ui, sans-serif; background:var(--bg); color:var(--text);
+         display:flex; flex-direction:column; height:100vh; }
+  header { padding:10px 18px; background:var(--panel); display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; }
+  header h1 { font-size:17px; margin:0; color:var(--accent); letter-spacing:.5px; }
+  header span { font-size:12px; opacity:.65; }
+  nav { display:flex; gap:6px; padding:8px 14px; background:var(--panel); flex-wrap:wrap;
+        border-top:1px solid #2c3038; }
+  nav button { background:#2a2e37; color:var(--text); border:1px solid #3a3f4a; border-radius:6px;
+               padding:7px 13px; cursor:pointer; font-size:13px; }
+  nav button:hover { border-color: var(--accent); }
+  nav button.active { background:var(--accent); color:#141414; font-weight:600; border-color:var(--accent); }
+  #stage { flex:1; position:relative; }
+  model-viewer { width:100%; height:100%; background:radial-gradient(ellipse at center, #23262d 0%, #101215 100%); }
+  #hud { position:absolute; left:14px; bottom:12px; font-size:12px; opacity:.75; background:#0009;
+         padding:6px 10px; border-radius:6px; max-width:520px; line-height:1.5; }
+  #controls { position:absolute; right:14px; bottom:12px; display:flex; gap:8px; }
+  #controls button { background:#2a2e37cc; color:var(--text); border:1px solid #3a3f4a; border-radius:6px;
+                     padding:6px 11px; cursor:pointer; font-size:12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>GAS Rev A — 3D Board Check</h1>
+  <span>Illicit Apothecary · placement scaffolds (unrouted) · drag = orbit, scroll = zoom, right-drag = pan</span>
+</header>
+<nav id="tabs"></nav>
+<div id="stage">
+  <model-viewer id="mv" camera-controls interaction-prompt="none" shadow-intensity="0.6"
+                exposure="1.05" camera-orbit="30deg 65deg auto" min-camera-orbit="auto auto auto"></model-viewer>
+  <div id="hud"></div>
+  <div id="controls">
+    <button onclick="topView()">Top view</button>
+    <button onclick="angleView()">3/4 view</button>
+    <button onclick="toggleSpin()" id="spinBtn">Spin: off</button>
+  </div>
+</div>
+<script>
+const BOARDS = [
+  { file:"io-board.glb", name:"I/O Board",
+    note:"Combo XLR/TRS jacks on both edges, OPA1644/1656 stages mid-board, new R21–R24 in the bottom passive row." },
+  { file:"crossfade-feedback-wet.glb", name:"Crossfade / Feedback / Wet",
+    note:"K301 relay (TQ2, no 3D body — footprint only) + D301 flyback and the new passive rows in the lower half." },
+  { file:"filter-clipper.glb", name:"Filter / Clipper",
+    note:"Clip-mode decoder bank K401–K403 (TQ2 footprints, no 3D body), D421/D422, plus all filter passives lower-left." },
+  { file:"ext-tank-routing.glb", name:"Ext Tank Routing",
+    note:"K201–K204 relays (TQ2 footprints), U201 quad summer, flybacks D261–D264 right side, summing passives lower rows." },
+  { file:"power-backplane.glb", name:"Power Backplane",
+    note:"PS500 module (custom footprint, no 3D body — check the big 6-pad pattern), J500 barrel jack, R502 ground link." },
+  { file:"tank-driver-recovery.glb", name:"Tank Driver / Recovery",
+    note:"8× RCJ-041 RCA jacks along the bottom edge (footprints only), BD139/140 drive transistors, 4 channel blocks." },
+];
+const mv = document.getElementById('mv');
+const hud = document.getElementById('hud');
+const tabs = document.getElementById('tabs');
+let spinning = false;
+BOARDS.forEach((b, i) => {
+  const btn = document.createElement('button');
+  btn.textContent = b.name;
+  btn.onclick = () => select(i);
+  tabs.appendChild(btn);
+});
+function select(i){
+  [...tabs.children].forEach((c, k) => c.classList.toggle('active', k === i));
+  mv.src = BOARDS[i].file;
+  hud.innerHTML = "<b>" + BOARDS[i].name + "</b><br>" + BOARDS[i].note +
+    "<br><i>Relays, RCA jacks & PS500 use custom footprints without 3D bodies — judge them by their pad patterns.</i>";
+  angleView();
+}
+function topView(){ mv.cameraOrbit = "0deg 0.1deg auto"; }
+function angleView(){ mv.cameraOrbit = "30deg 65deg auto"; }
+function toggleSpin(){
+  spinning = !spinning;
+  if (spinning) { mv.setAttribute('auto-rotate',''); } else { mv.removeAttribute('auto-rotate'); }
+  document.getElementById('spinBtn').textContent = "Spin: " + (spinning ? "on" : "off");
+}
+select(0);
+</script>
+</body>
+</html>
