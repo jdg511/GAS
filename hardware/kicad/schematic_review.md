@@ -233,3 +233,34 @@ export/import artifacts — safe to delete or keep.
 
 Still open (unchanged): TQ2 relay NC/NO + coil-polarity one-relay bench continuity
 check when parts arrive.
+
+---
+
+## Rev A build change — 2026-08-01: asymmetric clipping via DNP
+
+Per Jason, all three clip networks ship **asymmetric** in Rev A: one diode of each
+back-to-back pair is marked **DNP** (do-not-populate). Pads stay on the board;
+copper untouched (verified: connectivity checker still reports every net complete,
+374 segments / 41 vias unchanged).
+
+- **DNP (leave off):** D401, D403 (Si), D405, D407 (LED), D409, D411 (Ge) —
+  these are the cathode-to-line diodes that clipped the NEGATIVE half.
+- **Populate:** D402, D404, D406, D408, D410, D412 — anode-to-line, clip the
+  POSITIVE half. Same polarity both channels, all modes.
+
+Marked in three places so nothing can drift apart:
+1. Schematic: `(dnp yes)` on the six symbols (drawn crossed-out) + a dated note
+   on the sheet next to the Clip networks section.
+2. PCB: `dnp` attribute on the six footprints (so pos/BOM exports with
+   `--exclude-dnp` skip them automatically).
+3. `filter-clipper-bom-RevA.csv`: grouped by Value+DNP — DNP parts on their own
+   rows, clearly flagged.
+
+Also fixed while in there: U401/U402 sub-units carried mixed Values
+(OPA1679 vs OPA1679IDR) which produced a phantom third opamp row in the BOM —
+all units unified to OPA1679IDR; BOM now shows exactly 2.
+
+Sonic consequence (see clipper_asymmetric_revA.png): even harmonics (2nd, 4th)
+now appear alongside the odd ones; a small DC shift arises when clipping hard —
+expect a soft thump on mode switches; a series output cap is the Rev B fix if
+it matters in practice. Returning any mode to symmetric = solder the DNP pads.

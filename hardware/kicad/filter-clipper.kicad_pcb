@@ -449,7 +449,7 @@
 		)
 		(sheetname "filter-clipper")
 		(sheetfile "filter-clipper.kicad_sch")
-		(attr through_hole)
+		(attr through_hole dnp)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
 			(start 1.04 0)
@@ -3263,7 +3263,7 @@
 		)
 		(sheetname "filter-clipper")
 		(sheetfile "filter-clipper.kicad_sch")
-		(attr smd)
+		(attr smd dnp)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
 			(start -1.685 -0.96)
@@ -4693,7 +4693,7 @@
 		)
 		(sheetname "filter-clipper")
 		(sheetfile "filter-clipper.kicad_sch")
-		(attr smd)
+		(attr smd dnp)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
 			(start -1.61 -0.85)
@@ -5407,7 +5407,7 @@
 		)
 		(sheetname "filter-clipper")
 		(sheetfile "filter-clipper.kicad_sch")
-		(attr through_hole)
+		(attr through_hole dnp)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
 			(start 1.04 0)
@@ -5663,7 +5663,7 @@
 		)
 		(sheetname "filter-clipper")
 		(sheetfile "filter-clipper.kicad_sch")
-		(attr smd)
+		(attr smd dnp)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
 			(start -1.61 -0.85)
@@ -6377,7 +6377,7 @@
 		)
 		(sheetname "filter-clipper")
 		(sheetfile "filter-clipper.kicad_sch")
-		(attr smd)
+		(attr smd dnp)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
 			(start -1.685 -0.96)

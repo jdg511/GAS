@@ -2232,6 +2232,16 @@
 		)
 		(uuid "66666666-6666-4666-8666-00000000001c")
 	)
+	(text "Rev A build (2026-08-01): ASYMMETRIC clipping.\nD401 D403 D405 D407 D409 D411 are DNP (crossed out) - pads stay on the PCB.\nRemaining diode in each pair clips the POSITIVE half only -> even + odd harmonics.\nPopulate the DNP pads to return any mode to symmetric clipping."
+		(exclude_from_sim no)
+		(at 254.0 12.7 0)
+		(effects
+			(font
+				(size 1.8 1.8)
+			)
+			(justify left top)
+		)
+	)
 	(text "Clip networks"
 		(exclude_from_sim no)
 		(at 154.94 15.24 0)
@@ -2770,7 +2780,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp no)
+		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "66666666-6666-4666-8666-000000000201")
 		(property "Reference" "D401"
@@ -2940,7 +2950,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp no)
+		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "66666666-6666-4666-8666-000000000203")
 		(property "Reference" "D403"
@@ -3110,7 +3120,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp no)
+		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "66666666-6666-4666-8666-000000000205")
 		(property "Reference" "D405"
@@ -3280,7 +3290,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp no)
+		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "66666666-6666-4666-8666-000000000207")
 		(property "Reference" "D407"
@@ -3450,7 +3460,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp no)
+		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "66666666-6666-4666-8666-000000000209")
 		(property "Reference" "D409"
@@ -3620,7 +3630,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp no)
+		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "66666666-6666-4666-8666-00000000020b")
 		(property "Reference" "D411"
@@ -4308,7 +4318,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "OPA1679"
+		(property "Value" "OPA1679IDR"
 			(at 119.38 194.31 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4392,7 +4402,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "OPA1679"
+		(property "Value" "OPA1679IDR"
 			(at 119.38 234.95 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4476,7 +4486,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "OPA1679"
+		(property "Value" "OPA1679IDR"
 			(at 119.38 274.32 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4560,7 +4570,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "OPA1679"
+		(property "Value" "OPA1679IDR"
 			(at 119.38 314.96 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4641,7 +4651,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "OPA1679"
+		(property "Value" "OPA1679IDR"
 			(at 119.38 354.33 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4725,7 +4735,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "OPA1679"
+		(property "Value" "OPA1679IDR"
 			(at 119.38 394.97 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4809,7 +4819,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "OPA1679"
+		(property "Value" "OPA1679IDR"
 			(at 119.38 434.34 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4893,7 +4903,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "OPA1679"
+		(property "Value" "OPA1679IDR"
 			(at 119.38 474.98 0)
 			(show_name no)
 			(do_not_autoplace no)
