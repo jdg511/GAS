@@ -264,3 +264,33 @@ Sonic consequence (see clipper_asymmetric_revA.png): even harmonics (2nd, 4th)
 now appear alongside the odd ones; a small DC shift arises when clipping hard —
 expect a soft thump on mode switches; a series output cap is the Rev B fix if
 it matters in practice. Returning any mode to symmetric = solder the DNP pads.
+
+---
+
+## Post-fill DRC sweep — 2026-08-05 (caught by Jason's file-consistency question)
+
+The original routing-day DRC runs happened while the AGND pours were UNFILLED, so
+thermal-relief checks could not run. Re-running DRC with fills present exposed
+**42 starved_thermal errors** across 5 boards (crossfade 5, ext-tank 13,
+filter-clipper 9, io-board 8, tank 7): ground pads reaching the plane through a
+single spoke, one via an isolated island. power-backplane was clean.
+
+**Fix:** both AGND pours on the five boards switched from thermal-relief to
+**solid pad connection** (`connect_pads yes`), zones refilled headlessly, boards
+saved. Post-fix: **0 DRC errors on all six boards**; only known cosmetic warnings
+remain (silk-over-copper; 8 text-format lib mismatches on the RCA jacks).
+Independent connectivity checker re-verified all five changed boards — every net
+complete, segment/via counts unchanged. Gerber zips in fab-RevA/ regenerated for
+the five changed boards (power-backplane zip unchanged).
+
+Note for hand-rework: solid plane connections sink more heat than thermal spokes —
+use a hotter iron / more dwell when reworking ground-connected THT pads.
+
+File-status ledger (what "final" means per file type):
+- .kicad_pcb / .kicad_sch / .kicad_pro / GAS_Parts.pretty / fp-lib-table: SOURCE
+  files, all current and committed.
+- fab-RevA/ (gerbers, drill, centroid, BOM, spec sheet): DELIVERABLES, regenerated
+  from final sources 2026-08-05.
+- *_drc_violations.json: reports, refreshed 2026-08-05 (gitignored, local only).
+- .dsn / .ses: one-shot autorouter exchange files from routing day. Not design
+  sources; never updated afterward by design; safe to delete.
