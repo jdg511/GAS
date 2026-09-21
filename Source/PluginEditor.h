@@ -78,10 +78,154 @@ public:
     }
 
 private:
-    juce::String titleText { "The Great American Spring reverb" };
+    juce::String titleText { "The Great American Spring reverb Rev C" };
     juce::String typefaceName { "Georgia" };
     juce::Colour textColour { juce::Colours::white };
     juce::Colour flourishColour { juce::Colours::white };
+};
+
+//==============================================================================
+/** A simple peak level meter, 0 dBFS down to the processor's meter floor.
+
+    The processor publishes a raw block peak; the ballistics live here so the
+    audio thread only does one atomic store. Rise is instant so transients are
+    never missed, fall is eased so the bar stays readable, and the last peak is
+    held briefly as a thin marker.
+*/
+class LevelMeter final : public juce::Component,
+                         public juce::SettableTooltipClient
+{
+public:
+    void setTrackColours (juce::Colour background, juce::Colour fill, juce::Colour outline, juce::Colour peakMarker)
+    {
+        trackColour = background;
+        barColour = fill;
+        borderColour = outline;
+        markerColour = peakMarker;
+        repaint();
+    }
+
+    /** Feed a fresh reading, in dBFS. Call from a timer, not the audio thread. */
+    void setLevelDb (float newLevelDb)
+    {
+        const auto clamped = juce::jlimit (floorDb, 6.0f, newLevelDb);
+
+        levelDb = clamped > levelDb ? clamped                       // instant attack
+                                    : levelDb + (clamped - levelDb) * 0.30f;
+
+        if (clamped >= peakDb)
+        {
+            peakDb = clamped;
+            peakHoldTicks = 22;
+        }
+        else if (peakHoldTicks > 0)
+        {
+            --peakHoldTicks;
+        }
+        else
+        {
+            peakDb += (clamped - peakDb) * 0.10f;
+        }
+
+        repaint();
+    }
+
+    void paint (juce::Graphics& g) override
+    {
+        auto bounds = getLocalBounds().toFloat();
+
+        g.setColour (trackColour);
+        g.fillRoundedRectangle (bounds, 2.0f);
+
+        const auto proportionFor = [this] (float db)
+        {
+            return juce::jlimit (0.0f, 1.0f, (juce::jmin (db, 0.0f) - floorDb) / (0.0f - floorDb));
+        };
+
+        auto bar = bounds.reduced (1.0f);
+        const auto fullWidth = bar.getWidth();
+
+        // Bar turns warm as it approaches full scale, so clipping is obvious.
+        const auto hot = levelDb > -6.0f;
+        g.setColour (hot ? barColour.contrasting (0.25f) : barColour);
+        g.fillRoundedRectangle (bar.withWidth (fullWidth * proportionFor (levelDb)), 1.5f);
+
+        if (peakDb > floorDb + 0.5f)
+        {
+            const auto x = bar.getX() + fullWidth * proportionFor (peakDb);
+            g.setColour (markerColour);
+            g.fillRect (juce::Rectangle<float> (juce::jmin (x, bar.getRight() - 1.5f), bar.getY(), 1.5f, bar.getHeight()));
+        }
+
+        g.setColour (borderColour);
+        g.drawRoundedRectangle (bounds.reduced (0.5f), 2.0f, 1.0f);
+    }
+
+private:
+    float floorDb = -48.0f;
+    float levelDb = -48.0f;
+    float peakDb = -48.0f;
+    int   peakHoldTicks = 0;
+
+    juce::Colour trackColour { juce::Colours::black.withAlpha (0.35f) };
+    juce::Colour barColour { juce::Colours::orange };
+    juce::Colour borderColour { juce::Colours::white.withAlpha (0.4f) };
+    juce::Colour markerColour { juce::Colours::white };
+};
+
+//==============================================================================
+/** A rotary knob with a pull-out switch, like a push-pull pot on the board.
+
+    Drag turns it as usual. A plain click (press and release without dragging)
+    pulls the knob out or pushes it back in, which toggles the attached bool
+    parameter. The pulled state is drawn by the LookAndFeel from the "pulled"
+    property so the knob visibly sits proud of the panel when engaged.
+*/
+class PullKnobSlider final : public juce::Slider
+{
+public:
+    std::function<void()> onPullToggle;
+
+    void setPulled (bool shouldBePulled)
+    {
+        if (pulled == shouldBePulled)
+            return;
+
+        pulled = shouldBePulled;
+        getProperties().set ("pulled", pulled);
+        repaint();
+    }
+
+    bool isPulled() const noexcept { return pulled; }
+
+    void mouseDown (const juce::MouseEvent& e) override
+    {
+        dragged = false;
+        juce::Slider::mouseDown (e);
+    }
+
+    void mouseDrag (const juce::MouseEvent& e) override
+    {
+        if (e.getDistanceFromDragStart() > 3)
+            dragged = true;
+
+        juce::Slider::mouseDrag (e);
+    }
+
+    void mouseUp (const juce::MouseEvent& e) override
+    {
+        juce::Slider::mouseUp (e);
+
+        if (! dragged && e.mods.isLeftButtonDown() && onPullToggle != nullptr
+            && getLocalBounds().withTrimmedBottom (getTextBoxHeight()).contains (e.getPosition()))
+        {
+            onPullToggle();
+        }
+    }
+
+private:
+    bool pulled = false;
+    bool dragged = false;
 };
 
 class TheGreatAmericanSpringAudioProcessorEditor final : public juce::AudioProcessorEditor,
@@ -102,8 +246,26 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
+    // The UI is authored once at this fixed logical size and then scaled to
+    // whatever the window is dragged to, so nothing is ever clipped.
+    static constexpr int baseEditorWidth = 920;
+    // Rev C added the Tube / Dirt / Tape switch row (28 px + 8 px pad), so both heights grew by 36.
+    static constexpr int baseCollapsedHeight = 730;
+    static constexpr int baseExpandedHeight = 936;
+    static constexpr double minEditorScale = 0.75;
+    static constexpr double maxEditorScale = 2.50;
+
 private:
     using TankSlot = TheGreatAmericanSpringAudioProcessor::TankSlot;
+
+    // Lays the controls out inside `content` at the fixed logical size. The
+    // editor's own resized() only picks the scale factor.
+    void layoutContent();
+    void updateSizeLimits();
+    void applyEditorScale (double newScale);
+    double readStoredEditorScale() const;
+    void storeEditorScale (double scale) const;
+    static double defaultEditorScaleForDisplay();
 
     void configureRotarySlider (juce::Slider& slider,
                                 juce::Label& label,
@@ -120,22 +282,50 @@ private:
     void refreshThemeButtons();
     void refreshLogoButton();
     void refreshOptionControls();
+    void refreshPullStates();
+    void refreshChainReadout();
+    void configurePullKnob (PullKnobSlider& slider, const juce::String& parameterID);
     void updateExpandedTankControlsAnimation();
     void changeListenerCallback (juce::ChangeBroadcaster* source) override;
     void timerCallback() override;
 
     TheGreatAmericanSpringAudioProcessor& audioProcessor;
 
+    // Declared before every control so it outlives them on destruction.
+    // Everything visible lives inside this component; it carries the scale
+    // transform. Clicks pass straight through to its children.
+    juce::Component content;
+    juce::ComponentBoundsConstrainer sizeConstrainer;
+    double editorScale = 1.0;
+
     ArtNouveauTitle titleComponent;
     juce::Label subtitleLabel;
-    juce::Label modeLabel;
-    juce::ComboBox modeComboBox;
+    juce::Label chainDescriptionLabel;
     juce::Label ir2RoutingLabel;
     juce::ComboBox ir2RoutingComboBox;
     juce::Label feedbackPhaseLabel;
     juce::ToggleButton feedbackPhaseNormalButton;
     juce::ToggleButton feedbackPhaseInvertButton;
-    juce::ToggleButton monoSourceToStereoButton;
+    juce::Label dynamicsLabel;
+    juce::ToggleButton dynamicsCompButton;
+    juce::ToggleButton dynamicsOffButton;
+    juce::ToggleButton dynamicsLimitButton;
+    juce::Label stereoModeLabel;
+    juce::ToggleButton stereoButton;
+    juce::ToggleButton monoToStereoButton;
+    juce::ToggleButton megaverbButton;
+
+    // Rev C panel switch row. The Vol / Gain / Output pulls became three mini toggles on the
+    // control deck (TUBE, DIRT, TAPE), so the plugin shows them as two-position switches too.
+    juce::Label tubeSwitchLabel;
+    juce::ToggleButton tubeOffButton;
+    juce::ToggleButton tubeOnButton;
+    juce::Label dirtSwitchLabel;
+    juce::ToggleButton dirtOffButton;
+    juce::ToggleButton dirtOnButton;
+    juce::Label tapeSwitchLabel;
+    juce::ToggleButton tapeOffButton;
+    juce::ToggleButton tapeOnButton;
     juce::ToggleButton showUnavailableTankControlsButton;
     juce::Label themeLabel;
     juce::ToggleButton solarThemeButton;
@@ -145,24 +335,33 @@ private:
     juce::Label presetLabel;
     juce::ComboBox presetComboBox;
 
-    juce::Label driveLabel;
-    juce::Slider driveSlider;
+    juce::Label preInputLevelLabel;
+    juce::Slider preInputLevelSlider;
+    juce::Label inputLevelLabel;
+    PullKnobSlider inputLevelSlider;      // Vol, pull for Tube
+    juce::Label gainLabel;
+    PullKnobSlider gainSlider;            // Gain, pull for Dirt
     juce::Label preHpfCutoffLabel;
     juce::Slider preHpfCutoffSlider;
-    juce::Label preHpfResonanceLabel;
-    juce::Slider preHpfResonanceSlider;
     juce::Label postLpfCutoffLabel;
     juce::Slider postLpfCutoffSlider;
-    juce::Label postLpfResonanceLabel;
-    juce::Slider postLpfResonanceSlider;
-    juce::Label crossfadeAmountLabel;
-    juce::Slider crossfadeAmountSlider;
     juce::Label extTankMixLabel;
     juce::Slider extTankMixSlider;
     juce::Label feedbackAmountLabel;
     juce::Slider feedbackAmountSlider;
     juce::Label wetDryLabel;
     juce::Slider wetDrySlider;
+    juce::Label outputLevelLabel;
+    PullKnobSlider outputLevelSlider;     // Output, pull for Tape
+    juce::Label postOutputLevelLabel;
+    juce::Slider postOutputLevelSlider;
+
+    juce::Label inputMeterLabel;
+    LevelMeter inputMeter;
+    juce::Label wetMeterLabel;
+    LevelMeter wetMeter;
+    juce::Label outputMeterLabel;
+    LevelMeter outputMeter;
 
     juce::GroupComponent leftTankGroup;
     juce::Label leftTankLabel;
@@ -185,18 +384,17 @@ private:
     juce::TextButton loadPlaybackButton;
     juce::TextButton playbackToggleButton;
 
-    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> modeAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> ir2RoutingAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> driveAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> gainAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> preInputLevelAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> postOutputLevelAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> preHpfCutoffAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> preHpfResonanceAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> postLpfCutoffAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> postLpfResonanceAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> crossfadeAmountAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> extTankMixAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> feedbackAmountAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> wetDryAttachment;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> monoSourceToStereoAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> inputLevelAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> outputLevelAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> showUnavailableTankControlsAttachment;
     std::unique_ptr<juce::LookAndFeel_V4> lookAndFeel;
     std::unique_ptr<juce::FileChooser> activeChooser;

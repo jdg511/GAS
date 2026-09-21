@@ -36,10 +36,38 @@ struct EmbeddedPlaybackSource
 
 const auto& getEmbeddedPlaybackSources()
 {
-    static const std::array<EmbeddedPlaybackSource, 3> sources {{
+    static const std::array<EmbeddedPlaybackSource, 30> sources {{
         { "Make Reverb Great Again-mono.mp3", BinaryData::Make_Reverb_Great_Againmono_mp3, BinaryData::Make_Reverb_Great_Againmono_mp3Size },
         { "Its a Shame-stereo.mp3", BinaryData::Its_a_Shamestereo_mp3, BinaryData::Its_a_Shamestereo_mp3Size },
-        { "Zombie Remix-stereo.mp3", BinaryData::Zombie_Remixstereo_mp3, BinaryData::Zombie_Remixstereo_mp3Size }
+        { "Zombie Remix-stereo.mp3", BinaryData::Zombie_Remixstereo_mp3, BinaryData::Zombie_Remixstereo_mp3Size },
+        // NAM rig demo clips (guitar and bass, added 2026-09-12)
+        { "arpeggio-deluxe-clean.mp3", BinaryData::arpeggiodeluxeclean_mp3, BinaryData::arpeggiodeluxeclean_mp3Size },
+        { "arpeggio-dirty-punk.mp3", BinaryData::arpeggiodirtypunk_mp3, BinaryData::arpeggiodirtypunk_mp3Size },
+        { "arpeggio-iconic-cleanish.mp3", BinaryData::arpeggioiconiccleanish_mp3, BinaryData::arpeggioiconiccleanish_mp3Size },
+        { "arpeggio-quick-clean.mp3", BinaryData::arpeggioquickclean_mp3, BinaryData::arpeggioquickclean_mp3Size },
+        { "arpeggio-warm-crunch.mp3", BinaryData::arpeggiowarmcrunch_mp3, BinaryData::arpeggiowarmcrunch_mp3Size },
+        { "finger-bass-bite.mp3", BinaryData::fingerbassbite_mp3, BinaryData::fingerbassbite_mp3Size },
+        { "finger-bass-clean-bright.mp3", BinaryData::fingerbasscleanbright_mp3, BinaryData::fingerbasscleanbright_mp3Size },
+        { "finger-bass-growl.mp3", BinaryData::fingerbassgrowl_mp3, BinaryData::fingerbassgrowl_mp3Size },
+        { "finger-bass-nice-warm.mp3", BinaryData::fingerbassnicewarm_mp3, BinaryData::fingerbassnicewarm_mp3Size },
+        { "metal-5150.mp3", BinaryData::metal5150_mp3, BinaryData::metal5150_mp3Size },
+        { "metal-blackstar.mp3", BinaryData::metalblackstar_mp3, BinaryData::metalblackstar_mp3Size },
+        { "metal-dualrec.mp3", BinaryData::metaldualrec_mp3, BinaryData::metaldualrec_mp3Size },
+        { "pick-bass-bite.mp3", BinaryData::pickbassbite_mp3, BinaryData::pickbassbite_mp3Size },
+        { "pick-bass-clean-bright.mp3", BinaryData::pickbasscleanbright_mp3, BinaryData::pickbasscleanbright_mp3Size },
+        { "pick-bass-growl.mp3", BinaryData::pickbassgrowl_mp3, BinaryData::pickbassgrowl_mp3Size },
+        { "pick-bass-metalcore.mp3", BinaryData::pickbassmetalcore_mp3, BinaryData::pickbassmetalcore_mp3Size },
+        { "pick-bass-rock-classic.mp3", BinaryData::pickbassrockclassic_mp3, BinaryData::pickbassrockclassic_mp3Size },
+        { "power-chords-classic-hi-gain.mp3", BinaryData::powerchordsclassichigain_mp3, BinaryData::powerchordsclassichigain_mp3Size },
+        { "power-chords-iconic-cleanish.mp3", BinaryData::powerchordsiconiccleanish_mp3, BinaryData::powerchordsiconiccleanish_mp3Size },
+        { "power-chords-plexi.mp3", BinaryData::powerchordsplexi_mp3, BinaryData::powerchordsplexi_mp3Size },
+        { "power-chords-punk-rock-rhythm.mp3", BinaryData::powerchordspunkrockrhythm_mp3, BinaryData::powerchordspunkrockrhythm_mp3Size },
+        { "rhythm-chords-ac30-crunch.mp3", BinaryData::rhythmchordsac30crunch_mp3, BinaryData::rhythmchordsac30crunch_mp3Size },
+        { "rhythm-chords-fender-clean.mp3", BinaryData::rhythmchordsfenderclean_mp3, BinaryData::rhythmchordsfenderclean_mp3Size },
+        { "rhythm-chords-suhr-clean.mp3", BinaryData::rhythmchordssuhrclean_mp3, BinaryData::rhythmchordssuhrclean_mp3Size },
+        { "solo-diezel.mp3", BinaryData::solodiezel_mp3, BinaryData::solodiezel_mp3Size },
+        { "solo-fortin.mp3", BinaryData::solofortin_mp3, BinaryData::solofortin_mp3Size },
+        { "solo-mesa.mp3", BinaryData::solomesa_mp3, BinaryData::solomesa_mp3Size }
     }};
 
     return sources;
@@ -142,6 +170,13 @@ void TheGreatAmericanSpringAudioProcessor::prepareToPlay (double sampleRate, int
 
     resizeProcessingBuffers (currentMaximumBlockSize);
 
+    // 30 ms ramp: fast enough to feel immediate on the knob, slow enough that
+    // a full-range jump stays click-free.
+    for (auto* smoothed : { &preInputGainSmoothed, &inputGainSmoothed, &outputGainSmoothed, &postOutputGainSmoothed })
+        smoothed->reset (sampleRate, 0.03);
+
+    resetLevelSmoothers();
+
     juce::dsp::ProcessSpec monoSpec;
     monoSpec.sampleRate = sampleRate;
     monoSpec.maximumBlockSize = static_cast<juce::uint32> (currentMaximumBlockSize);
@@ -182,6 +217,8 @@ void TheGreatAmericanSpringAudioProcessor::reset()
     for (int lane = 0; lane < 4; ++lane)
         predelayMsSmoothed[lane].setCurrentAndTargetValue (predelayTargetMs[lane]);
     lastIr2RoutingMode = getIr2RoutingMode();
+    lastStereoMode = getStereoMode();
+    resetLevelSmoothers();
 
     externalInputBuffer.clear();
     dryTapBuffer.clear();
@@ -220,18 +257,52 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
 
     buildExternalInput (buffer, numSamples);
 
-    // The plugin always stays on its stereo processing path.
-    // The optional mono-to-stereo toggle is handled when copying mono input in buildExternalInput().
+    // Pre Input (plugin only, not on the PCB): the very first gain stage, ahead
+    // of the dry / wet split, so both the host input and the built-in playback
+    // source are trimmed before anything else sees them.
+    preInputGainSmoothed.setTargetValue (
+        juce::Decibels::decibelsToGain (parameters.getRawParameterValue (preInputLevelParameterID)->load()));
+    applySmoothedGain (externalInputBuffer, preInputGainSmoothed, numSamples);
+
     lastMonoSourceWithoutStereoConversion.store (false, std::memory_order_relaxed);
 
+    const auto stereoMode = getStereoMode();
+
+    if (stereoMode != lastStereoMode)
+    {
+        // Switching Stereo / Mono > Stereo / MEGAVERB re-routes the feedback,
+        // so flush the loop rather than let the old recirculation cross over.
+        feedbackReturnBuffer.clear();
+        chain.feedback.reset();
+        lastStereoMode = stereoMode;
+    }
+
+    // Dry tap is split off here, straight after Pre Input. Everything below is
+    // the wet path until the Wet/Dry mixer.
     dryTapBuffer.copyFrom (0, 0, externalInputBuffer, 0, 0, numSamples);
     dryTapBuffer.copyFrom (1, 0, externalInputBuffer, 1, 0, numSamples);
 
+    // Vol (Solid State / Tube): the board's first knob on the wet path. The pot
+    // stage sets the level into the tube, so the knob is also the tube's drive.
+    const auto inputTube = isInputTubeEngaged();
+    const auto outputTape = isOutputTapeEngaged();
     wetInputBaseBuffer.copyFrom (0, 0, externalInputBuffer, 0, 0, numSamples);
     wetInputBaseBuffer.copyFrom (1, 0, externalInputBuffer, 1, 0, numSamples);
+    inputGainSmoothed.setTargetValue (
+        juce::Decibels::decibelsToGain (parameters.getRawParameterValue (inputLevelParameterID)->load()));
+    applySmoothedGain (wetInputBaseBuffer, inputGainSmoothed, numSamples);
+
+    chain.inputStage.setEnabled (inputTube, false);
+    chain.inputStage.process (wetInputBaseBuffer, numSamples);
+    sanitizeBuffer (wetInputBaseBuffer, numSamples);
+
+    // Input meter: straight after the Solid State / Tube knob.
+    inputMeterPeak.store (wetInputBaseBuffer.getMagnitude (0, numSamples), std::memory_order_relaxed);
 
     wetInputBaseBuffer.addFrom (0, 0, feedbackReturnBuffer, 0, 0, numSamples);
     wetInputBaseBuffer.addFrom (1, 0, feedbackReturnBuffer, 1, 0, numSamples);
+
+    chain.dirtDynamics.setParameters (getDirtDynamicsParameters());
 
     updatePredelayModulation (numSamples);
     applyWetPredelay (numSamples);
@@ -287,9 +358,9 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
         applySecondaryTankPredelay (monoLeftBuffer, secondaryLeftTankPredelay, predelayModulationBuffer.getReadPointer (3), numSamples);
         applySecondaryTankPredelay (monoRightBuffer, secondaryRightTankPredelay, predelayModulationBuffer.getReadPointer (4), numSamples);
 
-        // +12 dB makeup gain between the two tanks (Series only) to compensate
+        // +6 dB makeup gain between the two tanks (Series only) to compensate
         // for the level drop from cascading the second reverb tank.
-        const float interTankGain = juce::Decibels::decibelsToGain (12.0f);
+        const float interTankGain = juce::Decibels::decibelsToGain (6.0f);
         monoLeftBuffer.applyGain  (0, 0, numSamples, interTankGain);
         monoRightBuffer.applyGain (0, 0, numSamples, interTankGain);
 
@@ -309,18 +380,18 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
     wetStereoBuffer.copyFrom (0, 0, monoLeftBuffer, 0, 0, numSamples);
     wetStereoBuffer.copyFrom (1, 0, monoRightBuffer, 0, 0, numSamples);
 
-    chain.stereoTankCrossfade.setCrossfadeAmount (
-        parameters.getRawParameterValue (crossfadeAmountParameterID)->load());
-
-    chain.stereoTankCrossfade.process (wetStereoBuffer, numSamples);
-
-    chain.filterClipper.setParameters (getFilterClipperParameters());
-    chain.filterClipper.process (wetStereoBuffer, numSamples);
+    // Gain (pull for Dirt) + Comp / Off / Limit: wet path only, after the tanks
+    // and before the feedback block, where the Rev B mode circuit sat.
+    chain.dirtDynamics.process (wetStereoBuffer, numSamples);
     sanitizeBuffer (wetStereoBuffer, numSamples);
+
+    // Wet meter: straight after the circuit, just before the feedback path.
+    wetMeterPeak.store (wetStereoBuffer.getMagnitude (0, numSamples), std::memory_order_relaxed);
 
     chain.feedback.setFeedbackAmount (
         parameters.getRawParameterValue (feedbackAmountParameterID)->load());
     chain.feedback.setFeedbackPhaseInverted (isFeedbackPhaseInverted());
+    chain.feedback.setCrossCoupled (stereoMode == StereoMode::megaverb);
 
     chain.feedback.process (wetStereoBuffer,
                             wetAfterFeedbackBuffer,
@@ -338,7 +409,70 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
                                buffer,
                                numSamples);
 
+    // Output (pull for Tape): the board's last knob. The pot stage drives the
+    // output circuits: the tube first when Vol is pulled, then the tape.
+    outputGainSmoothed.setTargetValue (
+        juce::Decibels::decibelsToGain (parameters.getRawParameterValue (outputLevelParameterID)->load()));
+    applySmoothedGain (buffer, outputGainSmoothed, numSamples);
+
+    if (buffer.getNumChannels() >= 2)
+    {
+        chain.outputStage.setEnabled (inputTube, outputTape);
+        chain.outputStage.process (buffer, numSamples);
+    }
+    else
+    {
+        // Mono host bus: run the stage on a stereo scratch copy.
+        wetAfterFeedbackBuffer.copyFrom (0, 0, buffer, 0, 0, numSamples);
+        wetAfterFeedbackBuffer.copyFrom (1, 0, buffer, 0, 0, numSamples);
+        chain.outputStage.setEnabled (inputTube, outputTape);
+        chain.outputStage.process (wetAfterFeedbackBuffer, numSamples);
+        buffer.copyFrom (0, 0, wetAfterFeedbackBuffer, 0, 0, numSamples);
+    }
+
+    // Post Output (plugin only, not on the PCB).
+    postOutputGainSmoothed.setTargetValue (
+        juce::Decibels::decibelsToGain (parameters.getRawParameterValue (postOutputLevelParameterID)->load()));
+    applySmoothedGain (buffer, postOutputGainSmoothed, numSamples);
+
     sanitizeBuffer (buffer, numSamples);
+
+    // Output meter: the absolute last thing before audio leaves the plugin.
+    outputMeterPeak.store (buffer.getMagnitude (0, numSamples), std::memory_order_relaxed);
+}
+
+void TheGreatAmericanSpringAudioProcessor::resetLevelSmoothers()
+{
+    preInputGainSmoothed.setCurrentAndTargetValue (
+        juce::Decibels::decibelsToGain (parameters.getRawParameterValue (preInputLevelParameterID)->load()));
+    inputGainSmoothed.setCurrentAndTargetValue (
+        juce::Decibels::decibelsToGain (parameters.getRawParameterValue (inputLevelParameterID)->load()));
+    outputGainSmoothed.setCurrentAndTargetValue (
+        juce::Decibels::decibelsToGain (parameters.getRawParameterValue (outputLevelParameterID)->load()));
+    postOutputGainSmoothed.setCurrentAndTargetValue (
+        juce::Decibels::decibelsToGain (parameters.getRawParameterValue (postOutputLevelParameterID)->load()));
+}
+
+void TheGreatAmericanSpringAudioProcessor::applySmoothedGain (juce::AudioBuffer<float>& target,
+                                                                juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear>& smoothedGain,
+                                                                int numSamples)
+{
+    // Per-sample only while the ramp is actually moving; a settled knob falls
+    // through to a single vectorised applyGain.
+    if (smoothedGain.isSmoothing())
+    {
+        for (int sample = 0; sample < numSamples; ++sample)
+        {
+            const auto gain = smoothedGain.getNextValue();
+
+            for (int channel = 0; channel < target.getNumChannels(); ++channel)
+                target.getWritePointer (channel)[sample] *= gain;
+        }
+    }
+    else
+    {
+        target.applyGain (0, numSamples, smoothedGain.getTargetValue());
+    }
 }
 
 bool TheGreatAmericanSpringAudioProcessor::hasEditor() const
@@ -378,13 +512,7 @@ void TheGreatAmericanSpringAudioProcessor::setStateInformation (const void* data
 
         if (restoredState.hasType (parameters.state.getType()))
         {
-            const auto restoredIr2Routing = restoredState.getProperty (x2TanksParameterID);
-
-            if (restoredIr2Routing.isBool())
-                restoredState.setProperty (x2TanksParameterID,
-                                           static_cast<bool> (restoredIr2Routing) ? 2 : 0,
-                                           nullptr);
-
+            migrateLegacyState (restoredState);
             parameters.replaceState (restoredState);
             applyDefaultGasSettings();
 
@@ -480,19 +608,68 @@ bool TheGreatAmericanSpringAudioProcessor::isFeedbackPhaseInverted() const
     return parameters.getRawParameterValue (feedbackPhaseInvertParameterID)->load() >= 0.5f;
 }
 
+TheGreatAmericanSpringAudioProcessor::StereoMode TheGreatAmericanSpringAudioProcessor::getStereoMode() const
+{
+    return toStereoMode (parameters.getRawParameterValue (stereoModeParameterID)->load());
+}
+
 bool TheGreatAmericanSpringAudioProcessor::shouldConvertMonoSourceToStereo() const
 {
-    return parameters.getRawParameterValue (monoSourceToStereoParameterID)->load() >= 0.5f;
+    return getStereoMode() == StereoMode::monoToStereo;
+}
+
+bool TheGreatAmericanSpringAudioProcessor::isMegaverbEngaged() const
+{
+    return getStereoMode() == StereoMode::megaverb;
+}
+
+bool TheGreatAmericanSpringAudioProcessor::isInputTubeEngaged() const
+{
+    return parameters.getRawParameterValue (inputTubeParameterID)->load() >= 0.5f;
+}
+
+bool TheGreatAmericanSpringAudioProcessor::isOutputTapeEngaged() const
+{
+    return parameters.getRawParameterValue (outputTapeParameterID)->load() >= 0.5f;
+}
+
+bool TheGreatAmericanSpringAudioProcessor::isDirtEngaged() const
+{
+    return parameters.getRawParameterValue (dirtParameterID)->load() >= 0.5f;
+}
+
+TheGreatAmericanSpringAudioProcessor::Dynamics TheGreatAmericanSpringAudioProcessor::getDynamics() const
+{
+    return toDynamics (parameters.getRawParameterValue (dynamicsParameterID)->load());
+}
+
+juce::String TheGreatAmericanSpringAudioProcessor::getSignalChainDescription() const
+{
+    juce::StringArray stages;
+    stages.add (isInputTubeEngaged() ? "Vol: J201 tube stage" : "Vol: solid state");
+    stages.add (isMegaverbEngaged() ? "tanks (MEGAVERB: L>R>L feedback)"
+              : shouldConvertMonoSourceToStereo() ? "tanks (mono > stereo)" : "tanks (stereo)");
+    stages.add (isDirtEngaged() ? "Gain: TS808 2x 1N4148" : "Gain: clean");
+
+    switch (getDynamics())
+    {
+        case Dynamics::comp:  stages.add ("Comp: VTL5C3 vactrol"); break;
+        case Dynamics::limit: stages.add ("Limit: THAT2180 10:1"); break;
+        case Dynamics::off:
+        default:              stages.add ("dynamics off"); break;
+    }
+
+    juce::StringArray output;
+    if (isInputTubeEngaged()) output.add ("tube");
+    if (isOutputTapeEngaged()) output.add ("2N3904 tape");
+    stages.add ("Output: " + (output.isEmpty() ? juce::String ("solid state") : output.joinIntoString (" > ")));
+
+    return stages.joinIntoString ("  >  ");
 }
 
 bool TheGreatAmericanSpringAudioProcessor::shouldShowUnavailableTankControls() const
 {
     return parameters.getRawParameterValue (showUnavailableTankControlsParameterID)->load() >= 0.5f;
-}
-
-bool TheGreatAmericanSpringAudioProcessor::isCrossfadeAvailableForCurrentLayout() const
-{
-    return ! isMonoSourceWithoutStereoConversion();
 }
 
 juce::String TheGreatAmericanSpringAudioProcessor::getIr2RoutingDisplayName() const
@@ -565,7 +742,20 @@ juce::StringArray TheGreatAmericanSpringAudioProcessor::getPlaybackSourceDisplay
     juce::StringArray names;
 
     for (const auto& source : getEmbeddedPlaybackSources())
-        names.add (juce::File (juce::String (source.displayPath)).getFileName());
+    {
+        // Show "power-chords-plexi.mp3" as "Power Chords Plexi": drop the
+        // extension, turn hyphens into spaces, capitalise each word.
+        auto name = juce::File (juce::String (source.displayPath)).getFileNameWithoutExtension()
+                        .replaceCharacter ('-', ' ').replaceCharacter ('_', ' ');
+        juce::StringArray words;
+        words.addTokens (name, " ", "");
+        words.removeEmptyStrings();
+
+        for (auto& word : words)
+            word = word.substring (0, 1).toUpperCase() + word.substring (1);
+
+        names.add (words.joinIntoString (" "));
+    }
 
     return names;
 }
@@ -604,44 +794,78 @@ juce::String TheGreatAmericanSpringAudioProcessor::getPlaybackFileDisplayName() 
     return juce::File (playbackFilePath).getFileName();
 }
 
+namespace
+{
+    /*  Rev C hardware convention (2026-09-21): both filter pots LOWER their corner frequency as the
+        knob turns clockwise.  On the filter-pot riser each gang ties its CW end to the wiper, so the
+        resistance in circuit rises clockwise, and in both Sallen-Key sections more resistance means a
+        lower corner.  Clockwise therefore means less bass cut on the HPF and darker on the LPF.
+
+        A JUCE rotary slider always runs its minimum at full counter-clockwise and its maximum at full
+        clockwise, so to make the plugin turn the same way as the panel we reverse the normalised
+        mapping: normalised 0 (full CCW) is the TOP of the frequency range and normalised 1 (full CW)
+        is the bottom.  The parameter's value is still plain Hz, and the skewed feel of the original
+        range is preserved, just mirrored.  */
+    juce::NormalisableRange<float> reversedCutoffRange (float lo, float hi, float skew)
+    {
+        const juce::NormalisableRange<float> forward (lo, hi, 0.01f, skew);
+
+        return juce::NormalisableRange<float> (
+            lo, hi,
+            [forward] (float, float, float norm)  { return forward.convertFrom0to1 (1.0f - norm); },
+            [forward] (float, float, float value) { return 1.0f - forward.convertTo0to1 (value); },
+            [forward] (float, float, float value) { return forward.snapToLegalValue (value); });
+    }
+}
+
 juce::AudioProcessorValueTreeState::ParameterLayout TheGreatAmericanSpringAudioProcessor::createParameterLayout()
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
 
-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { crossfadeAmountParameterID, 1 },
-                                                              "Crossfade Amount",
-                                                              juce::NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
-                                                              0.2f));
+    // Every level knob is the same +/-18 dB pot stage, linear in dB, unity at centre.
+    const auto levelRange = juce::NormalisableRange<float> (levelMinDb, levelMaxDb, 0.1f);
 
-    layout.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { modeParameterID, 1 },
-                                                               "Mode",
-                                                               juce::StringArray { "Clean", "Silicon", "LED", "Germanium" },
-                                                               0));
+    // Plugin only (not on the PCB): the very first gain stage.
+    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { preInputLevelParameterID, 1 },
+                                                              "Pre Input",
+                                                              levelRange,
+                                                              0.0f));
 
-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { driveParameterID, 1 },
-                                                              "Drive",
-                                                              juce::NormalisableRange<float> (0.0f, 30.0f, 0.01f),
-                                                              6.0f));
+    // Vol (Solid State / Tube): first knob on the wet path. Rev C moved the pull onto its own
+    // TUBE mini toggle in the panel's switch row, so this is a plain knob plus a separate switch.
+    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { inputLevelParameterID, 2 },
+                                                              "Vol",
+                                                              levelRange,
+                                                              0.0f));
+
+    layout.add (std::make_unique<juce::AudioParameterBool> (juce::ParameterID { inputTubeParameterID, 1 },
+                                                            "Tube",
+                                                            false));
+
+    // Gain: level into the Tube Screamer and the Comp / Limit circuit. Rev C: DIRT is its own toggle.
+    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { gainParameterID, 1 },
+                                                              "Gain",
+                                                              levelRange,
+                                                              0.0f));
+
+    layout.add (std::make_unique<juce::AudioParameterBool> (juce::ParameterID { dirtParameterID, 1 },
+                                                            "Dirt",
+                                                            false));
+
+    layout.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { dynamicsParameterID, 1 },
+                                                               "Feedback Dynamics",
+                                                               DirtDynamicsBlock::getDynamicsNames(),
+                                                               1));   // Off
 
     layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { preHpfCutoffParameterID, 1 },
                                                               "HPF Cutoff",
-                                                              juce::NormalisableRange<float> (1.0f, 4000.0f, 0.01f, 0.35f),
+                                                              reversedCutoffRange (1.0f, 4000.0f, 0.35f),
                                                               120.0f));
-
-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { preHpfResonanceParameterID, 1 },
-                                                              "HPF Q",
-                                                              juce::NormalisableRange<float> (0.25f, 8.0f, 0.001f, 0.5f),
-                                                              0.707f));
 
     layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { postLpfCutoffParameterID, 1 },
                                                               "LPF Cutoff",
-                                                              juce::NormalisableRange<float> (500.0f, 20000.0f, 0.01f, 0.35f),
+                                                              reversedCutoffRange (500.0f, 20000.0f, 0.35f),
                                                               16000.0f));
-
-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { postLpfResonanceParameterID, 1 },
-                                                              "LPF Q",
-                                                              juce::NormalisableRange<float> (0.25f, 8.0f, 0.001f, 0.5f),
-                                                              0.707f));
 
     layout.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { x2TanksParameterID, 1 },
                                                                "Ext Reverb Tanks",
@@ -667,9 +891,26 @@ juce::AudioProcessorValueTreeState::ParameterLayout TheGreatAmericanSpringAudioP
                                                               juce::NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
                                                               0.5f));
 
-    layout.add (std::make_unique<juce::AudioParameterBool> (juce::ParameterID { monoSourceToStereoParameterID, 1 },
-                                                            "Mono Source To Stereo",
+    // Output: the board's last knob, after the Wet/Dry mix. Rev C: TAPE is its own toggle.
+    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { outputLevelParameterID, 2 },
+                                                              "Output",
+                                                              levelRange,
+                                                              0.0f));
+
+    layout.add (std::make_unique<juce::AudioParameterBool> (juce::ParameterID { outputTapeParameterID, 1 },
+                                                            "Tape",
                                                             false));
+
+    // Plugin only (not on the PCB): the very last gain stage.
+    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { postOutputLevelParameterID, 1 },
+                                                              "Post Output",
+                                                              levelRange,
+                                                              0.0f));
+
+    layout.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { stereoModeParameterID, 1 },
+                                                               "Source",
+                                                               juce::StringArray { "Stereo", "Mono > Stereo", "MEGAVERB" },
+                                                               0));
 
     layout.add (std::make_unique<juce::AudioParameterBool> (juce::ParameterID { showUnavailableTankControlsParameterID, 1 },
                                                             "Will not be available in real life",
@@ -756,40 +997,48 @@ void TheGreatAmericanSpringAudioProcessor::setParameterPlainValue (const juce::S
 
 void TheGreatAmericanSpringAudioProcessor::applyDefaultGasSettings()
 {
-    // "GBS default" preset
-    setParameterPlainValue (modeParameterID, 0.0f);                 // Clean
-    setParameterPlainValue (driveParameterID, 6.0f);                // 6 dB
+    // "GBS default" preset: everything solid state, dynamics off
+    setParameterPlainValue (preInputLevelParameterID, 0.0f);
+    setParameterPlainValue (inputTubeParameterID, 0.0f);
+    setParameterPlainValue (gainParameterID, 0.0f);
+    setParameterPlainValue (dirtParameterID, 0.0f);
+    setParameterPlainValue (dynamicsParameterID, 1.0f);             // Off
+    setParameterPlainValue (outputTapeParameterID, 0.0f);
+    setParameterPlainValue (postOutputLevelParameterID, 0.0f);
+    setParameterPlainValue (stereoModeParameterID, 0.0f);           // Stereo
     setParameterPlainValue (preHpfCutoffParameterID, 100.0f);       // 100 Hz
-    setParameterPlainValue (preHpfResonanceParameterID, 1.0f);      // Q = 1
     setParameterPlainValue (postLpfCutoffParameterID, 12000.0f);    // 12 kHz
-    setParameterPlainValue (postLpfResonanceParameterID, 1.0f);     // Q = 1
     setParameterPlainValue (x2TanksParameterID, 0.0f);              // Ext Reverb Tanks: Off
     setParameterPlainValue (extTankMixParameterID, 1.0f);           // 100%
-    setParameterPlainValue (crossfadeAmountParameterID, 0.0f);      // 0
     setParameterPlainValue (feedbackAmountParameterID, 0.1f);       // 10%
     setParameterPlainValue (feedbackPhaseInvertParameterID, 0.0f);  // Normal
     setParameterPlainValue (wetDryParameterID, 0.5f);               // 50%
-    setParameterPlainValue (monoSourceToStereoParameterID, 0.0f);
+    setParameterPlainValue (inputLevelParameterID, 0.0f);           // 0 dB (unity)
+    setParameterPlainValue (outputLevelParameterID, 0.0f);          // 0 dB (unity)
     setParameterPlainValue (showUnavailableTankControlsParameterID, 0.0f);
     assignDefaultTankIRs();
 }
 
 void TheGreatAmericanSpringAudioProcessor::applyGasPresetSettings()
 {
-    // "GAS default" preset — same as GBS except where noted
-    setParameterPlainValue (modeParameterID, 3.0f);                 // Germanium
-    setParameterPlainValue (driveParameterID, 6.0f);                // 6 dB
+    // "GAS default" preset: same as GBS except where noted
+    setParameterPlainValue (preInputLevelParameterID, 0.0f);
+    setParameterPlainValue (inputTubeParameterID, 1.0f);            // Vol pulled: tube in and out
+    setParameterPlainValue (gainParameterID, 0.0f);
+    setParameterPlainValue (dirtParameterID, 1.0f);                 // Gain pulled: Tube Screamer
+    setParameterPlainValue (dynamicsParameterID, 1.0f);             // Off
+    setParameterPlainValue (outputTapeParameterID, 1.0f);           // Output pulled: tape
+    setParameterPlainValue (postOutputLevelParameterID, 0.0f);
+    setParameterPlainValue (stereoModeParameterID, 0.0f);           // Stereo
     setParameterPlainValue (preHpfCutoffParameterID, 250.0f);       // 250 Hz
-    setParameterPlainValue (preHpfResonanceParameterID, 1.0f);      // Q = 1
     setParameterPlainValue (postLpfCutoffParameterID, 8000.0f);     // 8 kHz
-    setParameterPlainValue (postLpfResonanceParameterID, 1.0f);     // Q = 1
     setParameterPlainValue (x2TanksParameterID, 1.0f);              // Series
     setParameterPlainValue (extTankMixParameterID, 1.0f);           // 100%
-    setParameterPlainValue (crossfadeAmountParameterID, 0.25f);     // 25%
     setParameterPlainValue (feedbackAmountParameterID, 0.25f);      // 25%
     setParameterPlainValue (feedbackPhaseInvertParameterID, 0.0f);  // Normal
     setParameterPlainValue (wetDryParameterID, 0.5f);               // 50%
-    setParameterPlainValue (monoSourceToStereoParameterID, 0.0f);
+    setParameterPlainValue (inputLevelParameterID, 0.0f);           // 0 dB (unity)
+    setParameterPlainValue (outputLevelParameterID, 0.0f);          // 0 dB (unity)
     setParameterPlainValue (showUnavailableTankControlsParameterID, 0.0f);
     assignDefaultTankIRs();
 }
@@ -869,13 +1118,7 @@ bool TheGreatAmericanSpringAudioProcessor::applyPresetState (juce::ValueTree res
     if (! restoredState.hasType (parameters.state.getType()))
         return false;
 
-    const auto restoredIr2Routing = restoredState.getProperty (x2TanksParameterID);
-
-    if (restoredIr2Routing.isBool())
-        restoredState.setProperty (x2TanksParameterID,
-                                   static_cast<bool> (restoredIr2Routing) ? 2 : 0,
-                                   nullptr);
-
+    migrateLegacyState (restoredState);
     parameters.replaceState (restoredState);
     leftTank1IrPath = restoredState.getProperty (getTankIrPathPropertyName (TankSlot::left1)).toString();
     rightTank1IrPath = restoredState.getProperty (getTankIrPathPropertyName (TankSlot::right1)).toString();
@@ -912,6 +1155,57 @@ bool TheGreatAmericanSpringAudioProcessor::applyPresetState (juce::ValueTree res
     juce::ignoreUnused (presetName);
     sendChangeMessage();
     return true;
+}
+
+void TheGreatAmericanSpringAudioProcessor::migrateLegacyState (juce::ValueTree& restoredState)
+{
+    // Pre-Rev-A states stored Ext Reverb Tanks as a bool.
+    const auto restoredIr2Routing = restoredState.getProperty (x2TanksParameterID);
+
+    if (restoredIr2Routing.isBool())
+        restoredState.setProperty (x2TanksParameterID, static_cast<bool> (restoredIr2Routing) ? 2 : 0, nullptr);
+
+    // Rev A / Rev B states: "Mono Source To Stereo" toggle becomes the Source
+    // switch, and the old Mode / Drive controls map onto the Rev C pulls.
+    const auto findParam = [&restoredState] (const juce::String& id) -> juce::ValueTree
+    {
+        return restoredState.getChildWithProperty ("id", id);
+    };
+
+    if (auto mono = findParam ("monoSourceToStereo"); mono.isValid() && ! findParam (stereoModeParameterID).isValid())
+    {
+        const auto converting = static_cast<float> (mono.getProperty ("value", 0.0f)) >= 0.5f;
+        auto node = juce::ValueTree ("PARAM");
+        node.setProperty ("id", stereoModeParameterID, nullptr);
+        node.setProperty ("value", converting ? 1.0f : 0.0f, nullptr);
+        restoredState.appendChild (node, nullptr);
+    }
+
+    if (auto mode = findParam ("mode"); mode.isValid() && ! findParam (dirtParameterID).isValid())
+    {
+        // Old Mode order: Clean, Tube, Tape, Tube Screamer, Opto, FET, VCA.
+        const auto index = juce::roundToInt (static_cast<float> (mode.getProperty ("value", 0.0f)));
+        const auto add = [&restoredState] (const juce::String& id, float value)
+        {
+            auto node = juce::ValueTree ("PARAM");
+            node.setProperty ("id", id, nullptr);
+            node.setProperty ("value", value, nullptr);
+            restoredState.appendChild (node, nullptr);
+        };
+
+        add (inputTubeParameterID, index == 1 ? 1.0f : 0.0f);
+        add (outputTapeParameterID, index == 2 ? 1.0f : 0.0f);
+        add (dirtParameterID, index == 3 ? 1.0f : 0.0f);
+        add (dynamicsParameterID, (index == 4 || index == 5) ? 0.0f : index == 6 ? 2.0f : 1.0f);
+    }
+
+    if (auto drive = findParam ("drive"); drive.isValid() && ! findParam (gainParameterID).isValid())
+    {
+        auto node = juce::ValueTree ("PARAM");
+        node.setProperty ("id", gainParameterID, nullptr);
+        node.setProperty ("value", juce::jlimit (levelMinDb, levelMaxDb, static_cast<float> (drive.getProperty ("value", 0.0f))), nullptr);
+        restoredState.appendChild (node, nullptr);
+    }
 }
 
 juce::File TheGreatAmericanSpringAudioProcessor::getUserPresetDirectory() const
@@ -1184,19 +1478,22 @@ void TheGreatAmericanSpringAudioProcessor::loadPlaybackIntoBuffer (juce::AudioBu
         return;
 
     const auto positionIncrement = playbackSourceSampleRate / currentSampleRate;
+    const auto sourceLength = playbackBuffer.getNumSamples();
+    const auto sourceLengthDouble = static_cast<double> (sourceLength);
     auto* left = targetBuffer.getWritePointer (0);
     auto* right = targetBuffer.getWritePointer (1);
 
     for (int sample = 0; sample < numSamples; ++sample)
     {
-        const auto baseIndex = static_cast<int> (playbackReadPosition);
-        const auto nextIndex = juce::jmin (baseIndex + 1, playbackBuffer.getNumSamples() - 1);
+        // Loop: once the read head passes the end of the clip it wraps back to
+        // the start, so a demo keeps playing until Stop is pressed.
+        while (playbackReadPosition >= sourceLengthDouble)
+            playbackReadPosition -= sourceLengthDouble;
 
-        if (baseIndex >= playbackBuffer.getNumSamples())
-        {
-            playbackActive = false;
-            break;
-        }
+        const auto baseIndex = static_cast<int> (playbackReadPosition);
+        // The interpolation partner of the last sample is the first sample, so
+        // the seam between loop passes is interpolated rather than stepped.
+        const auto nextIndex = (baseIndex + 1) % sourceLength;
 
         const auto fraction = static_cast<float> (playbackReadPosition - static_cast<double> (baseIndex));
         const auto sourceLeft0 = playbackBuffer.getSample (0, baseIndex);
@@ -1210,9 +1507,6 @@ void TheGreatAmericanSpringAudioProcessor::loadPlaybackIntoBuffer (juce::AudioBu
         right[sample] = juce::jmap (fraction, sourceRight0, sourceRight1);
         playbackReadPosition += positionIncrement;
     }
-
-    if (playbackReadPosition >= static_cast<double> (playbackBuffer.getNumSamples()))
-        playbackActive = false;
 }
 
 bool TheGreatAmericanSpringAudioProcessor::loadPlaybackSourceFromMemory (const void* data,
@@ -1413,7 +1707,7 @@ void TheGreatAmericanSpringAudioProcessor::sanitizeBuffer (juce::AudioBuffer<flo
             if (! std::isfinite (value))
                 value = 0.0f;
 
-            samples[sample] = juce::jlimit (-8.0f, 8.0f, value);
+            samples[sample] = juce::jlimit (-sanitizeClampGain, sanitizeClampGain, value);
         }
     }
 }
@@ -1433,31 +1727,38 @@ void TheGreatAmericanSpringAudioProcessor::applySecondaryTankPredelay (
     }
 }
 
-FilterClipperBlock::Parameters TheGreatAmericanSpringAudioProcessor::getFilterClipperParameters() const
+DirtDynamicsBlock::Parameters TheGreatAmericanSpringAudioProcessor::getDirtDynamicsParameters() const
 {
-    FilterClipperBlock::Parameters filterParameters;
-    filterParameters.mode = toFilterClipperMode (
-        juce::roundToInt (parameters.getRawParameterValue (modeParameterID)->load()));
-    filterParameters.driveDb = parameters.getRawParameterValue (driveParameterID)->load();
-    filterParameters.preHpfCutoffHz = parameters.getRawParameterValue (preHpfCutoffParameterID)->load();
-    filterParameters.preHpfResonance = parameters.getRawParameterValue (preHpfResonanceParameterID)->load();
-    filterParameters.postLpfCutoffHz = parameters.getRawParameterValue (postLpfCutoffParameterID)->load();
-    filterParameters.postLpfResonance = parameters.getRawParameterValue (postLpfResonanceParameterID)->load();
-    return filterParameters;
+    DirtDynamicsBlock::Parameters p;
+    p.gainDb = parameters.getRawParameterValue (gainParameterID)->load();
+    p.dirt = isDirtEngaged();
+    p.dynamics = getDynamics();
+    p.preHpfCutoffHz = parameters.getRawParameterValue (preHpfCutoffParameterID)->load();
+    p.postLpfCutoffHz = parameters.getRawParameterValue (postLpfCutoffParameterID)->load();
+    p.filterQ = filterQ;
+    return p;
 }
 
-FilterClipperBlock::Mode TheGreatAmericanSpringAudioProcessor::toFilterClipperMode (int modeIndex)
+TheGreatAmericanSpringAudioProcessor::StereoMode TheGreatAmericanSpringAudioProcessor::toStereoMode (float parameterValue)
 {
-    switch (modeIndex)
+    switch (juce::jlimit (0, 2, juce::roundToInt (parameterValue)))
     {
-        case 0:  return FilterClipperBlock::Mode::clean;
-        case 1:  return FilterClipperBlock::Mode::silicon;
-        case 2:  return FilterClipperBlock::Mode::led;
-        case 3:  return FilterClipperBlock::Mode::germanium;
-        default: break;
+        case 1:  return StereoMode::monoToStereo;
+        case 2:  return StereoMode::megaverb;
+        case 0:
+        default: return StereoMode::stereo;
     }
+}
 
-    return FilterClipperBlock::Mode::clean;
+TheGreatAmericanSpringAudioProcessor::Dynamics TheGreatAmericanSpringAudioProcessor::toDynamics (float parameterValue)
+{
+    switch (juce::jlimit (0, 2, juce::roundToInt (parameterValue)))
+    {
+        case 0:  return Dynamics::comp;
+        case 2:  return Dynamics::limit;
+        case 1:
+        default: return Dynamics::off;
+    }
 }
 
 TheGreatAmericanSpringAudioProcessor::Ir2RoutingMode TheGreatAmericanSpringAudioProcessor::toIr2RoutingMode (float parameterValue)

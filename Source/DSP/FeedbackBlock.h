@@ -40,6 +40,15 @@ public:
         feedbackPhase = shouldInvert ? -1.0f : 1.0f;
     }
 
+    /** MEGAVERB: the feedback crosses over. What comes out of the Left path is
+        sent back to the START of the Right path and vice versa, so a sound
+        ping-pongs L -> R -> L -> R through both tank chains instead of
+        recirculating in its own channel. */
+    void setCrossCoupled (bool shouldCross)
+    {
+        crossCoupled = shouldCross;
+    }
+
     void process (const juce::AudioBuffer<float>& inputWet,
                   juce::AudioBuffer<float>& outputWet,
                   juce::AudioBuffer<float>& feedbackReturn,
@@ -64,8 +73,19 @@ public:
 
             const auto amount = feedbackAmount.getNextValue();
             const auto predelaySamples = predelaySamplesPerSample != nullptr ? juce::jmax (0.0f, predelaySamplesPerSample[sample]) : 0.0f;
-            feedbackLeft[sample] = feedbackPredelayLeft.popSample (0, predelaySamples) * amount * feedbackPhase;
-            feedbackRight[sample] = feedbackPredelayRight.popSample (0, predelaySamples) * amount * feedbackPhase;
+            const auto returnedLeft  = feedbackPredelayLeft.popSample (0, predelaySamples) * amount * feedbackPhase;
+            const auto returnedRight = feedbackPredelayRight.popSample (0, predelaySamples) * amount * feedbackPhase;
+
+            if (crossCoupled)
+            {
+                feedbackLeft[sample]  = returnedRight;   // R path output -> L path input
+                feedbackRight[sample] = returnedLeft;    // L path output -> R path input
+            }
+            else
+            {
+                feedbackLeft[sample]  = returnedLeft;
+                feedbackRight[sample] = returnedRight;
+            }
 
             delayedLeft = wetLeft[sample];
             delayedRight = wetRight[sample];
@@ -82,4 +102,5 @@ private:
     float lastLeftSample = 0.0f;
     float lastRightSample = 0.0f;
     float feedbackPhase = 1.0f;
+    bool crossCoupled = false;
 };

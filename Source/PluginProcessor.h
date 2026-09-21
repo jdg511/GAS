@@ -27,6 +27,16 @@ public:
         parallel
     };
 
+    /** The three-position source switch (Rev C). */
+    enum class StereoMode
+    {
+        stereo = 0,       // L and R each run their own path, feedback stays in its channel
+        monoToStereo,     // a mono source is copied to both channels, then as Stereo
+        megaverb          // feedback crosses over: L path -> R path -> L path ...
+    };
+
+    using Dynamics = DirtDynamicsBlock::Dynamics;
+
     TheGreatAmericanSpringAudioProcessor();
     ~TheGreatAmericanSpringAudioProcessor() override;
 
@@ -63,9 +73,15 @@ public:
     Ir2RoutingMode getIr2RoutingMode() const;
     juce::String getIr2RoutingDisplayName() const;
     bool isFeedbackPhaseInverted() const;
+    StereoMode getStereoMode() const;
     bool shouldConvertMonoSourceToStereo() const;
+    bool isMegaverbEngaged() const;
     bool shouldShowUnavailableTankControls() const;
-    bool isCrossfadeAvailableForCurrentLayout() const;
+    bool isInputTubeEngaged() const;
+    bool isOutputTapeEngaged() const;
+    bool isDirtEngaged() const;
+    Dynamics getDynamics() const;
+    juce::String getSignalChainDescription() const;
 
     bool loadPlaybackFile (const juce::File& file);
     void setPlaybackActive (bool shouldPlay);
@@ -80,20 +96,67 @@ public:
 
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
-    static constexpr auto crossfadeAmountParameterID = "crossfadeAmount";
-    static constexpr auto modeParameterID = "mode";
-    static constexpr auto driveParameterID = "drive";
+    // Plugin-only trims (not on the PCB)
+    static constexpr auto preInputLevelParameterID = "preInputLevel";
+    static constexpr auto postOutputLevelParameterID = "postOutputLevel";
+    // Board controls
+    static constexpr auto inputLevelParameterID = "inputLevel";          // "Vol", pull for Tube
+    static constexpr auto inputTubeParameterID = "inputTube";
+    static constexpr auto gainParameterID = "gain";                      // "Gain", pull for Dirt
+    static constexpr auto dirtParameterID = "dirt";
+    static constexpr auto dynamicsParameterID = "fbDynamics";            // Comp / Off / Limit
+    static constexpr auto outputTapeParameterID = "outputTape";          // Output knob, pull for Tape
+    static constexpr auto stereoModeParameterID = "stereoMode";          // Stereo / Mono > Stereo / MEGAVERB
     static constexpr auto preHpfCutoffParameterID = "preHpfCutoff";
-    static constexpr auto preHpfResonanceParameterID = "preHpfResonance";
     static constexpr auto postLpfCutoffParameterID = "postLpfCutoff";
-    static constexpr auto postLpfResonanceParameterID = "postLpfResonance";
     static constexpr auto x2TanksParameterID = "x2Tanks";
     static constexpr auto extTankMixParameterID = "extTankMix";
     static constexpr auto feedbackAmountParameterID = "feedbackAmount";
     static constexpr auto feedbackPhaseInvertParameterID = "feedbackPhaseInvert";
     static constexpr auto wetDryParameterID = "wetDry";
-    static constexpr auto monoSourceToStereoParameterID = "monoSourceToStereo";
+    static constexpr auto outputLevelParameterID = "outputLevel";
     static constexpr auto showUnavailableTankControlsParameterID = "showUnavailableTankControls";
+
+    // Every level knob in Rev C (Pre Input, Vol, Gain, Output, Post Output) is
+    // the same -18 .. +18 dB pot stage. sanitizeBuffer() still hard-clamps at
+    // +-sanitizeClampGain (+12 dBFS, the +/-15 V rails).
+    static constexpr float levelMinDb = -18.0f;
+    static constexpr float levelMaxDb = 18.0f;
+
+    /** Absolute sample ceiling applied by sanitizeBuffer(), as linear gain.
+        3.9811f is +12 dBFS (was 8.0f, about +18 dBFS, before 2026-09-12). */
+    static constexpr float sanitizeClampGain = 3.9811f;
+
+    /** Fixed Q for the circuit's pre-HPF and post-LPF: 1/sqrt(2), a Butterworth
+        response. The Q knobs were removed 2026-09-12. */
+    static constexpr float filterQ = 0.70710678f;
+
+    /** Floor of the level meters. Anything quieter reads as empty. */
+    static constexpr float meterFloorDb = -48.0f;
+
+    /** Peak level in dBFS at the three metering points (plugin only, none on
+        the PCB). Input: straight after the Vol (Solid State / Tube) knob on the
+        wet path. Wet: straight after the Gain / Dirt / Comp-Limit circuit, just
+        before the signal heads down the feedback path. Output: the absolute
+        last thing before audio leaves the plugin. */
+    float getInputMeterDb() const noexcept
+    {
+        return juce::Decibels::gainToDecibels (inputMeterPeak.load (std::memory_order_relaxed), meterFloorDb);
+    }
+
+    float getWetMeterDb() const noexcept
+    {
+        return juce::Decibels::gainToDecibels (wetMeterPeak.load (std::memory_order_relaxed), meterFloorDb);
+    }
+
+    /** Gain reduction of the Comp / Limit circuit in dB (0 when Off). */
+    float getGainReductionDb() const noexcept { return chain.dirtDynamics.getGainReductionDb(); }
+
+    float getOutputMeterDb() const noexcept
+    {
+        return juce::Decibels::gainToDecibels (outputMeterPeak.load (std::memory_order_relaxed), meterFloorDb);
+    }
+
 
     void setParameterPlainValue (const juce::String& parameterID, float plainValue);
 
@@ -103,6 +166,8 @@ public:
 
 private:
     juce::ValueTree createStateTree();
+    void migrateLegacyState (juce::ValueTree& restoredState);
+    void resetLevelSmoothers();
     bool applyPresetState (juce::ValueTree restoredState, const juce::String& presetName);
     juce::File getUserPresetDirectory() const;
     juce::Array<juce::File> getUserPresetFiles() const;
@@ -135,14 +200,18 @@ private:
     void updatePredelayModulation (int numSamples);
     void applyWetPredelay (int numSamples);
     void sanitizeBuffer (juce::AudioBuffer<float>& buffer, int numSamples) const;
+    static void applySmoothedGain (juce::AudioBuffer<float>& target,
+                                   juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear>& smoothedGain,
+                                   int numSamples);
     void applySecondaryTankPredelay (juce::AudioBuffer<float>& monoBuffer,
                                        juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear>& delayLine,
                                        const float* delaySamplesPerSample,
                                        int numSamples);
-    FilterClipperBlock::Parameters getFilterClipperParameters() const;
+    DirtDynamicsBlock::Parameters getDirtDynamicsParameters() const;
 
-    static FilterClipperBlock::Mode toFilterClipperMode (int modeIndex);
     static Ir2RoutingMode toIr2RoutingMode (float parameterValue);
+    static StereoMode toStereoMode (float parameterValue);
+    static Dynamics toDynamics (float parameterValue);
 
     ModularFxChain chain;
 
@@ -185,7 +254,19 @@ private:
     std::array<juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear>, 4> predelayMsSmoothed;
     std::array<float, 4> predelayTargetMs { { 25.0f, 25.0f, 36.0f, 36.0f } };
     juce::Random predelayRandom;
+    // Input and output trims, smoothed on the audio thread so knob moves and
+    // host automation never step the gain and click.
+    juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> preInputGainSmoothed { 1.0f };
+    juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> inputGainSmoothed { 1.0f };
+    juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> outputGainSmoothed { 1.0f };
+    juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> postOutputGainSmoothed { 1.0f };
+
+    // Metering taps, written on the audio thread and polled by the editor.
+    std::atomic<float> inputMeterPeak { 0.0f };
+    std::atomic<float> wetMeterPeak { 0.0f };
+    std::atomic<float> outputMeterPeak { 0.0f };
     Ir2RoutingMode lastIr2RoutingMode = Ir2RoutingMode::off;
+    StereoMode lastStereoMode = StereoMode::stereo;
     std::atomic<bool> lastMonoSourceWithoutStereoConversion { false };
     bool playbackActive = false;
     bool isPrepared = false;

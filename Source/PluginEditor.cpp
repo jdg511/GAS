@@ -202,7 +202,7 @@ struct ArtDirectedLookAndFeel final : juce::LookAndFeel_V4
                            float sliderPosProportional,
                            float rotaryStartAngle,
                            float rotaryEndAngle,
-                           juce::Slider&) override
+                           juce::Slider& slider) override
     {
         const auto style = getThemeStyle (theme);
         const auto bounds = juce::Rectangle<float> (static_cast<float> (x), static_cast<float> (y),
@@ -211,6 +211,31 @@ struct ArtDirectedLookAndFeel final : juce::LookAndFeel_V4
         const auto centre = bounds.getCentre();
         const auto angle = rotaryStartAngle + sliderPosProportional * (rotaryEndAngle - rotaryStartAngle);
         const auto knobBounds = juce::Rectangle<float> (radius * 2.0f, radius * 2.0f).withCentre (centre);
+        const bool pulled = slider.getProperties()["pulled"];
+        const bool pullKnob = slider.getProperties().contains ("pulled");
+
+        if (pulled)
+        {
+            // Pulled out: a warm halo and a raised rim so it reads as "engaged"
+            // from across the room, like a push-pull pot sitting proud.
+            juce::ColourGradient halo (style.accentB.withAlpha (0.55f), centre.x, centre.y,
+                                       style.accentB.withAlpha (0.0f), centre.x + radius * 1.6f, centre.y, true);
+            g.setGradientFill (halo);
+            g.fillEllipse (knobBounds.expanded (radius * 0.55f));
+
+            g.setColour (style.accentB.withAlpha (0.95f));
+            g.drawEllipse (knobBounds.expanded (4.0f), 2.2f);
+        }
+        else if (pullKnob)
+        {
+            // Pushed in: a faint dotted ring hints that this knob pulls.
+            g.setColour (style.textSecondary.withAlpha (0.35f));
+            juce::Path ringPath, dashed;
+            ringPath.addEllipse (knobBounds.expanded (4.0f));
+            const float dashes[] = { 2.0f, 4.0f };
+            juce::PathStrokeType (1.0f).createDashedStroke (dashed, ringPath, dashes, 2);
+            g.fillPath (dashed);
+        }
 
         juce::ColourGradient bodyGradient (style.knobBodyOuter, knobBounds.getCentreX(), knobBounds.getY(),
                                            style.knobBodyInner, knobBounds.getCentreX(), knobBounds.getBottom(), false);
@@ -418,25 +443,41 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     cosmicBackground = loadImageFromBinaryData (BinaryData::background_session_03_png, BinaryData::background_session_03_pngSize);
     logoImage = createLogoImage (BinaryData::illicit_apothecary_logo_svg, BinaryData::illicit_apothecary_logo_svgSize);
 
-    addAndMakeVisible (logoButton);
+    content.addAndMakeVisible (logoButton);
     refreshLogoButton();
 
-    addAndMakeVisible (titleComponent);
+    content.addAndMakeVisible (titleComponent);
 
     subtitleLabel.setText ({}, juce::dontSendNotification);
     subtitleLabel.setJustificationType (juce::Justification::centred);
 
-    modeLabel.setText ("Mode", juce::dontSendNotification);
-    addAndMakeVisible (modeLabel);
+    ir2RoutingLabel.setText ("Ext Tanks", juce::dontSendNotification);
+    content.addAndMakeVisible (ir2RoutingLabel);
 
-    ir2RoutingLabel.setText ("Ext Reverb Tanks", juce::dontSendNotification);
-    addAndMakeVisible (ir2RoutingLabel);
+    feedbackPhaseLabel.setText ("FB Phase", juce::dontSendNotification);
+    content.addAndMakeVisible (feedbackPhaseLabel);
 
-    feedbackPhaseLabel.setText ("Feedback Phase", juce::dontSendNotification);
-    addAndMakeVisible (feedbackPhaseLabel);
+    dynamicsLabel.setText ("FB Dyn", juce::dontSendNotification);
+    dynamicsLabel.setTooltip ("Three-way switch at the head of the feedback path: Comp (VTL5C3 vactrol compressor), Off, Limit (THAT2180 VCA limiter, 10:1). The Gain knob sets the level into whichever is selected.");
+    content.addAndMakeVisible (dynamicsLabel);
+
+    stereoModeLabel.setText ("Source", juce::dontSendNotification);
+    content.addAndMakeVisible (stereoModeLabel);
+
+    tubeSwitchLabel.setText ("Tube", juce::dontSendNotification);
+    tubeSwitchLabel.setTooltip ("Rev C mini toggle beside the Vol knob: Off = solid state, On = the J201 tube stage (which also puts the tube on the output).");
+    content.addAndMakeVisible (tubeSwitchLabel);
+
+    dirtSwitchLabel.setText ("Dirt", juce::dontSendNotification);
+    dirtSwitchLabel.setTooltip ("Rev C mini toggle beside the Gain knob: Off = clean, On = the Tube Screamer clipper (2x 1N4148).");
+    content.addAndMakeVisible (dirtSwitchLabel);
+
+    tapeSwitchLabel.setText ("Tape", juce::dontSendNotification);
+    tapeSwitchLabel.setTooltip ("Rev C mini toggle beside the Output knob: Off = solid state, On = the 2N3904 differential pair tape stage. The tube runs first when Tube is on.");
+    content.addAndMakeVisible (tapeSwitchLabel);
 
     themeLabel.setText ("Art", juce::dontSendNotification);
-    addAndMakeVisible (themeLabel);
+    content.addAndMakeVisible (themeLabel);
 
     const auto configureThemeButton = [] (juce::ToggleButton& button, const juce::String& text)
     {
@@ -464,75 +505,135 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
         audioProcessor.setParameterPlainValue (TheGreatAmericanSpringAudioProcessor::feedbackPhaseInvertParameterID, 1.0f);
         refreshOptionControls();
     };
-    addAndMakeVisible (feedbackPhaseNormalButton);
-    addAndMakeVisible (feedbackPhaseInvertButton);
+    content.addAndMakeVisible (feedbackPhaseNormalButton);
+    content.addAndMakeVisible (feedbackPhaseInvertButton);
+
+    // Comp / Off / Limit: a three-position switch, drawn as three radio buttons.
+    const auto configureChoiceButton = [this] (juce::ToggleButton& button, const juce::String& text, int group,
+                                               const juce::String& parameterID, float value, const juce::String& tip)
+    {
+        button.setButtonText (text);
+        button.setRadioGroupId (group);
+        button.setTooltip (tip);
+        button.onClick = [this, parameterID, value]
+        {
+            audioProcessor.setParameterPlainValue (parameterID, value);
+            refreshOptionControls();
+        };
+        content.addAndMakeVisible (button);
+    };
+
+    using P = TheGreatAmericanSpringAudioProcessor;
+    configureChoiceButton (dynamicsCompButton,  "Comp",  3001, P::dynamicsParameterID, 0.0f, "Vactrol (VTL5C3) opto compressor on the wet signal, feed-forward, stereo linked. Threshold -18 dBFS.");
+    configureChoiceButton (dynamicsOffButton,   "Off",   3001, P::dynamicsParameterID, 1.0f, "No dynamics circuit.");
+    configureChoiceButton (dynamicsLimitButton, "Limit", 3001, P::dynamicsParameterID, 2.0f, "THAT2180 VCA limiter with a log-average detector, feedback, 10:1, stereo linked. Threshold -18 dBFS.");
+
+    configureChoiceButton (stereoButton,       "Stereo",        4001, P::stereoModeParameterID, 0.0f, "L and R each run their own tank path; feedback stays in its own channel.");
+    configureChoiceButton (monoToStereoButton, "Mono > Stereo", 4001, P::stereoModeParameterID, 1.0f, "A mono source is copied to both channels first, then runs as Stereo.");
+    configureChoiceButton (megaverbButton,     "MEGAVERB",      4001, P::stereoModeParameterID, 2.0f, "Feedback crosses over: what leaves the Left path is fed to the start of the Right path and vice versa, so echoes ping-pong L > R > L through both tank chains.");
+
+    // Rev C: the Vol / Gain / Output pulls are now three separate mini toggles on the control deck,
+    // so they get the same two-position switch treatment here as FB Phase.
+    configureChoiceButton (tubeOffButton, "Off", 5001, P::inputTubeParameterID,  0.0f, "Vol stage stays solid state.");
+    configureChoiceButton (tubeOnButton,  "On",  5001, P::inputTubeParameterID,  1.0f, "J201 tube stage in the Vol section, and the tube also runs on the output.");
+    configureChoiceButton (dirtOffButton, "Off", 5002, P::dirtParameterID,       0.0f, "Gain stage stays clean.");
+    configureChoiceButton (dirtOnButton,  "On",  5002, P::dirtParameterID,       1.0f, "Tube Screamer clipper (2x 1N4148) in the Gain section.");
+    configureChoiceButton (tapeOffButton, "Off", 5003, P::outputTapeParameterID, 0.0f, "Output stage stays solid state.");
+    configureChoiceButton (tapeOnButton,  "On",  5003, P::outputTapeParameterID, 1.0f, "2N3904 differential pair tape stage on the output.");
+
+    inputMeterLabel.setText ("In", juce::dontSendNotification);
+    wetMeterLabel.setText ("Wet", juce::dontSendNotification);
+    outputMeterLabel.setText ("Out", juce::dontSendNotification);
+    inputMeterLabel.setJustificationType (juce::Justification::centredRight);
+    wetMeterLabel.setJustificationType (juce::Justification::centredRight);
+    outputMeterLabel.setJustificationType (juce::Justification::centredRight);
+    inputMeter.setTooltip ("Peak level straight after the Vol (Solid State / Tube) knob. Plugin only. 0 to -48 dBFS.");
+    wetMeter.setTooltip ("Peak level straight after the Gain / Dirt / Comp-Limit circuit, just before the feedback path. Plugin only. 0 to -48 dBFS.");
+    outputMeter.setTooltip ("Peak level at the very end, after Post Output. Plugin only. 0 to -48 dBFS.");
+    content.addAndMakeVisible (inputMeterLabel);
+    content.addAndMakeVisible (inputMeter);
+    content.addAndMakeVisible (wetMeterLabel);
+    content.addAndMakeVisible (wetMeter);
+    content.addAndMakeVisible (outputMeterLabel);
+    content.addAndMakeVisible (outputMeter);
 
     solarThemeButton.onClick = [this] { introThemeStep = 3; applyTheme (Theme::solar); };
     petalThemeButton.onClick = [this] { introThemeStep = 3; applyTheme (Theme::petal); };
     cosmicThemeButton.onClick = [this] { introThemeStep = 3; applyTheme (Theme::cosmic); };
 
-    addAndMakeVisible (solarThemeButton);
-    addAndMakeVisible (petalThemeButton);
-    addAndMakeVisible (cosmicThemeButton);
+    content.addAndMakeVisible (solarThemeButton);
+    content.addAndMakeVisible (petalThemeButton);
+    content.addAndMakeVisible (cosmicThemeButton);
 
-    modeComboBox.addItem ("Clean", 1);
-    modeComboBox.addItem ("Silicon", 2);
-    modeComboBox.addItem ("LED", 3);
-    modeComboBox.addItem ("Germanium", 4);
-    addAndMakeVisible (modeComboBox);
-
-    modeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (
-        audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::modeParameterID, modeComboBox);
+    chainDescriptionLabel.setJustificationType (juce::Justification::centred);
+    chainDescriptionLabel.setMinimumHorizontalScale (0.7f);
+    content.addAndMakeVisible (chainDescriptionLabel);
 
     ir2RoutingComboBox.addItem ("Off", 1);
     ir2RoutingComboBox.addItem ("Series", 2);
     ir2RoutingComboBox.addItem ("Parallel", 3);
     ir2RoutingComboBox.setTooltip ("Route Left/Right Ext Reverb Tanks off, in series after Main Tanks, or in parallel with Main Tanks.");
     ir2RoutingComboBox.onChange = [this] { refreshX2VisualState(); };
-    addAndMakeVisible (ir2RoutingComboBox);
+    content.addAndMakeVisible (ir2RoutingComboBox);
 
     ir2RoutingAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (
         audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::x2TanksParameterID, ir2RoutingComboBox);
 
-    configureRotarySlider (driveSlider, driveLabel, "Drive", " dB");
+    configureRotarySlider (preInputLevelSlider, preInputLevelLabel, "Pre Input (plugin)", " dB");
+    configureRotarySlider (inputLevelSlider, inputLevelLabel, "Vol", " dB");
+    configureRotarySlider (gainSlider, gainLabel, "Gain", " dB");
     configureRotarySlider (preHpfCutoffSlider, preHpfCutoffLabel, "HPF Cutoff", " Hz");
-    configureRotarySlider (preHpfResonanceSlider, preHpfResonanceLabel, "HPF Q", "");
     configureRotarySlider (postLpfCutoffSlider, postLpfCutoffLabel, "LPF Cutoff", " Hz");
-    configureRotarySlider (postLpfResonanceSlider, postLpfResonanceLabel, "LPF Q", "");
-    configureRotarySlider (crossfadeAmountSlider, crossfadeAmountLabel, "Crossfade", " %");
     configureRotarySlider (extTankMixSlider, extTankMixLabel, "Ext Tanks", " %");
     configureRotarySlider (feedbackAmountSlider, feedbackAmountLabel, "Feedback", " %");
     configureRotarySlider (wetDrySlider, wetDryLabel, "Wet/Dry", " %");
+    configureRotarySlider (outputLevelSlider, outputLevelLabel, "Output", " dB");
+    configureRotarySlider (postOutputLevelSlider, postOutputLevelLabel, "Post Output (plugin)", " dB");
 
-    driveAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
-        audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::driveParameterID, driveSlider);
+    for (auto* slider : std::initializer_list<juce::Slider*> { &preInputLevelSlider, &inputLevelSlider, &gainSlider,
+                                                               &outputLevelSlider, &postOutputLevelSlider })
+        slider->setNumDecimalPlacesToDisplay (1);
+
+    preInputLevelSlider.setTooltip ("Plugin-only trim ahead of everything, -18 to +18 dB. Not on the PCB.");
+    postOutputLevelSlider.setTooltip ("Plugin-only trim after everything, -18 to +18 dB. Not on the PCB.");
+
+    // Rev C: no more pull knobs. Tube, Dirt and Tape are the panel's own mini toggles, so these are
+    // plain level knobs and the switch row below the Source row does the switching.
+    inputLevelSlider.setTooltip ("Vol, -18 to +18 dB, first knob on the wet path. Solid State or Tube is set by the TUBE switch.");
+    gainSlider.setTooltip ("Gain, -18 to +18 dB, into the Dirt and Comp / Limit circuits. Clean or Dirt is set by the DIRT switch.");
+    outputLevelSlider.setTooltip ("Output, -18 to +18 dB, after the Wet/Dry mix. Solid State or Tape is set by the TAPE switch. The tube runs first when TUBE is on.");
+
+    gainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
+        audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::gainParameterID, gainSlider);
+    preInputLevelAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
+        audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::preInputLevelParameterID, preInputLevelSlider);
+    postOutputLevelAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
+        audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::postOutputLevelParameterID, postOutputLevelSlider);
     preHpfCutoffAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
         audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::preHpfCutoffParameterID, preHpfCutoffSlider);
-    preHpfResonanceAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
-        audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::preHpfResonanceParameterID, preHpfResonanceSlider);
     postLpfCutoffAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
         audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::postLpfCutoffParameterID, postLpfCutoffSlider);
-    postLpfResonanceAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
-        audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::postLpfResonanceParameterID, postLpfResonanceSlider);
-    crossfadeAmountAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
-        audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::crossfadeAmountParameterID, crossfadeAmountSlider);
     extTankMixAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
         audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::extTankMixParameterID, extTankMixSlider);
     feedbackAmountAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
         audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::feedbackAmountParameterID, feedbackAmountSlider);
     wetDryAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
         audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::wetDryParameterID, wetDrySlider);
+    inputLevelAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
+        audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::inputLevelParameterID, inputLevelSlider);
+    outputLevelAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
+        audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::outputLevelParameterID, outputLevelSlider);
 
-    addAndMakeVisible (leftTankGroup);
-    addAndMakeVisible (rightTankGroup);
-    addAndMakeVisible (leftTank2Group);
-    addAndMakeVisible (rightTank2Group);
+    content.addAndMakeVisible (leftTankGroup);
+    content.addAndMakeVisible (rightTankGroup);
+    content.addAndMakeVisible (leftTank2Group);
+    content.addAndMakeVisible (rightTank2Group);
 
     const auto styleTankLabel = [this] (juce::Label& label)
     {
         label.setJustificationType (juce::Justification::centredLeft);
         label.setMinimumHorizontalScale (0.7f);
-        addAndMakeVisible (label);
+        content.addAndMakeVisible (label);
     };
 
     styleTankLabel (leftTankLabel);
@@ -542,23 +643,23 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
 
     leftTankLoadButton.setButtonText ("Load Left Main...");
     leftTankLoadButton.onClick = [this] { chooseTankImpulseResponseFile (TankSlot::left1); };
-    addAndMakeVisible (leftTankLoadButton);
+    content.addAndMakeVisible (leftTankLoadButton);
 
     rightTankLoadButton.setButtonText ("Load Right Main...");
     rightTankLoadButton.onClick = [this] { chooseTankImpulseResponseFile (TankSlot::right1); };
-    addAndMakeVisible (rightTankLoadButton);
+    content.addAndMakeVisible (rightTankLoadButton);
 
     leftTank2LoadButton.setButtonText ("Load Left Ext...");
     leftTank2LoadButton.onClick = [this] { chooseTankImpulseResponseFile (TankSlot::left2); };
-    addAndMakeVisible (leftTank2LoadButton);
+    content.addAndMakeVisible (leftTank2LoadButton);
 
     rightTank2LoadButton.setButtonText ("Load Right Ext...");
     rightTank2LoadButton.onClick = [this] { chooseTankImpulseResponseFile (TankSlot::right2); };
-    addAndMakeVisible (rightTank2LoadButton);
+    content.addAndMakeVisible (rightTank2LoadButton);
 
     playbackLabel.setText ("Playback Source", juce::dontSendNotification);
     playbackLabel.setJustificationType (juce::Justification::centredLeft);
-    addAndMakeVisible (playbackLabel);
+    content.addAndMakeVisible (playbackLabel);
 
     playbackSourceComboBox.addItemList (audioProcessor.getPlaybackSourceDisplayNames(), 1);
     playbackSourceComboBox.setTextWhenNothingSelected ("Select playback source");
@@ -572,18 +673,18 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
             refreshPlaybackLabel();
         }
     };
-    addAndMakeVisible (playbackSourceComboBox);
+    content.addAndMakeVisible (playbackSourceComboBox);
 
     loadPlaybackButton.setButtonText ("Add Audio...");
     loadPlaybackButton.onClick = [this] { choosePlaybackFile(); };
-    addAndMakeVisible (loadPlaybackButton);
+    content.addAndMakeVisible (loadPlaybackButton);
 
     playbackToggleButton.onClick = [this]
     {
         audioProcessor.setPlaybackActive (! audioProcessor.isPlaybackActive());
         refreshPlaybackLabel();
     };
-    addAndMakeVisible (playbackToggleButton);
+    content.addAndMakeVisible (playbackToggleButton);
 
     for (auto* btn : std::initializer_list<juce::TextButton*> { &leftTankLoadButton, &rightTankLoadButton,
                                                                  &leftTank2LoadButton, &rightTank2LoadButton,
@@ -594,7 +695,7 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
 
     presetLabel.setText ("Preset", juce::dontSendNotification);
     presetLabel.setJustificationType (juce::Justification::centredLeft);
-    addAndMakeVisible (presetLabel);
+    content.addAndMakeVisible (presetLabel);
 
     presetComboBox.onChange = [this]
     {
@@ -611,38 +712,91 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
         if (presetIndex >= 0 && audioProcessor.loadPreset (presetIndex))
             currentPresetSelection = presetComboBox.getText();
     };
-    addAndMakeVisible (presetComboBox);
+    content.addAndMakeVisible (presetComboBox);
     refreshPresetOptions();
-
-    monoSourceToStereoButton.setButtonText ("Mono Source To Stereo");
-    addAndMakeVisible (monoSourceToStereoButton);
-    monoSourceToStereoAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (
-        audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::monoSourceToStereoParameterID, monoSourceToStereoButton);
 
     showUnavailableTankControlsButton.setButtonText ("Options not available in real life");
     showUnavailableTankControlsButton.onClick = [this]
     {
-        targetEditorHeight = showUnavailableTankControlsButton.getToggleState() ? 900 : 694;
+        targetEditorHeight = showUnavailableTankControlsButton.getToggleState() ? baseExpandedHeight : baseCollapsedHeight;
         refreshOptionControls();
         startTimerHz (30);
     };
-    addAndMakeVisible (showUnavailableTankControlsButton);
+    content.addAndMakeVisible (showUnavailableTankControlsButton);
     showUnavailableTankControlsAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (
         audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::showUnavailableTankControlsParameterID, showUnavailableTankControlsButton);
 
-    animatedEditorHeight = audioProcessor.shouldShowUnavailableTankControls() ? 900 : 694;
+    animatedEditorHeight = audioProcessor.shouldShowUnavailableTankControls() ? baseExpandedHeight : baseCollapsedHeight;
     targetEditorHeight = animatedEditorHeight;
-    setSize (920, animatedEditorHeight);
+
+    // The whole UI lives inside `content`, which gets the scale transform.
+    // It must not eat mouse clicks meant for its children or the background.
+    content.setInterceptsMouseClicks (false, true);
+    addAndMakeVisible (content);
+
+    // Drag-to-resize corner, aspect locked so the artwork never distorts.
+    setResizable (true, true);
+    setConstrainer (&sizeConstrainer);
+
+    editorScale = readStoredEditorScale();
+    updateSizeLimits();
+    applyEditorScale (editorScale);
+
     refreshTankLabels();
     refreshPlaybackLabel();
     refreshOptionControls();
+    refreshPullStates();
+    refreshChainReadout();
     applyTheme (Theme::solar);
     refreshX2VisualState();
     startTimerHz (30);
 }
 
+void TheGreatAmericanSpringAudioProcessorEditor::configurePullKnob (PullKnobSlider& slider, const juce::String& parameterID)
+{
+    slider.getProperties().set ("pulled", false);
+    slider.onPullToggle = [this, &slider, parameterID]
+    {
+        const auto engaged = audioProcessor.parameters.getRawParameterValue (parameterID)->load() >= 0.5f;
+        audioProcessor.setParameterPlainValue (parameterID, engaged ? 0.0f : 1.0f);
+        slider.setPulled (! engaged);
+        refreshPullStates();
+        refreshChainReadout();
+    };
+}
+
+void TheGreatAmericanSpringAudioProcessorEditor::refreshPullStates()
+{
+    const auto tube = audioProcessor.isInputTubeEngaged();
+    const auto dirt = audioProcessor.isDirtEngaged();
+    const auto tape = audioProcessor.isOutputTapeEngaged();
+
+    inputLevelSlider.setPulled (tube);
+    gainSlider.setPulled (dirt);
+    outputLevelSlider.setPulled (tape);
+
+    inputLevelLabel.setText (tube ? "Vol: TUBE" : "Vol: Solid State", juce::dontSendNotification);
+    gainLabel.setText (dirt ? "Gain: DIRT" : "Gain: Clean", juce::dontSendNotification);
+    outputLevelLabel.setText (tape ? "Output: TAPE" : "Output: Solid State", juce::dontSendNotification);
+
+    tubeOffButton.setToggleState (! tube, juce::dontSendNotification);
+    tubeOnButton.setToggleState  (tube,   juce::dontSendNotification);
+    dirtOffButton.setToggleState (! dirt, juce::dontSendNotification);
+    dirtOnButton.setToggleState  (dirt,   juce::dontSendNotification);
+    tapeOffButton.setToggleState (! tape, juce::dontSendNotification);
+    tapeOnButton.setToggleState  (tape,   juce::dontSendNotification);
+}
+
+void TheGreatAmericanSpringAudioProcessorEditor::refreshChainReadout()
+{
+    chainDescriptionLabel.setText (audioProcessor.getSignalChainDescription(), juce::dontSendNotification);
+}
+
 TheGreatAmericanSpringAudioProcessorEditor::~TheGreatAmericanSpringAudioProcessorEditor()
 {
+    // Drop the constrainer before it is destroyed, so the resizable corner
+    // cannot reach a dangling pointer during teardown.
+    setConstrainer (nullptr);
     setLookAndFeel (nullptr);
     audioProcessor.removeChangeListener (this);
 }
@@ -743,12 +897,31 @@ void TheGreatAmericanSpringAudioProcessorEditor::paint (juce::Graphics& graphics
 
 void TheGreatAmericanSpringAudioProcessorEditor::resized()
 {
+    if (getWidth() <= 0 || getHeight() <= 0)
+        return;
+
+    // The window can be dragged to any size; the UI itself is always laid out
+    // at the fixed logical size and then scaled to fill, so no control can ever
+    // fall outside the window.
+    editorScale = juce::jlimit (minEditorScale, maxEditorScale,
+                                (double) getWidth() / (double) baseEditorWidth);
+    storeEditorScale (editorScale);
+
+    content.setTransform ({});
+    content.setBounds (0, 0, baseEditorWidth, animatedEditorHeight);
+    content.setTransform (juce::AffineTransform::scale ((float) editorScale));
+
+    layoutContent();
+}
+
+void TheGreatAmericanSpringAudioProcessorEditor::layoutContent()
+{
     constexpr int pad        = 8;
     constexpr int halfPad    = pad / 2;
     // All header rows and the Mode/Input rows share this column width so they
     // appear visually centred together rather than spanning the full panel.
     constexpr int contentWidth = 720;
-    auto area = getLocalBounds().reduced (20);
+    auto area = content.getLocalBounds().reduced (20);
 
     const auto centreRow = [] (juce::Rectangle<int> row, int w)
     {
@@ -801,36 +974,104 @@ void TheGreatAmericanSpringAudioProcessorEditor::resized()
 
     // ── Preset row ────────────────────────────────────────────────────────────
     {
-        auto row = centreRow (area.removeFromTop (26), contentWidth);
-        row = centreRow (row, 562);
+        constexpr int rowW = 50 + 8 + 200 + 24 + 56 + 76 + 112 + 100;   // = 626
+        auto row = centreRow (area.removeFromTop (26), rowW);
         presetLabel.setBounds (row.removeFromLeft (50));
         row.removeFromLeft (8);
-        presetComboBox.setBounds (row.removeFromLeft (220));
+        presetComboBox.setBounds (row.removeFromLeft (200));
         row.removeFromLeft (24);
-        monoSourceToStereoButton.setBounds (row.removeFromLeft (260));
+        stereoModeLabel.setBounds (row.removeFromLeft (56));
+        stereoButton.setBounds (row.removeFromLeft (76));
+        monoToStereoButton.setBounds (row.removeFromLeft (112));
+        megaverbButton.setBounds (row.removeFromLeft (100));
     }
 
     area.removeFromTop (pad);
 
-    // ── Controls row: Mode | Ext Routing | Feedback Phase ───────────────────
-    // All three groups fit in contentWidth (708 px of content < 720 px column).
+    // ── Controls row: Ext Tanks | FB Phase | FB Dyn (Comp / Off / Limit) ────
     {
-        auto row = centreRow (area.removeFromTop (28), contentWidth);
+        constexpr int routingLabelW = 72;
+        constexpr int routingComboW = 104;
+        constexpr int groupGap      = 22;
+        constexpr int phaseLabelW   = 70;
+        constexpr int phaseButtonW  = 82;
+        constexpr int dynLabelW     = 58;
+        constexpr int dynButtonW    = 70;
+        constexpr int controlsRowW  = routingLabelW + routingComboW + groupGap
+                                    + phaseLabelW + phaseButtonW * 2 + groupGap
+                                    + dynLabelW + dynButtonW * 3;   // = 704
 
-        modeLabel.setBounds (row.removeFromLeft (44));
-        modeComboBox.setBounds (row.removeFromLeft (130));
-        row.removeFromLeft (24);
+        auto row = centreRow (area.removeFromTop (28), controlsRowW);
 
-        ir2RoutingLabel.setBounds (row.removeFromLeft (112));
-        ir2RoutingComboBox.setBounds (row.removeFromLeft (110));
-        row.removeFromLeft (24);
+        ir2RoutingLabel.setBounds (row.removeFromLeft (routingLabelW));
+        ir2RoutingComboBox.setBounds (row.removeFromLeft (routingComboW));
+        row.removeFromLeft (groupGap);
 
-        feedbackPhaseLabel.setBounds (row.removeFromLeft (104));
-        feedbackPhaseNormalButton.setBounds (row.removeFromLeft (84));
-        feedbackPhaseInvertButton.setBounds (row.removeFromLeft (76));
+        feedbackPhaseLabel.setBounds (row.removeFromLeft (phaseLabelW));
+        feedbackPhaseNormalButton.setBounds (row.removeFromLeft (phaseButtonW));
+        feedbackPhaseInvertButton.setBounds (row.removeFromLeft (phaseButtonW));
+        row.removeFromLeft (groupGap);
+
+        dynamicsLabel.setBounds (row.removeFromLeft (dynLabelW));
+        dynamicsCompButton.setBounds (row.removeFromLeft (dynButtonW));
+        dynamicsOffButton.setBounds (row.removeFromLeft (dynButtonW));
+        dynamicsLimitButton.setBounds (row.removeFromLeft (dynButtonW));
     }
 
-    area.removeFromTop (pad + 4);
+    area.removeFromTop (pad);
+
+    // ── Rev C switch row: Tube | Dirt | Tape ─────────────────────────────────
+    // These three were push-pulls on the Vol / Gain / Output knobs until Rev C moved them onto
+    // their own mini toggles in the control deck's switch row. Two positions each, like the panel.
+    {
+        constexpr int swLabelW   = 44;
+        constexpr int swButtonW  = 54;
+        constexpr int swGroupGap = 22;
+        constexpr int switchRowW = 3 * (swLabelW + swButtonW * 2) + swGroupGap * 2;   // = 500
+
+        auto row = centreRow (area.removeFromTop (28), switchRowW);
+
+        tubeSwitchLabel.setBounds (row.removeFromLeft (swLabelW));
+        tubeOffButton.setBounds (row.removeFromLeft (swButtonW));
+        tubeOnButton.setBounds (row.removeFromLeft (swButtonW));
+        row.removeFromLeft (swGroupGap);
+
+        dirtSwitchLabel.setBounds (row.removeFromLeft (swLabelW));
+        dirtOffButton.setBounds (row.removeFromLeft (swButtonW));
+        dirtOnButton.setBounds (row.removeFromLeft (swButtonW));
+        row.removeFromLeft (swGroupGap);
+
+        tapeSwitchLabel.setBounds (row.removeFromLeft (swLabelW));
+        tapeOffButton.setBounds (row.removeFromLeft (swButtonW));
+        tapeOnButton.setBounds (row.removeFromLeft (swButtonW));
+    }
+
+    area.removeFromTop (6);
+
+    // ── The three level meters ───────────────────────────────────────────────
+    {
+        constexpr int meterLabelW  = 30;
+        constexpr int meterW       = 120;
+        constexpr int rowW = (meterLabelW + meterW) * 3 + 20;
+
+        auto row = centreRow (area.removeFromTop (20), rowW);
+
+        inputMeterLabel.setBounds (row.removeFromLeft (meterLabelW));
+        inputMeter.setBounds (row.removeFromLeft (meterW).reduced (2, 3));
+        row.removeFromLeft (10);
+        wetMeterLabel.setBounds (row.removeFromLeft (meterLabelW));
+        wetMeter.setBounds (row.removeFromLeft (meterW).reduced (2, 3));
+        row.removeFromLeft (10);
+        outputMeterLabel.setBounds (row.removeFromLeft (meterLabelW));
+        outputMeter.setBounds (row.removeFromLeft (meterW).reduced (2, 3));
+    }
+
+    area.removeFromTop (pad);
+
+    // ── The engaged signal chain, in words ───────────────────────────────────
+    chainDescriptionLabel.setBounds (centreRow (area.removeFromTop (18), 860));
+
+    area.removeFromTop (6);
 
     // ── Knob rows ────────────────────────────────────────────────────────────
     {
@@ -846,20 +1087,26 @@ void TheGreatAmericanSpringAudioProcessorEditor::resized()
             sl.setBounds  (b.removeFromTop (kh));
         };
 
-        auto row1 = centreRow (knobs.removeFromTop (kh + 22), kw * 5 + kg * 4);
+        // Rows read left to right in signal order (Rev C): Pre Input (plugin),
+        // Vol (pull for Tube), Gain (pull for Dirt), HPF, LPF; then Ext Tanks,
+        // Feedback, Wet/Dry, Output (pull for Tape), Post Output (plugin).
+        constexpr int kwWide = 124;   // the pull knobs carry longer labels
+        auto row1 = centreRow (knobs.removeFromTop (kh + 22), kwWide * 5 + kg * 4);
         knobs.removeFromTop (4);
-        auto row2 = centreRow (knobs.removeFromTop (kh + 22), kw * 4 + kg * 3);
+        auto row2 = centreRow (knobs.removeFromTop (kh + 22), kwWide * 5 + kg * 4);
+        juce::ignoreUnused (kw);
 
-        layoutKnob (row1.removeFromLeft (kw), driveLabel,            driveSlider);            row1.removeFromLeft (kg);
-        layoutKnob (row1.removeFromLeft (kw), preHpfCutoffLabel,     preHpfCutoffSlider);     row1.removeFromLeft (kg);
-        layoutKnob (row1.removeFromLeft (kw), preHpfResonanceLabel,  preHpfResonanceSlider);  row1.removeFromLeft (kg);
-        layoutKnob (row1.removeFromLeft (kw), postLpfCutoffLabel,    postLpfCutoffSlider);    row1.removeFromLeft (kg);
-        layoutKnob (row1.removeFromLeft (kw), postLpfResonanceLabel, postLpfResonanceSlider);
+        layoutKnob (row1.removeFromLeft (kwWide), preInputLevelLabel,   preInputLevelSlider);   row1.removeFromLeft (kg);
+        layoutKnob (row1.removeFromLeft (kwWide), inputLevelLabel,      inputLevelSlider);      row1.removeFromLeft (kg);
+        layoutKnob (row1.removeFromLeft (kwWide), gainLabel,            gainSlider);            row1.removeFromLeft (kg);
+        layoutKnob (row1.removeFromLeft (kwWide), preHpfCutoffLabel,    preHpfCutoffSlider);    row1.removeFromLeft (kg);
+        layoutKnob (row1.removeFromLeft (kwWide), postLpfCutoffLabel,   postLpfCutoffSlider);
 
-        layoutKnob (row2.removeFromLeft (kw), crossfadeAmountLabel,  crossfadeAmountSlider);  row2.removeFromLeft (kg);
-        layoutKnob (row2.removeFromLeft (kw), extTankMixLabel,       extTankMixSlider);       row2.removeFromLeft (kg);
-        layoutKnob (row2.removeFromLeft (kw), feedbackAmountLabel,   feedbackAmountSlider);   row2.removeFromLeft (kg);
-        layoutKnob (row2.removeFromLeft (kw), wetDryLabel,           wetDrySlider);
+        layoutKnob (row2.removeFromLeft (kwWide), extTankMixLabel,      extTankMixSlider);      row2.removeFromLeft (kg);
+        layoutKnob (row2.removeFromLeft (kwWide), feedbackAmountLabel,  feedbackAmountSlider);  row2.removeFromLeft (kg);
+        layoutKnob (row2.removeFromLeft (kwWide), wetDryLabel,          wetDrySlider);          row2.removeFromLeft (kg);
+        layoutKnob (row2.removeFromLeft (kwWide), outputLevelLabel,     outputLevelSlider);     row2.removeFromLeft (kg);
+        layoutKnob (row2.removeFromLeft (kwWide), postOutputLevelLabel, postOutputLevelSlider);
     }
 
     area.removeFromTop (pad);
@@ -921,12 +1168,12 @@ void TheGreatAmericanSpringAudioProcessorEditor::configureRotarySlider (juce::Sl
 {
     label.setText (labelText, juce::dontSendNotification);
     label.setJustificationType (juce::Justification::centred);
-    addAndMakeVisible (label);
+    content.addAndMakeVisible (label);
 
     slider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     slider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 84, 20);
     slider.setTextValueSuffix (suffix);
-    addAndMakeVisible (slider);
+    content.addAndMakeVisible (slider);
 }
 
 void TheGreatAmericanSpringAudioProcessorEditor::refreshPresetOptions()
@@ -1000,15 +1247,13 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
 
     titleComponent.setStyle (style.textPrimary, style.accentA, pickArtNouveauTypeface());
     subtitleLabel.setFont (makeFont (12.0f, juce::Font::plain, style.bodyTypeface));
-    modeLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
-    ir2RoutingLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
-    feedbackPhaseLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
-    themeLabel.setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
+    for (auto* label : { &ir2RoutingLabel, &feedbackPhaseLabel, &dynamicsLabel, &stereoModeLabel, &themeLabel,
+                         &tubeSwitchLabel, &dirtSwitchLabel, &tapeSwitchLabel })
+    {
+        label->setFont (makeFont (12.5f, juce::Font::bold, style.bodyTypeface));
+        label->setColour (juce::Label::textColourId, style.textPrimary);
+    }
     subtitleLabel.setColour (juce::Label::textColourId, style.textSecondary);
-    modeLabel.setColour (juce::Label::textColourId, style.textPrimary);
-    ir2RoutingLabel.setColour (juce::Label::textColourId, style.textPrimary);
-    feedbackPhaseLabel.setColour (juce::Label::textColourId, style.textPrimary);
-    themeLabel.setColour (juce::Label::textColourId, style.textPrimary);
 
     const auto styleComboBox = [&style] (juce::ComboBox& comboBox)
     {
@@ -1018,7 +1263,6 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
         comboBox.setColour (juce::ComboBox::arrowColourId, style.textPrimary);
     };
 
-    styleComboBox (modeComboBox);
     styleComboBox (ir2RoutingComboBox);
     styleComboBox (playbackSourceComboBox);
     styleComboBox (presetComboBox);
@@ -1029,8 +1273,10 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
         label.setColour (juce::Label::textColourId, style.textPrimary);
     };
 
-    for (auto* label : { &driveLabel, &preHpfCutoffLabel, &preHpfResonanceLabel, &postLpfCutoffLabel,
-                         &postLpfResonanceLabel, &crossfadeAmountLabel, &extTankMixLabel, &feedbackAmountLabel, &wetDryLabel,
+    for (auto* label : { &gainLabel, &preHpfCutoffLabel, &postLpfCutoffLabel,
+                         &extTankMixLabel, &feedbackAmountLabel, &wetDryLabel,
+                         &preInputLevelLabel, &inputLevelLabel, &outputLevelLabel, &postOutputLevelLabel,
+                         &inputMeterLabel, &wetMeterLabel, &outputMeterLabel,
                          &leftTankLabel, &rightTankLabel, &leftTank2Label, &rightTank2Label, &playbackLabel })
     {
         styleControlLabel (*label);
@@ -1051,10 +1297,27 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
         slider.setColour (juce::Slider::thumbColourId, style.radioFill);
     };
 
-    for (auto* slider : { &driveSlider, &preHpfCutoffSlider, &preHpfResonanceSlider, &postLpfCutoffSlider,
-                          &postLpfResonanceSlider, &crossfadeAmountSlider, &extTankMixSlider, &feedbackAmountSlider, &wetDrySlider })
+    chainDescriptionLabel.setFont (makeFont (11.5f, juce::Font::plain, style.bodyTypeface));
+    chainDescriptionLabel.setColour (juce::Label::textColourId, style.textSecondary);
+
+    // Plugin-only knobs are labelled in the secondary colour so they read as
+    // "not on the board" at a glance.
+    preInputLevelLabel.setColour (juce::Label::textColourId, style.textSecondary);
+    postOutputLevelLabel.setColour (juce::Label::textColourId, style.textSecondary);
+
+    for (auto* slider : std::initializer_list<juce::Slider*> { &gainSlider, &preHpfCutoffSlider, &postLpfCutoffSlider,
+                                                               &extTankMixSlider, &feedbackAmountSlider, &wetDrySlider,
+                                                               &preInputLevelSlider, &inputLevelSlider, &outputLevelSlider, &postOutputLevelSlider })
     {
         styleSlider (*slider);
+    }
+
+    for (auto* meter : { &inputMeter, &wetMeter, &outputMeter })
+    {
+        meter->setTrackColours (style.panelBottom.withAlpha (0.85f),
+                                style.knobStart,
+                                style.buttonOutline.withAlpha (0.85f),
+                                style.textPrimary);
     }
 
     leftTankGroup.setText ("Left Main Tanks");
@@ -1106,6 +1369,18 @@ void TheGreatAmericanSpringAudioProcessorEditor::refreshOptionControls()
     feedbackPhaseNormalButton.setToggleState (! feedbackInverted, juce::dontSendNotification);
     feedbackPhaseInvertButton.setToggleState (feedbackInverted, juce::dontSendNotification);
 
+    using Dynamics = TheGreatAmericanSpringAudioProcessor::Dynamics;
+    const auto dynamics = audioProcessor.getDynamics();
+    dynamicsCompButton.setToggleState (dynamics == Dynamics::comp, juce::dontSendNotification);
+    dynamicsOffButton.setToggleState (dynamics == Dynamics::off, juce::dontSendNotification);
+    dynamicsLimitButton.setToggleState (dynamics == Dynamics::limit, juce::dontSendNotification);
+
+    using StereoMode = TheGreatAmericanSpringAudioProcessor::StereoMode;
+    const auto stereoMode = audioProcessor.getStereoMode();
+    stereoButton.setToggleState (stereoMode == StereoMode::stereo, juce::dontSendNotification);
+    monoToStereoButton.setToggleState (stereoMode == StereoMode::monoToStereo, juce::dontSendNotification);
+    megaverbButton.setToggleState (stereoMode == StereoMode::megaverb, juce::dontSendNotification);
+
     const auto showTankControls = showUnavailableTankControlsButton.getToggleState();
 
     juce::Component* tankControls[] = { &leftTankGroup, &rightTankGroup, &leftTank2Group, &rightTank2Group,
@@ -1117,9 +1392,7 @@ void TheGreatAmericanSpringAudioProcessorEditor::refreshOptionControls()
         component->setVisible (showTankControls);
     }
 
-    targetEditorHeight = showTankControls ? 900 : 694;
-    monoSourceToStereoButton.setEnabled (true);
-    monoSourceToStereoButton.setAlpha (1.0f);
+    targetEditorHeight = showTankControls ? baseExpandedHeight : baseCollapsedHeight;
 }
 
 void TheGreatAmericanSpringAudioProcessorEditor::updateExpandedTankControlsAnimation()
@@ -1136,11 +1409,75 @@ void TheGreatAmericanSpringAudioProcessorEditor::updateExpandedTankControlsAnima
         animatedEditorHeight = targetEditorHeight;
     }
 
-    setSize (getWidth(), animatedEditorHeight);
+    // Height changed, so the locked aspect ratio and the size limits move with
+    // it. The user's chosen scale is preserved throughout.
+    updateSizeLimits();
+    applyEditorScale (editorScale);
+}
+
+void TheGreatAmericanSpringAudioProcessorEditor::updateSizeLimits()
+{
+    sizeConstrainer.setFixedAspectRatio ((double) baseEditorWidth / (double) animatedEditorHeight);
+    sizeConstrainer.setSizeLimits (juce::roundToInt (baseEditorWidth * minEditorScale),
+                                   juce::roundToInt (animatedEditorHeight * minEditorScale),
+                                   juce::roundToInt (baseEditorWidth * maxEditorScale),
+                                   juce::roundToInt (animatedEditorHeight * maxEditorScale));
+}
+
+void TheGreatAmericanSpringAudioProcessorEditor::applyEditorScale (double newScale)
+{
+    editorScale = juce::jlimit (minEditorScale, maxEditorScale, newScale);
+    setSize (juce::roundToInt (baseEditorWidth * editorScale),
+             juce::roundToInt (animatedEditorHeight * editorScale));
+}
+
+double TheGreatAmericanSpringAudioProcessorEditor::defaultEditorScaleForDisplay()
+{
+    // Deliberately a fixed value rather than a screen-derived one.
+    //
+    // juce::Displays reports userArea in this display's own device pixels while
+    // the editor is laid out in logical units that Windows then multiplies by
+    // the monitor's DPI scale, and display.scale does not reliably reconcile
+    // the two on a mixed-DPI, multi-monitor Windows setup. Deriving the default
+    // from those numbers produced a window that fit one monitor and overflowed
+    // another, which is the exact failure this is meant to avoid.
+    //
+    // 1.15 is chosen so the FULLY EXPANDED window (tank controls open, 900
+    // logical px tall) still fits a 1080p-class monitor at 125% Windows
+    // scaling with room for a title bar and taskbar. It is a floor, not a
+    // ceiling: the window has a drag-resize corner up to maxEditorScale, and
+    // whatever size the user settles on is remembered in the plugin state.
+    return 1.15;
+}
+
+double TheGreatAmericanSpringAudioProcessorEditor::readStoredEditorScale() const
+{
+    const auto stored = (double) audioProcessor.parameters.state.getProperty ("editorScale", 0.0);
+
+    if (stored >= minEditorScale && stored <= maxEditorScale)
+        return stored;
+
+    return defaultEditorScaleForDisplay();
+}
+
+void TheGreatAmericanSpringAudioProcessorEditor::storeEditorScale (double scale) const
+{
+    audioProcessor.parameters.state.setProperty ("editorScale", scale, nullptr);
 }
 
 void TheGreatAmericanSpringAudioProcessorEditor::timerCallback()
 {
+    // Meters are polled here rather than pushed from the audio thread, so the
+    // ballistics cost nothing in processBlock.
+    inputMeter.setLevelDb (audioProcessor.getInputMeterDb());
+    wetMeter.setLevelDb (audioProcessor.getWetMeterDb());
+    outputMeter.setLevelDb (audioProcessor.getOutputMeterDb());
+
+    // Pull states and the chain readout follow the parameters, so host
+    // automation and presets move the knobs in and out too.
+    refreshPullStates();
+    refreshChainReadout();
+
     introElapsedMs += 33;
 
     // Wait 3 s before the first flip, then hold each artwork for 2 s.
