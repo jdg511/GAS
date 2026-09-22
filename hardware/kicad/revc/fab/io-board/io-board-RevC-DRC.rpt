@@ -1,0 +1,42 @@
+** Drc report for io-board.kicad_pcb **
+** Created on 2026-09-20T19:51:10 **
+** Report includes: Errors, Warnings, Exclusions **
+
+** Found 0 DRC violations **
+
+** Found 0 unconnected pads **
+
+** Found 8 Footprint errors **
+[net_conflict]: Pad missing net given by schematic (unconnected-(D4001-NC-Pad2))
+    Local override; warning
+    @(52.5375 mm, 48.2450 mm): Pad 2 [<no net>] of D4001 on F.Cu
+[net_conflict]: Pad missing net given by schematic (unconnected-(D4101-NC-Pad2))
+    Local override; warning
+    @(69.1275 mm, 55.1350 mm): Pad 2 [<no net>] of D4101 on F.Cu
+[net_conflict]: Pad missing net given by schematic (unconnected-(D7001-NC-Pad2))
+    Local override; warning
+    @(90.3875 mm, 76.2450 mm): Pad 2 [<no net>] of D7001 on F.Cu
+[net_conflict]: Pad missing net given by schematic (unconnected-(D7101-NC-Pad2))
+    Local override; warning
+    @(106.9775 mm, 83.1350 mm): Pad 2 [<no net>] of D7101 on F.Cu
+[net_conflict]: Pad missing net given by schematic (unconnected-(K5-Pad2))
+    Local override; warning
+    @(10.6950 mm, 16.1950 mm): Pad 2 [<no net>] of K5 on F.Cu
+[net_conflict]: Pad missing net given by schematic (unconnected-(K5-Pad7))
+    Local override; warning
+    @(17.6950 mm, 16.1950 mm): Pad 7 [<no net>] of K5 on F.Cu
+[net_conflict]: Pad missing net given by schematic (unconnected-(K6-Pad2))
+    Local override; warning
+    @(36.6850 mm, 39.6350 mm): Pad 2 [<no net>] of K6 on F.Cu
+[net_conflict]: Pad missing net given by schematic (unconnected-(K6-Pad7))
+    Local override; warning
+    @(43.6850 mm, 39.6350 mm): Pad 7 [<no net>] of K6 on F.Cu
+
+** Ignored checks **
+    - Footprint has no courtyard defined
+    - Track endpoint not centered on via
+    - Tuning profile track geometries
+    - Footprint doesn't match symbol's footprint filters
+    - Footprint component type doesn't match footprint pads
+
+** End of Report **

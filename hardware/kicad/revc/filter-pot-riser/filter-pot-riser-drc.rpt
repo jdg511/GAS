@@ -1,0 +1,50 @@
+** Drc report for filter-pot-riser.kicad_pcb **
+** Created on 2026-09-21T01:05:09 **
+** Report includes: Errors, Warnings, Exclusions **
+
+** Found 8 DRC violations **
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(2.0000 mm, 1.8800 mm): Segment of VR1 on F.Silkscreen
+    @(7.0000 mm, 2.5000 mm): PTH pad 13 [G1_W] of VR1
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(2.0000 mm, 1.8800 mm): Segment of VR1 on F.Silkscreen
+    @(9.5000 mm, 2.5000 mm): PTH pad 23 [G2_W] of VR1
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(2.0000 mm, 1.8800 mm): Segment of VR1 on F.Silkscreen
+    @(14.5000 mm, 2.5000 mm): PTH pad 33 [G3_W] of VR1
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(2.0000 mm, 1.8800 mm): Segment of VR1 on F.Silkscreen
+    @(17.0000 mm, 2.5000 mm): PTH pad 43 [G4_W] of VR1
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(19.3200 mm, 13.1200 mm): Segment of VR1 on F.Silkscreen
+    @(7.0000 mm, 12.5000 mm): PTH pad 11 [G1_HI] of VR1
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(19.3200 mm, 13.1200 mm): Segment of VR1 on F.Silkscreen
+    @(9.5000 mm, 12.5000 mm): PTH pad 21 [G2_HI] of VR1
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(19.3200 mm, 13.1200 mm): Segment of VR1 on F.Silkscreen
+    @(14.5000 mm, 12.5000 mm): PTH pad 31 [G3_HI] of VR1
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(19.3200 mm, 13.1200 mm): Segment of VR1 on F.Silkscreen
+    @(17.0000 mm, 12.5000 mm): PTH pad 41 [G4_HI] of VR1
+
+** Found 0 unconnected pads **
+
+** Found 0 Footprint errors **
+
+** Ignored checks **
+    - Footprint has no courtyard defined
+    - Track endpoint not centered on via
+    - Tuning profile track geometries
+    - Footprint doesn't match symbol's footprint filters
+    - Footprint component type doesn't match footprint pads
+
+** End of Report **

@@ -12,6 +12,9 @@ out/
 *.exp
 *.log
 *_artefacts/
+/.release-build/
+/releases/*
+!/releases/README.md
 
 # editor local-history caches (embedded git repos)
 **/.history/

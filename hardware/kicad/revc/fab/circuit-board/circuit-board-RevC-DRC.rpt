@@ -1,0 +1,70 @@
+** Drc report for circuit-board.kicad_pcb **
+** Created on 2026-09-21T01:08:53 **
+** Report includes: Errors, Warnings, Exclusions **
+
+** Found 13 DRC violations **
+[silk_overlap]: Silkscreen clearance
+    Rule: board setup constraints silk; warning
+    @(29.0250 mm, 57.5950 mm): Reference field of R1227
+    @(33.5750 mm, 57.5950 mm): Reference field of R1243
+[silk_overlap]: Silkscreen clearance
+    Rule: board setup constraints silk; warning
+    @(5.0250 mm, 104.5950 mm): Reference field of R1349
+    @(9.5750 mm, 104.5950 mm): Reference field of C1343
+[silk_overlap]: Silkscreen clearance
+    Rule: board setup constraints silk; warning
+    @(29.8150 mm, 130.8150 mm): Reference field of C1346
+    @(25.2650 mm, 130.8150 mm): Reference field of C1345
+[silk_overlap]: Silkscreen clearance
+    Rule: board setup constraints silk; warning
+    @(23.1150 mm, 93.8450 mm): Reference field of R1347
+    @(18.5650 mm, 93.8450 mm): Reference field of R1344
+[silk_overlap]: Silkscreen clearance
+    Rule: board setup constraints silk; warning
+    @(20.7150 mm, 130.8150 mm): Reference field of R1356
+    @(25.2650 mm, 130.8150 mm): Reference field of C1345
+[silk_overlap]: Silkscreen clearance
+    Rule: board setup constraints silk; warning
+    @(69.1650 mm, 109.4550 mm): Reference field of C1304
+    @(73.7150 mm, 109.4550 mm): Reference field of C1323
+[silk_overlap]: Silkscreen clearance
+    Rule: board setup constraints silk; warning
+    @(69.1650 mm, 109.4550 mm): Reference field of C1304
+    @(64.6150 mm, 109.4550 mm): Reference field of C1303
+[silk_overlap]: Silkscreen clearance
+    Rule: board setup constraints silk; warning
+    @(78.2650 mm, 109.4550 mm): Reference field of C1324
+    @(73.7150 mm, 109.4550 mm): Reference field of C1323
+[silk_overlap]: Silkscreen clearance
+    Rule: board setup constraints silk; warning
+    @(78.2650 mm, 109.4550 mm): Reference field of C1324
+    @(82.8150 mm, 109.4550 mm): Reference field of C1305
+[silk_overlap]: Silkscreen clearance
+    Rule: board setup constraints silk; warning
+    @(76.2250 mm, 94.7750 mm): Reference field of C1322
+    @(71.6750 mm, 94.7750 mm): Reference field of R1324
+[silk_overlap]: Silkscreen clearance
+    Rule: board setup constraints silk; warning
+    @(58.0250 mm, 84.0250 mm): Reference field of R1304
+    @(62.5750 mm, 84.0250 mm): Reference field of C1302
+[silk_overlap]: Silkscreen clearance
+    Rule: board setup constraints silk; warning
+    @(42.5650 mm, 46.8450 mm): Reference field of R1241
+    @(38.0150 mm, 46.8450 mm): Reference field of R1207
+[silk_overlap]: Silkscreen clearance
+    Rule: board setup constraints silk; warning
+    @(89.1150 mm, 26.2950 mm): Segment of C801 on F.Silkscreen
+    @(85.3950 mm, 27.0150 mm): Reference field of C804
+
+** Found 0 unconnected pads **
+
+** Found 0 Footprint errors **
+
+** Ignored checks **
+    - Footprint has no courtyard defined
+    - Track endpoint not centered on via
+    - Tuning profile track geometries
+    - Footprint doesn't match symbol's footprint filters
+    - Footprint component type doesn't match footprint pads
+
+** End of Report **

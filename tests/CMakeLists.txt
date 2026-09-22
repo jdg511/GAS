@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.22)
+project(GasCircuitTest VERSION 1.0.0)
+add_subdirectory("${JUCE_SOURCE_DIR}" juce-build)
+juce_add_console_app(GasCircuitTest PRODUCT_NAME "GasCircuitTest")
+juce_generate_juce_header(GasCircuitTest)
+target_sources(GasCircuitTest PRIVATE CircuitModelTests.cpp)
+target_include_directories(GasCircuitTest PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../Source/DSP")
+target_compile_definitions(GasCircuitTest PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_STANDALONE_APPLICATION=1)
+target_link_libraries(GasCircuitTest PRIVATE juce::juce_dsp juce::juce_audio_basics juce::juce_core
+    PUBLIC juce::juce_recommended_config_flags)

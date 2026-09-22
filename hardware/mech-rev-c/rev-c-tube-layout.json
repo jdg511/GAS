@@ -1,0 +1,204 @@
+{
+ "io_top": -3.0,
+ "plate_top": -10.6,
+ "plate_bot": -13.6,
+ "plate_w": 139.6,
+ "plate_z": [
+  45.0,
+  430.0
+ ],
+ "top_board_bot": -4.6,
+ "bot_board_top": -18.6,
+ "cage_len": 481.5,
+ "cage1_z": 460.0,
+ "cage2_z": 956.5,
+ "pipe_len": 1453,
+ "report": [
+  [
+   "control deck (6 in round, controls to the cap)",
+   152.4,
+   -76.2,
+   76.2,
+   76.2,
+   7.0
+  ],
+  [
+   "jack deck (6 in band, jacks to the cap) + plugs",
+   152.4,
+   -40.0,
+   49.0,
+   76.2,
+   7.0
+  ],
+  [
+   "io-board",
+   136,
+   -4.6,
+   11.0,
+   68.9,
+   8.1
+  ],
+  [
+   "circuit-board",
+   120,
+   -4.6,
+   11.0,
+   61.0,
+   16.0
+  ],
+  [
+   "power-board (under)",
+   120,
+   -40.2,
+   -18.6,
+   72.2,
+   4.8
+  ],
+  [
+   "tank-board (under, RCA at rear edge)",
+   120,
+   -40.2,
+   -18.6,
+   72.2,
+   4.8
+  ],
+  [
+   "sled plate (3 mm aluminium)",
+   139.57889035086646,
+   -13.6,
+   -10.6,
+   71.1,
+   5.9
+  ],
+  [
+   "4AB1C1B main L (upper)",
+   120.3,
+   7.0,
+   40.4,
+   72.5,
+   4.5
+  ],
+  [
+   "4AB1C1B main R (lower)",
+   120.3,
+   -40.4,
+   -7.0,
+   72.5,
+   4.5
+  ],
+  [
+   "9EB2C1B 2nd L (upper)",
+   111.1,
+   7.0,
+   40.4,
+   68.7,
+   8.3
+  ],
+  [
+   "9EB3C1B 2nd R (lower)",
+   111.1,
+   -40.4,
+   -7.0,
+   68.7,
+   8.3
+  ],
+  [
+   "cage rods M6 at (+/-30, +/-60)",
+   6,
+   60,
+   60,
+   68.5,
+   8.5
+  ]
+ ],
+ "tanks": [
+  {
+   "name": "4AB1C1B main L (upper)",
+   "z0": 488.0,
+   "z1": 913.5,
+   "y0": 7.0,
+   "y1": 40.4,
+   "w": 120.3
+  },
+  {
+   "name": "4AB1C1B main R (lower)",
+   "z0": 488.0,
+   "z1": 913.5,
+   "y0": -40.4,
+   "y1": -7.0,
+   "w": 120.3
+  },
+  {
+   "name": "9EB2C1B 2nd L (upper)",
+   "z0": 984.5,
+   "z1": 1410.0,
+   "y0": 7.0,
+   "y1": 40.4,
+   "w": 111.1
+  },
+  {
+   "name": "9EB3C1B 2nd R (lower)",
+   "z0": 984.5,
+   "z1": 1410.0,
+   "y0": -40.4,
+   "y1": -7.0,
+   "w": 111.1
+  }
+ ],
+ "items": [
+  {
+   "name": "control deck (6 in round, controls to the cap)",
+   "z0": 7.0,
+   "z1": 8.6,
+   "y0": -76.2,
+   "y1": 76.2,
+   "w": 152.4,
+   "color": "#8d6e63"
+  },
+  {
+   "name": "jack deck (6 in band, jacks to the cap) + plugs",
+   "z0": 23.0,
+   "z1": 41.6,
+   "y0": -40.0,
+   "y1": 49.0,
+   "w": 152.4,
+   "color": "#8d6e63"
+  },
+  {
+   "name": "io-board",
+   "z0": 45.0,
+   "z1": 225.0,
+   "y0": -4.6,
+   "y1": 11.0,
+   "w": 136,
+   "color": "#3a7d44"
+  },
+  {
+   "name": "circuit-board",
+   "z0": 230.0,
+   "z1": 405.0,
+   "y0": -4.6,
+   "y1": 11.0,
+   "w": 120,
+   "color": "#3a7d44"
+  },
+  {
+   "name": "power-board (under)",
+   "z0": 60.0,
+   "z1": 122.0,
+   "y0": -40.2,
+   "y1": -18.6,
+   "w": 120,
+   "color": "#4a6fa5"
+  },
+  {
+   "name": "tank-board (under, RCA at rear edge)",
+   "z0": 270.0,
+   "z1": 420.0,
+   "y0": -40.2,
+   "y1": -18.6,
+   "w": 120,
+   "color": "#4a6fa5"
+  }
+ ]
+}

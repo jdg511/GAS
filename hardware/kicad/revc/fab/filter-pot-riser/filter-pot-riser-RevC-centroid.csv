@@ -1,0 +1,3 @@
+Ref,Val,Package,PosX,PosY,Rot,Side
+"P1","to circuit-board P5 (HPF) or P6 (LPF)","JST_XH_B8B-XH-A_1x08_P2.50mm_Vertical",23.000000,-7.500000,0.000000,top
+"VR1","50k lin x4","Pot_Bourns_PTD904_SideAdjust",2.000000,-7.500000,0.000000,top

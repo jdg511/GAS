@@ -1,0 +1,153 @@
+name: Release The Great American Spring
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version without the leading v. Leave blank to use the UTC date.'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      tag: ${{ steps.release.outputs.tag }}
+      timestamp: ${{ steps.release.outputs.timestamp }}
+    steps:
+      - id: release
+        shell: bash
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
+            version="${GITHUB_REF_NAME#v}"
+          else
+            version="${INPUT_VERSION#v}"
+          fi
+          if [[ -z "${version}" ]]; then
+            version="$(date -u +%Y.%m.%d)"
+          fi
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${version}" >> "$GITHUB_OUTPUT"
+          echo "timestamp=$(date -u +%Y%m%d-%H%M%S)" >> "$GITHUB_OUTPUT"
+
+  build-windows:
+    needs: metadata
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Configure
+        shell: pwsh
+        run: >-
+          cmake -S . -B build/release-windows -G "Visual Studio 17 2022" -A x64
+          '-DSCC_BASE_PLUGIN_FORMATS=Standalone;VST3;LV2'
+          '-DSCC_DEPLOY_WINDOWS_VST3_AFTER_BUILD=OFF'
+      - name: Build
+        shell: pwsh
+        run: |
+          cmake --build build/release-windows --config Release --target TheGreatAmericanSpring_Standalone --parallel 2
+          cmake --build build/release-windows --config Release --target TheGreatAmericanSpring_VST3 --parallel 2
+          cmake --build build/release-windows --config Release --target TheGreatAmericanSpring_LV2 --parallel 2
+      - name: Package
+        shell: pwsh
+        run: ./scripts/Package-Release.ps1 -Platform windows -Version '${{ needs.metadata.outputs.version }}' -BuildDirectory build/release-windows -OutputDirectory dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gas-windows
+          path: dist/
+          if-no-files-found: error
+
+  build-linux:
+    needs: metadata
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install JUCE build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            libasound2-dev libcurl4-openssl-dev libfreetype6-dev libgl1-mesa-dev \
+            libglu1-mesa-dev libjack-jackd2-dev libx11-dev libxcomposite-dev \
+            libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev \
+            libwebkit2gtk-4.1-dev
+      - name: Configure
+        run: >-
+          cmake -S . -B build/release-linux -G Ninja -DCMAKE_BUILD_TYPE=Release
+          '-DSCC_BASE_PLUGIN_FORMATS=Standalone;VST3;LV2'
+      - name: Build
+        run: |
+          cmake --build build/release-linux --target TheGreatAmericanSpring_Standalone --parallel 2
+          cmake --build build/release-linux --target TheGreatAmericanSpring_VST3 --parallel 2
+          cmake --build build/release-linux --target TheGreatAmericanSpring_LV2 --parallel 2
+      - name: Package
+        shell: pwsh
+        run: ./scripts/Package-Release.ps1 -Platform linux -Version '${{ needs.metadata.outputs.version }}' -BuildDirectory build/release-linux -OutputDirectory dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gas-linux
+          path: dist/
+          if-no-files-found: error
+
+  build-macos:
+    needs: metadata
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v6
+      - name: Configure universal build
+        run: >-
+          cmake -S . -B build/release-macos -G Xcode
+          '-DSCC_BASE_PLUGIN_FORMATS=Standalone;VST3;AU;LV2'
+          '-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64'
+          '-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0'
+      - name: Build
+        run: |
+          cmake --build build/release-macos --config Release --target TheGreatAmericanSpring_Standalone --parallel 2
+          cmake --build build/release-macos --config Release --target TheGreatAmericanSpring_VST3 --parallel 2
+          cmake --build build/release-macos --config Release --target TheGreatAmericanSpring_AU --parallel 2
+          cmake --build build/release-macos --config Release --target TheGreatAmericanSpring_LV2 --parallel 2
+      - name: Package
+        shell: pwsh
+        run: ./scripts/Package-Release.ps1 -Platform macos -Version '${{ needs.metadata.outputs.version }}' -BuildDirectory build/release-macos -OutputDirectory dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gas-macos-universal
+          path: dist/
+          if-no-files-found: error
+
+  publish-github-release:
+    needs: [metadata, build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v5
+        with:
+          path: release-assets
+      - name: Create the tracked source archive
+        shell: bash
+        run: |
+          source_name="Source-Code_${{ needs.metadata.outputs.version }}_${{ needs.metadata.outputs.timestamp }}.zip"
+          git archive --format=zip --prefix="TheGreatAmericanSpring-${{ needs.metadata.outputs.version }}/" --output="release-assets/${source_name}" "${GITHUB_SHA}"
+          (cd release-assets && find . -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)
+      - name: Create or update the GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.metadata.outputs.tag }}
+          RELEASE_VERSION: ${{ needs.metadata.outputs.version }}
+        run: |
+          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            gh release upload "${RELEASE_TAG}" release-assets/*/* release-assets/Source-Code_*.zip release-assets/SHA256SUMS.txt --clobber
+          else
+            gh release create "${RELEASE_TAG}" release-assets/*/* release-assets/Source-Code_*.zip release-assets/SHA256SUMS.txt \
+              --target "${GITHUB_SHA}" --title "The Great American Spring ${RELEASE_VERSION}" --generate-notes
+          fi

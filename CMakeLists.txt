@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(TheGreatAmericanSpring VERSION 2.5.0)
+project(TheGreatAmericanSpring VERSION 3.0.0)
 
 include(FetchContent)
 
@@ -34,6 +34,7 @@ endif()
 set(SCC_ASSET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Assets")
 set(SCC_BASE_PLUGIN_FORMATS Standalone VST3 LV2 CACHE STRING "JUCE plugin formats to request. Platform-incompatible formats are ignored by JUCE.")
 set(SCC_VST2_SDK_PATH "" CACHE PATH "Path to the legacy Steinberg VST2 SDK folder. When set, the JUCE VST format is added.")
+set(SCC_AAX_SDK_PATH "" CACHE PATH "Path to the Avid AAX SDK (the folder containing its own CMakeLists.txt, e.g. .../aax-sdk-2-10-0-beta/aax-package). When set, the JUCE AAX format is added.")
 set(SCC_DEPLOY_WINDOWS_VST3_AFTER_BUILD ON CACHE BOOL "Copy the Windows VST3 bundle to SCC_VST3_DEPLOY_ROOT after building.")
 set(SCC_VST3_DEPLOY_ROOT "C:/Program Files/Common Files/VST3" CACHE PATH "Windows VST3 install root used when SCC_DEPLOY_WINDOWS_VST3_AFTER_BUILD is ON.")
 set(SPRING_IR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Spring IRs")
@@ -48,11 +49,19 @@ else()
     message(STATUS "VST2 disabled. Configure with -DSCC_VST2_SDK_PATH=/path/to/VST2_SDK to add the legacy VST target.")
 endif()
 
+if (SCC_AAX_SDK_PATH)
+    juce_set_aax_sdk_path("${SCC_AAX_SDK_PATH}")
+    list(APPEND SCC_PLUGIN_FORMATS AAX)
+else()
+    list(REMOVE_ITEM SCC_PLUGIN_FORMATS AAX)
+    message(STATUS "AAX disabled. Configure with -DSCC_AAX_SDK_PATH=/path/to/aax-package to add the AAX target. Note: the resulting binary still needs PACE/iLok wraptool signing before Pro Tools will load it.")
+endif()
+
 list(REMOVE_DUPLICATES SCC_PLUGIN_FORMATS)
 
 juce_add_plugin(TheGreatAmericanSpring
     COMPANY_NAME "Illicit Apothecary"
-    VERSION "2.5.0"
+    VERSION "${PROJECT_VERSION}"
     BUNDLE_ID "com.illicitapothecary.gas"
     IS_SYNTH FALSE
     NEEDS_MIDI_INPUT FALSE
@@ -66,7 +75,7 @@ juce_add_plugin(TheGreatAmericanSpring
     LV2URI "urn:illicitapothecary:plugins:great-american-spring"
     VST3_CATEGORIES Fx Reverb Stereo
     AAX_CATEGORY Reverb Effect
-    PRODUCT_NAME "The Great American Spring reverb")
+    PRODUCT_NAME "The Great American Spring reverb Rev C")
 
 juce_generate_juce_header(TheGreatAmericanSpring)
 
@@ -78,14 +87,50 @@ juce_add_binary_data(TheGreatAmericanSpringAssets
         "${SCC_ASSET_DIR}/Logos/illicit_apothecary_logo.svg"
         "${SCC_ASSET_DIR}/Playback/Make Reverb Great Again-mono.mp3"
         "${SCC_ASSET_DIR}/Playback/Its a Shame-stereo.mp3"
-        "${SCC_ASSET_DIR}/Playback/Zombie Remix-stereo.mp3")
+        "${SCC_ASSET_DIR}/Playback/Zombie Remix-stereo.mp3"
+        # NAM rig demo clips (added 2026-09-12)
+        "${SCC_ASSET_DIR}/Playback/arpeggio-deluxe-clean.mp3"
+        "${SCC_ASSET_DIR}/Playback/arpeggio-dirty-punk.mp3"
+        "${SCC_ASSET_DIR}/Playback/arpeggio-iconic-cleanish.mp3"
+        "${SCC_ASSET_DIR}/Playback/arpeggio-quick-clean.mp3"
+        "${SCC_ASSET_DIR}/Playback/arpeggio-warm-crunch.mp3"
+        "${SCC_ASSET_DIR}/Playback/finger-bass-bite.mp3"
+        "${SCC_ASSET_DIR}/Playback/finger-bass-clean-bright.mp3"
+        "${SCC_ASSET_DIR}/Playback/finger-bass-growl.mp3"
+        "${SCC_ASSET_DIR}/Playback/finger-bass-nice-warm.mp3"
+        "${SCC_ASSET_DIR}/Playback/metal-5150.mp3"
+        "${SCC_ASSET_DIR}/Playback/metal-blackstar.mp3"
+        "${SCC_ASSET_DIR}/Playback/metal-dualrec.mp3"
+        "${SCC_ASSET_DIR}/Playback/pick-bass-bite.mp3"
+        "${SCC_ASSET_DIR}/Playback/pick-bass-clean-bright.mp3"
+        "${SCC_ASSET_DIR}/Playback/pick-bass-growl.mp3"
+        "${SCC_ASSET_DIR}/Playback/pick-bass-metalcore.mp3"
+        "${SCC_ASSET_DIR}/Playback/pick-bass-rock-classic.mp3"
+        "${SCC_ASSET_DIR}/Playback/power-chords-classic-hi-gain.mp3"
+        "${SCC_ASSET_DIR}/Playback/power-chords-iconic-cleanish.mp3"
+        "${SCC_ASSET_DIR}/Playback/power-chords-plexi.mp3"
+        "${SCC_ASSET_DIR}/Playback/power-chords-punk-rock-rhythm.mp3"
+        "${SCC_ASSET_DIR}/Playback/rhythm-chords-ac30-crunch.mp3"
+        "${SCC_ASSET_DIR}/Playback/rhythm-chords-fender-clean.mp3"
+        "${SCC_ASSET_DIR}/Playback/rhythm-chords-suhr-clean.mp3"
+        "${SCC_ASSET_DIR}/Playback/solo-diezel.mp3"
+        "${SCC_ASSET_DIR}/Playback/solo-fortin.mp3"
+        "${SCC_ASSET_DIR}/Playback/solo-mesa.mp3")
 
 target_sources(TheGreatAmericanSpring
     PRIVATE
         Source/PluginEditor.cpp
         Source/PluginEditor.h
         Source/PluginProcessor.cpp
-        Source/PluginProcessor.h)
+        Source/PluginProcessor.h
+        Source/DSP/ClipperCircuitModels.h
+        Source/DSP/DynamicsModels.h
+        Source/DSP/FeedbackBlock.h
+        Source/DSP/ModularFxChain.h
+        Source/DSP/RevCStages.h
+        Source/DSP/SaturationModels.h
+        Source/DSP/TankIRBlock.h
+        Source/DSP/WetDryMixerBlock.h)
 
 target_compile_definitions(TheGreatAmericanSpring
     PUBLIC
@@ -113,7 +158,7 @@ function(scc_copy_spring_irs_after_build target_name)
     endif()
 endfunction()
 
-foreach(format_name IN ITEMS Standalone VST VST3 LV2)
+foreach(format_name IN ITEMS Standalone VST VST3 LV2 AAX)
     scc_copy_spring_irs_after_build(TheGreatAmericanSpring_${format_name})
 endforeach()
 

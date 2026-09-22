@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "GAS_Parts")(type "KiCad")(uri "${KIPRJMOD}/GAS_Parts.kicad_sym")(options "")(descr "Illicit Apothecary GAS project symbols"))
+)

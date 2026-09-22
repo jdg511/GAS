@@ -1,0 +1,1186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="E">
+  <design>
+    <source>C:\Users\Jason\GAS-build\repo\hardware\kicad\revc\control-deck\control-deck.kicad_sch</source>
+    <date>2026-09-20T19:58:31</date>
+    <tool>Eeschema 10.0.6</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title>GAS Rev C - control deck (7 toggles, 6 dual pots, DC jack, harness headers)</title>
+        <company>Illicit Apothecary</company>
+        <rev>C</rev>
+        <date>2026-09-21</date>
+        <source>control-deck.kicad_sch</source>
+        <comment number="1" value="6 in round, controls face the endcap, headers on the back"/>
+        <comment number="2" value="Pot headers bottom half, switch headers top half: no net crosses the jack bar"/>
+        <comment number="3" value="Hand wired: HPF / LPF 4-gang pots and the footswitch jack"/>
+        <comment number="4" value="Bare board = endcap drilling template"/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="J5">
+      <value>DC IN 24-30 V centre +</value>
+      <footprint>GAS_Parts:BarrelJack_SameSky_PJ-064B_Vertical</footprint>
+      <fields>
+        <field name="MPN">PJ-064B</field>
+        <field name="Manufacturer">Same Sky</field>
+        <field name="Footprint">GAS_Parts:BarrelJack_SameSky_PJ-064B_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector" part="Barrel_Jack_Switch" description="DC Barrel Jack with an internal switch"/>
+      <property name="MPN" value="PJ-064B"/>
+      <property name="Manufacturer" value="Same Sky"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="DC power barrel jack connector"/>
+      <property name="ki_fp_filters" value="BarrelJack*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>42ab8fa0-9c1a-5bcd-8a28-441bd3fc9a25</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="3"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="P1">
+      <value>to io-board P4 (Vol, Output pots)</value>
+      <footprint>Connector_JST:JST_XH_B12B-XH-A_1x12_P2.50mm_Vertical</footprint>
+      <fields>
+        <field name="MPN">B12B-XH-A(LF)(SN)</field>
+        <field name="Manufacturer">JST</field>
+        <field name="Footprint">Connector_JST:JST_XH_B12B-XH-A_1x12_P2.50mm_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x12" description="Generic connector, single row, 01x12, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="MPN" value="B12B-XH-A(LF)(SN)"/>
+      <property name="Manufacturer" value="JST"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>4ddd7ced-a0c3-5462-b2de-07abfaf566fd</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+            <pin num="5"/>
+            <pin num="6"/>
+            <pin num="7"/>
+            <pin num="8"/>
+            <pin num="9"/>
+            <pin num="10"/>
+            <pin num="11"/>
+            <pin num="12"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="P2">
+      <value>to circuit-board P7 (Ext Mix, Feedback pots)</value>
+      <footprint>Connector_JST:JST_XH_B12B-XH-A_1x12_P2.50mm_Vertical</footprint>
+      <fields>
+        <field name="MPN">B12B-XH-A(LF)(SN)</field>
+        <field name="Manufacturer">JST</field>
+        <field name="Footprint">Connector_JST:JST_XH_B12B-XH-A_1x12_P2.50mm_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x12" description="Generic connector, single row, 01x12, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="MPN" value="B12B-XH-A(LF)(SN)"/>
+      <property name="Manufacturer" value="JST"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>b328b48d-0b99-55db-8581-5d95ea60050b</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+            <pin num="5"/>
+            <pin num="6"/>
+            <pin num="7"/>
+            <pin num="8"/>
+            <pin num="9"/>
+            <pin num="10"/>
+            <pin num="11"/>
+            <pin num="12"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="P3">
+      <value>to io-board P5 (Wet/Dry pot)</value>
+      <footprint>Connector_JST:JST_XH_B6B-XH-A_1x06_P2.50mm_Vertical</footprint>
+      <fields>
+        <field name="MPN">B6B-XH-A(LF)(SN)</field>
+        <field name="Manufacturer">JST</field>
+        <field name="Footprint">Connector_JST:JST_XH_B6B-XH-A_1x06_P2.50mm_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x06" description="Generic connector, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="MPN" value="B6B-XH-A(LF)(SN)"/>
+      <property name="Manufacturer" value="JST"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>5f9b9105-f4fe-545e-8910-65596beff890</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+            <pin num="5"/>
+            <pin num="6"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="P4">
+      <value>to circuit-board P9 (Gain pot)</value>
+      <footprint>Connector_JST:JST_XH_B6B-XH-A_1x06_P2.50mm_Vertical</footprint>
+      <fields>
+        <field name="MPN">B6B-XH-A(LF)(SN)</field>
+        <field name="Manufacturer">JST</field>
+        <field name="Footprint">Connector_JST:JST_XH_B6B-XH-A_1x06_P2.50mm_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x06" description="Generic connector, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="MPN" value="B6B-XH-A(LF)(SN)"/>
+      <property name="Manufacturer" value="JST"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>432da117-2ca1-554a-8348-6a129e2f9ba8</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+            <pin num="5"/>
+            <pin num="6"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="P5">
+      <value>to io-board P8 (Source, Tube, Tape switch lines)</value>
+      <footprint>Connector_JST:JST_XH_B5B-XH-A_1x05_P2.50mm_Vertical</footprint>
+      <fields>
+        <field name="MPN">B5B-XH-A(LF)(SN)</field>
+        <field name="Manufacturer">JST</field>
+        <field name="Footprint">Connector_JST:JST_XH_B5B-XH-A_1x05_P2.50mm_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x05" description="Generic connector, single row, 01x05, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="MPN" value="B5B-XH-A(LF)(SN)"/>
+      <property name="Manufacturer" value="JST"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>234c1e4c-5bfa-56d0-a92c-dc7743a9b6dc</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+            <pin num="5"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="P6">
+      <value>to circuit-board P8 (Dirt, FB Dyn, MEGAVERB, FB Phase)</value>
+      <footprint>Connector_JST:JST_XH_B7B-XH-A_1x07_P2.50mm_Vertical</footprint>
+      <fields>
+        <field name="MPN">B7B-XH-A(LF)(SN)</field>
+        <field name="Manufacturer">JST</field>
+        <field name="Footprint">Connector_JST:JST_XH_B7B-XH-A_1x07_P2.50mm_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x07" description="Generic connector, single row, 01x07, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="MPN" value="B7B-XH-A(LF)(SN)"/>
+      <property name="Manufacturer" value="JST"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>7a8ced6c-b14b-5ff3-a159-49c02b764c79</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+            <pin num="5"/>
+            <pin num="6"/>
+            <pin num="7"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="P7">
+      <value>to tank-board P5 (Ext tanks toggle)</value>
+      <footprint>Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical</footprint>
+      <fields>
+        <field name="MPN">B4B-XH-A(LF)(SN)</field>
+        <field name="Manufacturer">JST</field>
+        <field name="Footprint">Connector_JST:JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x04" description="Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="MPN" value="B4B-XH-A(LF)(SN)"/>
+      <property name="Manufacturer" value="JST"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>03cbb251-4644-5f07-81ed-934cbbc807bb</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="S1">
+      <value>Source: up Mono&gt;Stereo / centre Stereo / down MEGAVERB</value>
+      <footprint>GAS_Parts:SW_Toggle_CK7000_SPDT_PC_Vertical</footprint>
+      <fields>
+        <field name="MPN">1MS3T1B1M2QES-5</field>
+        <field name="Manufacturer">Dailywell</field>
+        <field name="Footprint">GAS_Parts:SW_Toggle_CK7000_SPDT_PC_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Switch" part="SW_SPDT" description="Switch, single pole double throw"/>
+      <property name="MPN" value="1MS3T1B1M2QES-5"/>
+      <property name="Manufacturer" value="Dailywell"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="switch single-pole double-throw spdt ON-ON"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>c6ff2470-f25e-53be-8f12-04cef3ba3285</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="S2">
+      <value>Ext tanks: up Series / centre Off / down Parallel</value>
+      <footprint>GAS_Parts:SW_Toggle_CK7000_DPDT_PC_Vertical</footprint>
+      <fields>
+        <field name="MPN">1MD3T1B1M2QES</field>
+        <field name="Manufacturer">Dailywell</field>
+        <field name="Footprint">GAS_Parts:SW_Toggle_CK7000_DPDT_PC_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Switch" part="SW_DPDT_x2" description="Switch, dual pole double throw, separate symbols"/>
+      <property name="MPN" value="1MD3T1B1M2QES"/>
+      <property name="Manufacturer" value="Dailywell"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="switch dual-pole double-throw DPDT spdt ON-ON"/>
+      <property name="ki_fp_filters" value="SW*DPDT*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>cf75de98-6361-5164-9acc-ee2b3ff61e52 a49f3a3f-de35-538a-9d23-d28422990aaa</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+        <unit name="B">
+          <pins>
+            <pin num="5"/>
+            <pin num="4"/>
+            <pin num="6"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="S3">
+      <value>FB Dyn: up Comp / centre Off / down Limit</value>
+      <footprint>GAS_Parts:SW_Toggle_CK7000_SPDT_PC_Vertical</footprint>
+      <fields>
+        <field name="MPN">1MS3T1B1M2QES-5</field>
+        <field name="Manufacturer">Dailywell</field>
+        <field name="Footprint">GAS_Parts:SW_Toggle_CK7000_SPDT_PC_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Switch" part="SW_SPDT" description="Switch, single pole double throw"/>
+      <property name="MPN" value="1MS3T1B1M2QES-5"/>
+      <property name="Manufacturer" value="Dailywell"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="switch single-pole double-throw spdt ON-ON"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>3510982a-a5ff-5246-b7dd-c2133c1b5f6e</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="S4">
+      <value>FB Phase: up normal / centre normal / down inverted</value>
+      <footprint>GAS_Parts:SW_Toggle_CK7000_SPDT_PC_Vertical</footprint>
+      <fields>
+        <field name="MPN">1MS3T1B1M2QES-5</field>
+        <field name="Manufacturer">Dailywell</field>
+        <field name="Footprint">GAS_Parts:SW_Toggle_CK7000_SPDT_PC_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Switch" part="SW_SPDT" description="Switch, single pole double throw"/>
+      <property name="MPN" value="1MS3T1B1M2QES-5"/>
+      <property name="Manufacturer" value="Dailywell"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="switch single-pole double-throw spdt ON-ON"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>a49abedd-4b5b-55ca-9480-5058a8648c5d</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="S5">
+      <value>Tube: up on / centre and down off (Vol section)</value>
+      <footprint>GAS_Parts:SW_Toggle_CK7000_SPDT_PC_Vertical</footprint>
+      <fields>
+        <field name="MPN">1MS3T1B1M2QES-5</field>
+        <field name="Manufacturer">Dailywell</field>
+        <field name="Footprint">GAS_Parts:SW_Toggle_CK7000_SPDT_PC_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Switch" part="SW_SPDT" description="Switch, single pole double throw"/>
+      <property name="MPN" value="1MS3T1B1M2QES-5"/>
+      <property name="Manufacturer" value="Dailywell"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="switch single-pole double-throw spdt ON-ON"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>d628ff07-ce5f-56e0-94fa-742c485b650a</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="S6">
+      <value>Dirt: up on / centre and down off (Gain section)</value>
+      <footprint>GAS_Parts:SW_Toggle_CK7000_SPDT_PC_Vertical</footprint>
+      <fields>
+        <field name="MPN">1MS3T1B1M2QES-5</field>
+        <field name="Manufacturer">Dailywell</field>
+        <field name="Footprint">GAS_Parts:SW_Toggle_CK7000_SPDT_PC_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Switch" part="SW_SPDT" description="Switch, single pole double throw"/>
+      <property name="MPN" value="1MS3T1B1M2QES-5"/>
+      <property name="Manufacturer" value="Dailywell"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="switch single-pole double-throw spdt ON-ON"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>ca5dd7fe-794f-50d0-a004-e9d336d4e2dd</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="S7">
+      <value>Tape: up on / centre and down off (Output section)</value>
+      <footprint>GAS_Parts:SW_Toggle_CK7000_SPDT_PC_Vertical</footprint>
+      <fields>
+        <field name="MPN">1MS3T1B1M2QES-5</field>
+        <field name="Manufacturer">Dailywell</field>
+        <field name="Footprint">GAS_Parts:SW_Toggle_CK7000_SPDT_PC_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Switch" part="SW_SPDT" description="Switch, single pole double throw"/>
+      <property name="MPN" value="1MS3T1B1M2QES-5"/>
+      <property name="Manufacturer" value="Dailywell"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="switch single-pole double-throw spdt ON-ON"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>acd8c7db-e44e-5974-a961-dcd85ee18941</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="2"/>
+            <pin num="1"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="VR1">
+      <value>Vol</value>
+      <footprint>Potentiometer_THT:Potentiometer_Alps_RK09L_Double_Vertical</footprint>
+      <description>dual 10k linear, vertical, 15 mm shaft, centre detent (marks 0 dB on Vol / Gain / Output)</description>
+      <fields>
+        <field name="MPN">RK09L1240015</field>
+        <field name="Manufacturer">Alps Alpine</field>
+        <field name="Footprint">Potentiometer_THT:Potentiometer_Alps_RK09L_Double_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description">dual 10k linear, vertical, 15 mm shaft, centre detent (marks 0 dB on Vol / Gain / Output)</field>
+      </fields>
+      <libsource lib="Device" part="R_Potentiometer_Dual_Separate" description="Dual potentiometer, separate units"/>
+      <property name="MPN" value="RK09L1240015"/>
+      <property name="Manufacturer" value="Alps Alpine"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="resistor variable"/>
+      <property name="ki_fp_filters" value="Potentiometer*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>61bb6c70-6ab4-5c08-bc36-32b37bd60dbe 06dfe80d-4bbe-5fea-b3f9-b4c29c566e5e</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="3"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+        <unit name="B">
+          <pins>
+            <pin num="4"/>
+            <pin num="6"/>
+            <pin num="5"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="VR3">
+      <value>Gain</value>
+      <footprint>Potentiometer_THT:Potentiometer_Alps_RK09L_Double_Vertical</footprint>
+      <description>dual 10k linear, vertical, 15 mm shaft, centre detent (marks 0 dB on Vol / Gain / Output)</description>
+      <fields>
+        <field name="MPN">RK09L1240015</field>
+        <field name="Manufacturer">Alps Alpine</field>
+        <field name="Footprint">Potentiometer_THT:Potentiometer_Alps_RK09L_Double_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description">dual 10k linear, vertical, 15 mm shaft, centre detent (marks 0 dB on Vol / Gain / Output)</field>
+      </fields>
+      <libsource lib="Device" part="R_Potentiometer_Dual_Separate" description="Dual potentiometer, separate units"/>
+      <property name="MPN" value="RK09L1240015"/>
+      <property name="Manufacturer" value="Alps Alpine"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="resistor variable"/>
+      <property name="ki_fp_filters" value="Potentiometer*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>4e9bf502-1131-5ed5-bd4f-95fb9eee6769 1015d126-419e-52d9-8e4d-32ed34bb13d9</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="3"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+        <unit name="B">
+          <pins>
+            <pin num="4"/>
+            <pin num="6"/>
+            <pin num="5"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="VR5">
+      <value>Output</value>
+      <footprint>Potentiometer_THT:Potentiometer_Alps_RK09L_Double_Vertical</footprint>
+      <description>dual 10k linear, vertical, 15 mm shaft, centre detent (marks 0 dB on Vol / Gain / Output)</description>
+      <fields>
+        <field name="MPN">RK09L1240015</field>
+        <field name="Manufacturer">Alps Alpine</field>
+        <field name="Footprint">Potentiometer_THT:Potentiometer_Alps_RK09L_Double_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description">dual 10k linear, vertical, 15 mm shaft, centre detent (marks 0 dB on Vol / Gain / Output)</field>
+      </fields>
+      <libsource lib="Device" part="R_Potentiometer_Dual_Separate" description="Dual potentiometer, separate units"/>
+      <property name="MPN" value="RK09L1240015"/>
+      <property name="Manufacturer" value="Alps Alpine"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="resistor variable"/>
+      <property name="ki_fp_filters" value="Potentiometer*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>c0f76dbf-c28b-5292-b1d1-f102fd39cfbc 394254d5-ad98-5979-a518-14eb1555ad0c</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="3"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+        <unit name="B">
+          <pins>
+            <pin num="4"/>
+            <pin num="6"/>
+            <pin num="5"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="VR6">
+      <value>Ext Mix</value>
+      <footprint>Potentiometer_THT:Potentiometer_Alps_RK09L_Double_Vertical</footprint>
+      <description>dual 10k linear, vertical, 15 mm shaft, centre detent (marks 0 dB on Vol / Gain / Output)</description>
+      <fields>
+        <field name="MPN">RK09L1240015</field>
+        <field name="Manufacturer">Alps Alpine</field>
+        <field name="Footprint">Potentiometer_THT:Potentiometer_Alps_RK09L_Double_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description">dual 10k linear, vertical, 15 mm shaft, centre detent (marks 0 dB on Vol / Gain / Output)</field>
+      </fields>
+      <libsource lib="Device" part="R_Potentiometer_Dual_Separate" description="Dual potentiometer, separate units"/>
+      <property name="MPN" value="RK09L1240015"/>
+      <property name="Manufacturer" value="Alps Alpine"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="resistor variable"/>
+      <property name="ki_fp_filters" value="Potentiometer*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>26a0cbc4-055c-5e11-8047-5d1fa1160b82 0da0da1e-88b6-553c-88d1-3618a3edfff6</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="3"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+        <unit name="B">
+          <pins>
+            <pin num="4"/>
+            <pin num="6"/>
+            <pin num="5"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="VR7">
+      <value>Feedback</value>
+      <footprint>Potentiometer_THT:Potentiometer_Alps_RK09L_Double_Vertical</footprint>
+      <description>dual 10k linear, vertical, 15 mm shaft, centre detent (marks 0 dB on Vol / Gain / Output)</description>
+      <fields>
+        <field name="MPN">RK09L1240015</field>
+        <field name="Manufacturer">Alps Alpine</field>
+        <field name="Footprint">Potentiometer_THT:Potentiometer_Alps_RK09L_Double_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description">dual 10k linear, vertical, 15 mm shaft, centre detent (marks 0 dB on Vol / Gain / Output)</field>
+      </fields>
+      <libsource lib="Device" part="R_Potentiometer_Dual_Separate" description="Dual potentiometer, separate units"/>
+      <property name="MPN" value="RK09L1240015"/>
+      <property name="Manufacturer" value="Alps Alpine"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="resistor variable"/>
+      <property name="ki_fp_filters" value="Potentiometer*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>7446a0e9-feda-54a6-9bc0-d7247f4faa05 300dea50-7958-50cb-a318-32501f2532ad</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="3"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+        <unit name="B">
+          <pins>
+            <pin num="4"/>
+            <pin num="6"/>
+            <pin num="5"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="VR8">
+      <value>Wet/Dry (CW = wet)</value>
+      <footprint>Potentiometer_THT:Potentiometer_Alps_RK09L_Double_Vertical</footprint>
+      <description>dual 10k linear, vertical, 15 mm shaft, centre detent (marks 0 dB on Vol / Gain / Output)</description>
+      <fields>
+        <field name="MPN">RK09L1240015</field>
+        <field name="Manufacturer">Alps Alpine</field>
+        <field name="Footprint">Potentiometer_THT:Potentiometer_Alps_RK09L_Double_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description">dual 10k linear, vertical, 15 mm shaft, centre detent (marks 0 dB on Vol / Gain / Output)</field>
+      </fields>
+      <libsource lib="Device" part="R_Potentiometer_Dual_Separate" description="Dual potentiometer, separate units"/>
+      <property name="MPN" value="RK09L1240015"/>
+      <property name="Manufacturer" value="Alps Alpine"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="ki_keywords" value="resistor variable"/>
+      <property name="ki_fp_filters" value="Potentiometer*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>ab83fbb7-653d-5c64-8563-d9396f311d00 a5ab3a7c-e924-5620-9ea7-15e2c7367f12</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="3"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+        <unit name="B">
+          <pins>
+            <pin num="4"/>
+            <pin num="6"/>
+            <pin num="5"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="W1">
+      <value>DC cable to power-board P1 (VH-2): centre +, sleeve</value>
+      <footprint>GAS_Parts:WirePads_1x02_P3.0mm_D1.2mm</footprint>
+      <description>hand-wired pads (no part fitted)</description>
+      <fields>
+        <field name="Footprint">GAS_Parts:WirePads_1x02_P3.0mm_D1.2mm</field>
+        <field name="Datasheet"/>
+        <field name="Description">hand-wired pads (no part fitted)</field>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x02" description="Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="control-deck"/>
+      <property name="Sheetfile" value="control-deck.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>5322eeb9-521b-514e-9f10-f2b43c02238b</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="Connector" part="Barrel_Jack_Switch">
+      <description>DC Barrel Jack with an internal switch</description>
+      <footprints>
+        <fp>BarrelJack*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Barrel_Jack_Switch</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">DC Barrel Jack with an internal switch</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+        <pin num="3" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_01x02">
+      <description>Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x02</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_01x04">
+      <description>Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x04</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_01x05">
+      <description>Generic connector, single row, 01x05, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x05</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x05, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+        <pin num="5" name="Pin_5" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_01x06">
+      <description>Generic connector, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x06</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+        <pin num="5" name="Pin_5" type="passive"/>
+        <pin num="6" name="Pin_6" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_01x07">
+      <description>Generic connector, single row, 01x07, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x07</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x07, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+        <pin num="5" name="Pin_5" type="passive"/>
+        <pin num="6" name="Pin_6" type="passive"/>
+        <pin num="7" name="Pin_7" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_01x12">
+      <description>Generic connector, single row, 01x12, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x12</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x12, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+        <pin num="5" name="Pin_5" type="passive"/>
+        <pin num="6" name="Pin_6" type="passive"/>
+        <pin num="7" name="Pin_7" type="passive"/>
+        <pin num="8" name="Pin_8" type="passive"/>
+        <pin num="9" name="Pin_9" type="passive"/>
+        <pin num="10" name="Pin_10" type="passive"/>
+        <pin num="11" name="Pin_11" type="passive"/>
+        <pin num="12" name="Pin_12" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R_Potentiometer_Dual_Separate">
+      <description>Dual potentiometer, separate units</description>
+      <footprints>
+        <fp>Potentiometer*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">RV</field>
+        <field name="Value">R_Potentiometer_Dual_Separate</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Dual potentiometer, separate units</field>
+        <field name="Sim.Library">${KICAD9_SYMBOL_DIR}/Simulation_SPICE.sp</field>
+        <field name="Sim.Name">pot_dual</field>
+        <field name="Sim.Device">SUBCKT</field>
+        <field name="Sim.Pins">1=r1A 2=wA 3=r0A 4=r1B 5=wB 6=r0B</field>
+        <field name="Sim.Params">Rtot=1 wpos=0.4</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+        <pin num="3" name="3" type="passive"/>
+        <pin num="4" name="4" type="passive"/>
+        <pin num="5" name="5" type="passive"/>
+        <pin num="6" name="6" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Switch" part="SW_DPDT_x2">
+      <description>Switch, dual pole double throw, separate symbols</description>
+      <footprints>
+        <fp>SW*DPDT*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">SW</field>
+        <field name="Value">SW_DPDT_x2</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Switch, dual pole double throw, separate symbols</field>
+      </fields>
+      <pins>
+        <pin num="1" name="A" type="passive"/>
+        <pin num="2" name="B" type="passive"/>
+        <pin num="3" name="C" type="passive"/>
+        <pin num="4" name="A" type="passive"/>
+        <pin num="5" name="B" type="passive"/>
+        <pin num="6" name="C" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Switch" part="SW_SPDT">
+      <description>Switch, single pole double throw</description>
+      <fields>
+        <field name="Reference">SW</field>
+        <field name="Value">SW_SPDT</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Switch, single pole double throw</field>
+      </fields>
+      <pins>
+        <pin num="1" name="A" type="passive"/>
+        <pin num="2" name="B" type="passive"/>
+        <pin num="3" name="C" type="passive"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="Connector">
+      <uri>${KICAD10_SYMBOL_DIR}/Connector.kicad_sym</uri>
+    </library>
+    <library logical="Connector_Generic">
+      <uri>${KICAD10_SYMBOL_DIR}/Connector_Generic.kicad_sym</uri>
+    </library>
+    <library logical="Device">
+      <uri>${KICAD10_SYMBOL_DIR}/Device.kicad_sym</uri>
+    </library>
+    <library logical="Switch">
+      <uri>${KICAD10_SYMBOL_DIR}/Switch.kicad_sym</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="+5VAUX" class="Power">
+      <node ref="P5" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="P6" pin="6" pinfunction="Pin_6_6" pintype="passive"/>
+      <node ref="P7" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="S1" pin="2" pinfunction="B_2" pintype="passive"/>
+      <node ref="S2" pin="2" pinfunction="B_2" pintype="passive"/>
+      <node ref="S2" pin="5" pinfunction="B_5" pintype="passive"/>
+      <node ref="S3" pin="2" pinfunction="B_2" pintype="passive"/>
+      <node ref="S4" pin="2" pinfunction="B_2" pintype="passive"/>
+      <node ref="S5" pin="2" pinfunction="B_2" pintype="passive"/>
+      <node ref="S6" pin="2" pinfunction="B_2" pintype="passive"/>
+      <node ref="S7" pin="2" pinfunction="B_2" pintype="passive"/>
+    </net>
+    <net code="2" name="AGND" class="Default">
+      <node ref="P2" pin="12" pinfunction="Pin_12_12" pintype="passive"/>
+      <node ref="P2" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="P2" pin="6" pinfunction="Pin_6_6" pintype="passive"/>
+      <node ref="P2" pin="9" pinfunction="Pin_9_9" pintype="passive"/>
+      <node ref="P5" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
+      <node ref="P6" pin="7" pinfunction="Pin_7_7" pintype="passive"/>
+      <node ref="P7" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="VR6" pin="1" pinfunction="1_1" pintype="passive"/>
+      <node ref="VR6" pin="4" pinfunction="4_4" pintype="passive"/>
+      <node ref="VR7" pin="1" pinfunction="1_1" pintype="passive"/>
+      <node ref="VR7" pin="4" pinfunction="4_4" pintype="passive"/>
+    </net>
+    <net code="3" name="CTL_COMP" class="Default">
+      <node ref="P6" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="S3" pin="3" pinfunction="C_3" pintype="passive"/>
+    </net>
+    <net code="4" name="CTL_DIRT" class="Default">
+      <node ref="P6" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="S6" pin="3" pinfunction="C_3" pintype="passive"/>
+    </net>
+    <net code="5" name="CTL_EXT_A" class="Default">
+      <node ref="P7" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="S2" pin="1" pinfunction="A_1" pintype="passive"/>
+      <node ref="S2" pin="3" pinfunction="C_3" pintype="passive"/>
+    </net>
+    <net code="6" name="CTL_EXT_B" class="Default">
+      <node ref="P7" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="S2" pin="4" pinfunction="A_4" pintype="passive"/>
+    </net>
+    <net code="7" name="CTL_FB_INV" class="Default">
+      <node ref="P6" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
+      <node ref="S4" pin="1" pinfunction="A_1" pintype="passive"/>
+    </net>
+    <net code="8" name="CTL_LIMIT" class="Default">
+      <node ref="P6" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="S3" pin="1" pinfunction="A_1" pintype="passive"/>
+    </net>
+    <net code="9" name="CTL_MEGA" class="Default">
+      <node ref="P6" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="S1" pin="1" pinfunction="A_1" pintype="passive"/>
+    </net>
+    <net code="10" name="CTL_MONO" class="Default">
+      <node ref="P5" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="S1" pin="3" pinfunction="C_3" pintype="passive"/>
+    </net>
+    <net code="11" name="CTL_TAPE" class="Default">
+      <node ref="P5" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="S7" pin="3" pinfunction="C_3" pintype="passive"/>
+    </net>
+    <net code="12" name="CTL_TUBE" class="Default">
+      <node ref="P5" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="S5" pin="3" pinfunction="C_3" pintype="passive"/>
+    </net>
+    <net code="13" name="EXM_L_W" class="Default">
+      <node ref="P2" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="VR6" pin="2" pinfunction="2_2" pintype="passive"/>
+    </net>
+    <net code="14" name="EXM_R_W" class="Default">
+      <node ref="P2" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
+      <node ref="VR6" pin="5" pinfunction="5_5" pintype="passive"/>
+    </net>
+    <net code="15" name="FBP_L_W" class="Default">
+      <node ref="P2" pin="8" pinfunction="Pin_8_8" pintype="passive"/>
+      <node ref="VR7" pin="2" pinfunction="2_2" pintype="passive"/>
+    </net>
+    <net code="16" name="FBP_R_W" class="Default">
+      <node ref="P2" pin="11" pinfunction="Pin_11_11" pintype="passive"/>
+      <node ref="VR7" pin="5" pinfunction="5_5" pintype="passive"/>
+    </net>
+    <net code="17" name="GAIN_L_HI" class="Default">
+      <node ref="P4" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="VR3" pin="3" pinfunction="3_3" pintype="passive"/>
+    </net>
+    <net code="18" name="GAIN_L_LO" class="Default">
+      <node ref="P4" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="VR3" pin="1" pinfunction="1_1" pintype="passive"/>
+    </net>
+    <net code="19" name="GAIN_L_W" class="Default">
+      <node ref="P4" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="VR3" pin="2" pinfunction="2_2" pintype="passive"/>
+    </net>
+    <net code="20" name="GAIN_R_HI" class="Default">
+      <node ref="P4" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="VR3" pin="6" pinfunction="6_6" pintype="passive"/>
+    </net>
+    <net code="21" name="GAIN_R_LO" class="Default">
+      <node ref="P4" pin="6" pinfunction="Pin_6_6" pintype="passive"/>
+      <node ref="VR3" pin="4" pinfunction="4_4" pintype="passive"/>
+    </net>
+    <net code="22" name="GAIN_R_W" class="Default">
+      <node ref="P4" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
+      <node ref="VR3" pin="5" pinfunction="5_5" pintype="passive"/>
+    </net>
+    <net code="23" name="L_PROG" class="Default">
+      <node ref="P3" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="VR8" pin="1" pinfunction="1_1" pintype="passive"/>
+    </net>
+    <net code="24" name="OUT_L_HI" class="Default">
+      <node ref="P1" pin="7" pinfunction="Pin_7_7" pintype="passive"/>
+      <node ref="VR5" pin="3" pinfunction="3_3" pintype="passive"/>
+    </net>
+    <net code="25" name="OUT_L_LO" class="Default">
+      <node ref="P1" pin="9" pinfunction="Pin_9_9" pintype="passive"/>
+      <node ref="VR5" pin="1" pinfunction="1_1" pintype="passive"/>
+    </net>
+    <net code="26" name="OUT_L_W" class="Default">
+      <node ref="P1" pin="8" pinfunction="Pin_8_8" pintype="passive"/>
+      <node ref="VR5" pin="2" pinfunction="2_2" pintype="passive"/>
+    </net>
+    <net code="27" name="OUT_R_HI" class="Default">
+      <node ref="P1" pin="10" pinfunction="Pin_10_10" pintype="passive"/>
+      <node ref="VR5" pin="6" pinfunction="6_6" pintype="passive"/>
+    </net>
+    <net code="28" name="OUT_R_LO" class="Default">
+      <node ref="P1" pin="12" pinfunction="Pin_12_12" pintype="passive"/>
+      <node ref="VR5" pin="4" pinfunction="4_4" pintype="passive"/>
+    </net>
+    <net code="29" name="OUT_R_W" class="Default">
+      <node ref="P1" pin="11" pinfunction="Pin_11_11" pintype="passive"/>
+      <node ref="VR5" pin="5" pinfunction="5_5" pintype="passive"/>
+    </net>
+    <net code="30" name="PGND" class="Power">
+      <node ref="J5" pin="2" pintype="passive"/>
+      <node ref="J5" pin="3" pintype="passive"/>
+      <node ref="W1" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+    </net>
+    <net code="31" name="R_PROG" class="Default">
+      <node ref="P3" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="VR8" pin="4" pinfunction="4_4" pintype="passive"/>
+    </net>
+    <net code="32" name="SEC_BUF_L" class="Default">
+      <node ref="P2" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="VR6" pin="3" pinfunction="3_3" pintype="passive"/>
+    </net>
+    <net code="33" name="SEC_BUF_R" class="Default">
+      <node ref="P2" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="VR6" pin="6" pinfunction="6_6" pintype="passive"/>
+    </net>
+    <net code="34" name="VIN_RAW" class="Power">
+      <node ref="J5" pin="1" pintype="passive"/>
+      <node ref="W1" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+    </net>
+    <net code="35" name="VOL_L_HI" class="Default">
+      <node ref="P1" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="VR1" pin="3" pinfunction="3_3" pintype="passive"/>
+    </net>
+    <net code="36" name="VOL_L_LO" class="Default">
+      <node ref="P1" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="VR1" pin="1" pinfunction="1_1" pintype="passive"/>
+    </net>
+    <net code="37" name="VOL_L_W" class="Default">
+      <node ref="P1" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="VR1" pin="2" pinfunction="2_2" pintype="passive"/>
+    </net>
+    <net code="38" name="VOL_R_HI" class="Default">
+      <node ref="P1" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="VR1" pin="6" pinfunction="6_6" pintype="passive"/>
+    </net>
+    <net code="39" name="VOL_R_LO" class="Default">
+      <node ref="P1" pin="6" pinfunction="Pin_6_6" pintype="passive"/>
+      <node ref="VR1" pin="4" pinfunction="4_4" pintype="passive"/>
+    </net>
+    <net code="40" name="VOL_R_W" class="Default">
+      <node ref="P1" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
+      <node ref="VR1" pin="5" pinfunction="5_5" pintype="passive"/>
+    </net>
+    <net code="41" name="WD_L_W" class="Default">
+      <node ref="P3" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="VR8" pin="2" pinfunction="2_2" pintype="passive"/>
+    </net>
+    <net code="42" name="WD_R_W" class="Default">
+      <node ref="P3" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
+      <node ref="VR8" pin="5" pinfunction="5_5" pintype="passive"/>
+    </net>
+    <net code="43" name="WET_L" class="Default">
+      <node ref="P3" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="VR8" pin="3" pinfunction="3_3" pintype="passive"/>
+    </net>
+    <net code="44" name="WET_R" class="Default">
+      <node ref="P3" pin="6" pinfunction="Pin_6_6" pintype="passive"/>
+      <node ref="VR8" pin="6" pinfunction="6_6" pintype="passive"/>
+    </net>
+    <net code="45" name="WET_RAW_L" class="Default">
+      <node ref="P2" pin="7" pinfunction="Pin_7_7" pintype="passive"/>
+      <node ref="VR7" pin="3" pinfunction="3_3" pintype="passive"/>
+    </net>
+    <net code="46" name="WET_RAW_R" class="Default">
+      <node ref="P2" pin="10" pinfunction="Pin_10_10" pintype="passive"/>
+      <node ref="VR7" pin="6" pinfunction="6_6" pintype="passive"/>
+    </net>
+    <net code="47" name="unconnected-(S2B-C-Pad6)" class="Default">
+      <node ref="S2" pin="6" pinfunction="C_6" pintype="passive+no_connect"/>
+    </net>
+    <net code="48" name="unconnected-(S4-C-Pad3)" class="Default">
+      <node ref="S4" pin="3" pinfunction="C_3" pintype="passive+no_connect"/>
+    </net>
+    <net code="49" name="unconnected-(S5-A-Pad1)" class="Default">
+      <node ref="S5" pin="1" pinfunction="A_1" pintype="passive+no_connect"/>
+    </net>
+    <net code="50" name="unconnected-(S6-A-Pad1)" class="Default">
+      <node ref="S6" pin="1" pinfunction="A_1" pintype="passive+no_connect"/>
+    </net>
+    <net code="51" name="unconnected-(S7-A-Pad1)" class="Default">
+      <node ref="S7" pin="1" pinfunction="A_1" pintype="passive+no_connect"/>
+    </net>
+  </nets>
+</export>

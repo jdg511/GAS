@@ -1,0 +1,3 @@
+Item,Designator,Qty,Value,Package,MPN,Manufacturer,Description,DNP
+1,P1,1,to circuit-board P5 (HPF) or P6 (LPF),JST_XH_B8B-XH-A_1x08_P2.50mm_Vertical,B8B-XH-A(LF)(SN),JST,"1:1 with circuit P5 / P6: (HI, wiper) per gang, gang 1 nearest the panel",
+2,VR1,1,50k lin x4,Pot_Bourns_PTD904_SideAdjust,PTD904-2015K-B503,Bourns,"4-gang 50k linear, M7x0.75, 15 mm shaft, side adjust. Gang 1 is nearest the panel",

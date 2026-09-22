@@ -1,0 +1,70 @@
+** Drc report for tank-driver-recovery.kicad_pcb **
+** Created on 2026-09-15T16:16:49 **
+** Report includes: Errors **
+
+** Found 0 DRC violations **
+
+** Found 13 unconnected pads **
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on B.Cu, priority 0
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on B.Cu, priority 0
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on B.Cu, priority 0
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+    @(0.5000 mm, 0.5000 mm): Zone [AGND] on F.Cu, priority 0
+
+** Found 0 Footprint errors **
+
+** Ignored checks **
+    - Footprint has no courtyard defined
+    - Track endpoint not centered on via
+    - Tuning profile track geometries
+    - Footprint doesn't match symbol's footprint filters
+    - Footprint component type doesn't match footprint pads
+
+** End of Report **

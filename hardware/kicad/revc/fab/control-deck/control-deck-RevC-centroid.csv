@@ -1,0 +1,25 @@
+Ref,Val,Package,PosX,PosY,Rot,Side
+"P1","to io-board P4 (Vol, Output pots)","JST_XH_B12B-XH-A_1x12_P2.50mm_Vertical",63.950000,-92.200000,180.000000,bottom
+"P2","to circuit-board P7 (Ext Mix, Feedback pots)","JST_XH_B12B-XH-A_1x12_P2.50mm_Vertical",115.950000,-92.200000,180.000000,bottom
+"P3","to io-board P5 (Wet/Dry pot)","JST_XH_B6B-XH-A_1x06_P2.50mm_Vertical",64.450000,-132.200000,180.000000,bottom
+"P4","to circuit-board P9 (Gain pot)","JST_XH_B6B-XH-A_1x06_P2.50mm_Vertical",100.450000,-132.200000,180.000000,bottom
+"P5","to io-board P8 (Source, Tube, Tape switch lines)","JST_XH_B5B-XH-A_1x05_P2.50mm_Vertical",47.200000,-20.200000,180.000000,bottom
+"P6","to circuit-board P8 (Dirt, FB Dyn, MEGAVERB, FB Phase)","JST_XH_B7B-XH-A_1x07_P2.50mm_Vertical",73.700000,-20.200000,180.000000,bottom
+"P7","to tank-board P5 (Ext tanks toggle)","JST_XH_B4B-XH-A_1x04_P2.50mm_Vertical",91.950000,-20.200000,180.000000,bottom
+"P8","FOOTSWITCH (to jack-board P4): tip, sleeve","JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical",117.450000,-20.200000,180.000000,bottom
+"P9","DC OUT (to power-board P1): centre +, sleeve","JST_VH_B2P-VH_1x02_P3.96mm_Vertical",106.180000,-20.200000,180.000000,bottom
+"J5","DC IN 24-30 V centre +","BarrelJack_SameSky_PJ-064B_Vertical",76.200000,-10.200000,0.000000,top
+"J6","FOOTSW 3.5 mm","Jack_3.5mm_PJ-301C_Vertical",76.200000,-90.200000,0.000000,top
+"S1","Source: up Mono>Stereo / centre Stereo / down MEGAVERB","SW_Toggle_CK7000_SPDT_PC_Vertical",25.200000,-33.200000,0.000000,top
+"S2","Ext tanks: up Series / centre Off / down Parallel","SW_Toggle_CK7000_DPDT_PC_Vertical",93.200000,-33.200000,0.000000,top
+"S3","FB Dyn: up Comp / centre Off / down Limit","SW_Toggle_CK7000_SPDT_PC_Vertical",110.200000,-33.200000,0.000000,top
+"S4","FB Phase: up normal / centre normal / down inverted","SW_Toggle_CK7000_SPDT_PC_Vertical",127.200000,-33.200000,0.000000,top
+"S5","Tube: up on / centre and down off (Vol section)","SW_Toggle_CK7000_SPDT_PC_Vertical",42.200000,-33.200000,0.000000,top
+"S6","Dirt: up on / centre and down off (Gain section)","SW_Toggle_CK7000_SPDT_PC_Vertical",59.200000,-33.200000,0.000000,top
+"S7","Tape: up on / centre and down off (Output section)","SW_Toggle_CK7000_SPDT_PC_Vertical",76.200000,-33.200000,0.000000,top
+"VR1","Vol","Potentiometer_Alps_RK09L_Double_Vertical",27.000000,-100.250000,180.000000,top
+"VR3","Gain","Potentiometer_Alps_RK09L_Double_Vertical",78.700000,-129.200000,-90.000000,top
+"VR5","Output","Potentiometer_Alps_RK09L_Double_Vertical",125.400000,-95.250000,0.000000,top
+"VR6","Ext Mix","Potentiometer_Alps_RK09L_Double_Vertical",48.200000,-109.700000,90.000000,top
+"VR7","Feedback","Potentiometer_Alps_RK09L_Double_Vertical",73.700000,-123.200000,90.000000,top
+"VR8","Wet/Dry (CW = wet)","Potentiometer_Alps_RK09L_Double_Vertical",99.200000,-109.700000,90.000000,top

@@ -1,0 +1,46 @@
+** Drc report for tank-board.kicad_pcb **
+** Created on 2026-09-15T18:23:11 **
+** Report includes: Errors, Warnings, Exclusions **
+
+** Found 7 DRC violations **
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(33.6000 mm, 147.9900 mm): Reference field of J2
+    @(34.9500 mm, 147.6500 mm): NPTH pad of J3
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(46.7000 mm, 147.9900 mm): Reference field of J3
+    @(48.0500 mm, 147.6500 mm): NPTH pad of J4
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(20.5000 mm, 147.9900 mm): Reference field of J1
+    @(21.8500 mm, 147.6500 mm): NPTH pad of J2
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(86.0000 mm, 147.9900 mm): Reference field of J6
+    @(87.3500 mm, 147.6500 mm): NPTH pad of J7
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(99.1000 mm, 147.9900 mm): Reference field of J7
+    @(100.4500 mm, 147.6500 mm): NPTH pad of J8
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(72.9000 mm, 147.9900 mm): Reference field of J5
+    @(74.2500 mm, 147.6500 mm): NPTH pad of J6
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(59.8000 mm, 147.9900 mm): Reference field of J4
+    @(61.1500 mm, 147.6500 mm): NPTH pad of J5
+
+** Found 0 unconnected pads **
+
+** Found 0 Footprint errors **
+
+** Ignored checks **
+    - Footprint has no courtyard defined
+    - Track endpoint not centered on via
+    - Tuning profile track geometries
+    - Footprint doesn't match symbol's footprint filters
+    - Footprint component type doesn't match footprint pads
+
+** End of Report **
