@@ -18,7 +18,7 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
+          cmake -S . -B build -A x64 `
             -DSCC_BASE_PLUGIN_FORMATS="Standalone;VST3" `
             -DSCC_DEPLOY_WINDOWS_VST3_AFTER_BUILD=OFF
 
