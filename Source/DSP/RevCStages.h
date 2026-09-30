@@ -30,8 +30,18 @@ inline constexpr size_t kOversamplingFactor = size_t (1) << kOversamplingOrder;
                          runs the tube as well, ahead of the tape.
 
       DirtDynamicsBlock  where the Rev B mode circuit sat: pre-HPF -> Gain knob
-                         ("pull for Dirt" = Tube Screamer) -> Comp / Off / Limit
-                         switch (vactrol compressor / THAT2180 limiter) -> post-LPF.
+                         ("pull for Dirt" = Tube Screamer) -> post-LPF. It still
+                         carries the Comp / Off / Limit code, but the wet path now
+                         always passes Dynamics::off (see below).
+
+      FeedbackDynamicsBlock
+                         the Comp / Off / Limit switch itself (MMBF5457 FET
+                         compressor / Coolaudio V2181 limiter), moved by
+                         signal-path diagram v4 (2026-09-30) out of the wet path
+                         and into the feedback RETURN leg, between the Feedback
+                         Fb% block and the Fb In summer, so its job is holding the
+                         loop down rather than shaping what you hear. Threshold
+                         dropped 6 dB at the same time, to -24 dBFS.
 
     Every nonlinear circuit runs 4x oversampled (as the Rev B plugin did). Engaging a circuit crossfades
     over about 15 ms so a pull never clicks; the fade happens INSIDE the chain
@@ -45,9 +55,20 @@ class TubeTapeStage
 public:
     void prepare (double sampleRate, int maximumBlockSize)
     {
+        // The last flag asks for integer latency, so the delay this stage adds is a
+        // whole number of samples and the bypass below can match it exactly.
         oversampling = std::make_unique<juce::dsp::Oversampling<float>> (2, gas::revc::kOversamplingOrder,
-                            juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR, true);
+                            juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR, true, true);
         oversampling->initProcessing (static_cast<size_t> (maximumBlockSize));
+
+        juce::dsp::ProcessSpec stereoSpec;
+        stereoSpec.sampleRate = sampleRate;
+        stereoSpec.maximumBlockSize = static_cast<juce::uint32> (juce::jmax (1, maximumBlockSize));
+        stereoSpec.numChannels = 2;
+
+        bypassDelay.prepare (stereoSpec);
+        bypassDelay.setMaximumDelayInSamples (juce::jmax (1, static_cast<int> (std::ceil (oversampling->getLatencyInSamples())) + 2));
+        bypassDelay.setDelay (oversampling->getLatencyInSamples());
 
         const auto oversampledRate = sampleRate * static_cast<double> (gas::revc::kOversamplingFactor);
 
@@ -69,10 +90,18 @@ public:
         if (oversampling != nullptr)
             oversampling->reset();
 
+        bypassDelay.reset();
+
         for (auto& t : triodes) t.reset();
         for (auto& t : tapes)   t.reset();
         dcX1 = { { 0.0f, 0.0f } };
         dcY1 = { { 0.0f, 0.0f } };
+    }
+
+    /** Samples of delay this stage adds. The same either way, engaged or bypassed. */
+    float getLatencyInSamples() const
+    {
+        return oversampling != nullptr ? oversampling->getLatencyInSamples() : 0.0f;
     }
 
     void setEnabled (bool tube, bool tape)
@@ -88,8 +117,28 @@ public:
     {
         const auto tubeActive = tubeMix.getTargetValue() > 0.5f || tubeMix.isSmoothing();
         const auto tapeActive = tapeMix.getTargetValue() > 0.5f || tapeMix.isSmoothing();
+        const auto engaged = tubeActive || tapeActive;
 
-        if (! tubeActive && ! tapeActive)
+        // The compensation delay is fed on every block, engaged or not, for two
+        // reasons: the plugin's delay stays the same whichever way the switches sit, so
+        // flipping Tube or Tape cannot shift its timing under the host, and the line
+        // always holds current audio, so the changeover never plays out stale samples.
+        for (int channel = 0; channel < 2; ++channel)
+        {
+            auto* samples = stereo.getWritePointer (channel);
+
+            for (int i = 0; i < numSamples; ++i)
+            {
+                bypassDelay.pushSample (channel, samples[i]);
+                const auto delayed = bypassDelay.popSample (channel);
+
+                // Only the bypass takes it; the oversampler supplies the delay itself.
+                if (! engaged)
+                    samples[i] = delayed;
+            }
+        }
+
+        if (! engaged)
         {
             tubeMix.skip (numSamples);
             tapeMix.skip (numSamples);
@@ -160,6 +209,9 @@ public:
 
 private:
     std::unique_ptr<juce::dsp::Oversampling<float>> oversampling;
+    // Matches the oversampler's delay when the circuit is bypassed. Integer latency is
+    // requested above, so plain (uninterpolated) taps land exactly right.
+    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::None> bypassDelay { 64 };
     std::array<gas::saturation::JfetTubeStage, 2> triodes;
     std::array<gas::saturation::TapeDiffPairStage, 2> tapes;
     juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> tubeMix, tapeMix;
@@ -168,7 +220,13 @@ private:
 };
 
 //==============================================================================
-/** Pre-HPF -> Gain -> [Tube Screamer] -> [Comp | Off | Limit] -> post-LPF. */
+/** Pre-HPF -> Gain -> [Tube Screamer] -> [Comp | Off | Limit] -> post-LPF.
+
+    2026-09-30: the wet path now passes Dynamics::off here every block, because the
+    Comp / Off / Limit circuit was moved into the feedback return leg (see
+    FeedbackDynamicsBlock below). The dynamics code is left in place rather than
+    stripped out, so the block still matches the Rev B board it came from and the move
+    is one line in the processor if it ever needs to come back. */
 class DirtDynamicsBlock
 {
 public:
@@ -194,14 +252,25 @@ public:
     void prepare (double sampleRate, int maximumBlockSize)
     {
         currentSampleRate = sampleRate;
+        // Integer latency, matched by bypassDelay below, so engaging Dirt or the
+        // Comp / Limit circuit does not move the wet path in time.
         oversampling = std::make_unique<juce::dsp::Oversampling<float>> (2, gas::revc::kOversamplingOrder,
-                            juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR, true);
+                            juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR, true, true);
         oversampling->initProcessing (static_cast<size_t> (maximumBlockSize));
+
+        juce::dsp::ProcessSpec stereoSpec;
+        stereoSpec.sampleRate = sampleRate;
+        stereoSpec.maximumBlockSize = static_cast<juce::uint32> (juce::jmax (1, maximumBlockSize));
+        stereoSpec.numChannels = 2;
+
+        bypassDelay.prepare (stereoSpec);
+        bypassDelay.setMaximumDelayInSamples (juce::jmax (1, static_cast<int> (std::ceil (oversampling->getLatencyInSamples())) + 2));
+        bypassDelay.setDelay (oversampling->getLatencyInSamples());
 
         getTubeScreamerCurve();
 
         const auto oversampledRate = sampleRate * static_cast<double> (gas::revc::kOversamplingFactor);
-        opto.prepare (oversampledRate);
+        fet.prepare (oversampledRate);
         vca.prepare (oversampledRate);
 
         for (auto& f : preHpf)  { f.reset(); f.setType (juce::dsp::StateVariableTPTFilterType::highpass); }
@@ -225,13 +294,21 @@ public:
         if (oversampling != nullptr)
             oversampling->reset();
 
+        bypassDelay.reset();
+
         for (auto& f : preHpf)  f.reset();
         for (auto& f : postLpf) f.reset();
-        opto.reset();
+        fet.reset();
         vca.reset();
         gainDb.setCurrentAndTargetValue (gainDb.getTargetValue());
         preHpfCutoffHz.setCurrentAndTargetValue (preHpfCutoffHz.getTargetValue());
         postLpfCutoffHz.setCurrentAndTargetValue (postLpfCutoffHz.getTargetValue());
+    }
+
+    /** Samples of delay this block adds. The same either way, engaged or bypassed. */
+    float getLatencyInSamples() const
+    {
+        return oversampling != nullptr ? oversampling->getLatencyInSamples() : 0.0f;
     }
 
     void setParameters (const Parameters& p)
@@ -262,7 +339,7 @@ public:
 
         if (dynamicsChanged.exchange (false, std::memory_order_relaxed))
         {
-            opto.reset();
+            fet.reset();
             vca.reset();
         }
 
@@ -279,6 +356,19 @@ public:
 
         if (dirtActive || dynamicsActive)
         {
+            // Keep the compensation line current even though the oversampler is
+            // supplying the delay, so the changeover never plays out stale samples.
+            for (int channel = 0; channel < 2; ++channel)
+            {
+                const auto* samples = stereo.getReadPointer (channel);
+
+                for (int i = 0; i < numSamples; ++i)
+                {
+                    bypassDelay.pushSample (channel, samples[i]);
+                    bypassDelay.popSample (channel);
+                }
+            }
+
             for (int i = 0; i < numSamples; ++i)
                 dirtRamp[static_cast<size_t> (i)] = dirtMix.getNextValue();
 
@@ -304,7 +394,7 @@ public:
 
                 switch (activeDynamics)
                 {
-                    case Dynamics::comp:  opto.process (xl, xr); break;
+                    case Dynamics::comp:  fet.process (xl, xr); break;
                     case Dynamics::limit: vca.process (xl, xr); break;
                     case Dynamics::off:
                     default: break;
@@ -316,13 +406,26 @@ public:
 
             oversampling->processSamplesDown (base);
 
-            gainReductionDb.store (activeDynamics == Dynamics::comp  ? opto.getGainReductionDb()
+            gainReductionDb.store (activeDynamics == Dynamics::comp  ? fet.getGainReductionDb()
                                  : activeDynamics == Dynamics::limit ? vca.getGainReductionDb()
                                                                      : 0.0f,
                                    std::memory_order_relaxed);
         }
         else
         {
+            // Bypassed, so pay the oversampler's delay by hand and keep the wet path
+            // the same length whichever way Dirt and the dynamics switch sit.
+            for (int channel = 0; channel < 2; ++channel)
+            {
+                auto* samples = stereo.getWritePointer (channel);
+
+                for (int i = 0; i < numSamples; ++i)
+                {
+                    bypassDelay.pushSample (channel, samples[i]);
+                    samples[i] = bypassDelay.popSample (channel);
+                }
+            }
+
             dirtMix.skip (numSamples);
             gainReductionDb.store (0.0f, std::memory_order_relaxed);
         }
@@ -379,7 +482,122 @@ private:
     juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> gainDb, preHpfCutoffHz, postLpfCutoffHz, dirtMix;
     std::vector<float> dirtRamp;
     std::array<juce::dsp::StateVariableTPTFilter<float>, 2> preHpf, postLpf;
-    gas::dynamics::OptoCompressor opto;
+    gas::dynamics::FetCompressor fet;   // Rev C Comp: MMBF5457, refs 12xx
     gas::dynamics::VcaLimiter vca;
+    std::unique_ptr<juce::dsp::Oversampling<float>> oversampling;
+    // Stands in for the oversampler's delay while the circuit is bypassed.
+    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::None> bypassDelay { 64 };
+};
+
+//==============================================================================
+/** The Comp / Off / Limit circuit on its own, sitting in the FEEDBACK RETURN leg.
+
+    Signal-path diagram v4 (2026-09-30) takes the dynamics circuit out of the wet path
+    and puts it between the Feedback Fb% block and the Fb In summer, so what it acts on
+    is the signal going back round the loop, not the signal going to the output. That
+    makes it a loop tamer: with Fb turned up, Comp or Limit holds the recirculation down
+    instead of letting it run away, and the wet signal you actually hear keeps whatever
+    dynamics the tanks and the Dirt stage gave it.
+
+    Nothing else from DirtDynamicsBlock comes along: no Gain knob, no Tube Screamer and
+    no filters, just the circuit and the oversampling its nonlinearity needs so nothing
+    aliases back into the loop.
+
+    No bypass delay line here, unlike DirtDynamicsBlock. That one matches the
+    oversampler's latency so the wet path stays the same length whichever way the switch
+    sits; here the block is inside the feedback loop, where the only effect of a few
+    samples either way is that the loop is a hair shorter with the circuit switched off,
+    against a feedback delay measured in tens of milliseconds.
+*/
+class FeedbackDynamicsBlock
+{
+public:
+    using Dynamics = DirtDynamicsBlock::Dynamics;
+
+    void prepare (double sampleRate, int maximumBlockSize)
+    {
+        oversampling = std::make_unique<juce::dsp::Oversampling<float>> (2, gas::revc::kOversamplingOrder,
+                            juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR, true, true);
+        oversampling->initProcessing (static_cast<size_t> (maximumBlockSize));
+
+        const auto oversampledRate = sampleRate * static_cast<double> (gas::revc::kOversamplingFactor);
+        fet.prepare (oversampledRate);
+        vca.prepare (oversampledRate);
+        reset();
+    }
+
+    void reset()
+    {
+        if (oversampling != nullptr)
+            oversampling->reset();
+
+        fet.reset();
+        vca.reset();
+        gainReductionDb.store (0.0f, std::memory_order_relaxed);
+    }
+
+    void setDynamics (Dynamics requested)
+    {
+        if (requested != dynamics)
+        {
+            dynamics = requested;
+            dynamicsChanged.store (true, std::memory_order_relaxed);
+        }
+    }
+
+    /** Gain reduction of the active circuit, dB, for metering. Zero when Off. */
+    float getGainReductionDb() const noexcept { return gainReductionDb.load (std::memory_order_relaxed); }
+
+    void process (juce::AudioBuffer<float>& stereo, int numSamples)
+    {
+        if (dynamicsChanged.exchange (false, std::memory_order_relaxed))
+        {
+            fet.reset();
+            vca.reset();
+        }
+
+        const auto activeDynamics = dynamics;
+
+        if (activeDynamics == Dynamics::off || oversampling == nullptr
+            || stereo.getNumChannels() < 2 || numSamples <= 0)
+        {
+            gainReductionDb.store (0.0f, std::memory_order_relaxed);
+            return;
+        }
+
+        juce::dsp::AudioBlock<float> block (stereo);
+        auto base = block.getSubBlock (0, static_cast<size_t> (numSamples));
+        auto up = oversampling->processSamplesUp (base);
+
+        auto* l = up.getChannelPointer (0);
+        auto* r = up.getChannelPointer (1);
+
+        for (size_t i = 0; i < up.getNumSamples(); ++i)
+        {
+            auto xl = l[i];
+            auto xr = r[i];
+
+            if (activeDynamics == Dynamics::comp)
+                fet.process (xl, xr);
+            else
+                vca.process (xl, xr);
+
+            l[i] = xl;
+            r[i] = xr;
+        }
+
+        oversampling->processSamplesDown (base);
+
+        gainReductionDb.store (activeDynamics == Dynamics::comp ? fet.getGainReductionDb()
+                                                                : vca.getGainReductionDb(),
+                               std::memory_order_relaxed);
+    }
+
+private:
+    Dynamics dynamics = Dynamics::off;
+    std::atomic<bool> dynamicsChanged { false };
+    std::atomic<float> gainReductionDb { 0.0f };
+    gas::dynamics::FetCompressor fet;   // Rev C Comp: MMBF5457, refs 12xx
+    gas::dynamics::VcaLimiter vca;      // Rev C Limit: Coolaudio V2181, refs 13xx
     std::unique_ptr<juce::dsp::Oversampling<float>> oversampling;
 };

@@ -48,7 +48,7 @@ def build():
 
     for ch, n in (("L", 2), ("R", 3)):
         o = "R" if ch == "L" else "L"
-        B = f"Main path {ch}: Ext Mix sum, Gain, HPF, LPF"
+        B = f"Main path {ch}: Ext Mix sum, HPF, Gain, LPF"
         # secondary return buffer for the Ext Mix pot HI end
         b.R(f"R{n}20", "100k", f"PRI_RET_{ch}", f"MIX_N_{ch}", B)
         b.R(f"R{n}21", "100k", f"EXM_{ch}_W", f"MIX_N_{ch}", B, Description="Ext Mix: additive, 0..100 % of the 2nd tank (100k keeps the 10k pot law within 2.5 %)")
@@ -56,10 +56,13 @@ def build():
         b.C(f"C{n}20", "22pF", f"MIX_N_{ch}", f"TANK_MIX_{ch}", B, MPN="CL10C220JB8NNNC", Manufacturer="Samsung")
         b.R(f"R{n}23", "100k", f"PRI_RET_{ch}", "AGND", B, Description="input bias if the harness is unplugged")
         b.R(f"R{n}24", "100k", f"SEC_RET_{ch}", "AGND", B)
-        gain = pot_stage(b, f"{n}0", f"TANK_MIX_{ch}", f"GAIN_{ch}_HI", f"GAIN_{ch}_W", f"GAIN_{ch}_LO", f"GAIN_OUT_{ch}", None, None, B)
         # HPF Sallen-Key, K = 1.59, Q 0.71, R = 499R + 50k gang, C = 2 x 68 nF (same 23 Hz .. 2.3 kHz sweep and law as 1k + 100k)
-        b.C(f"C{n}02", "68nF film", f"GAIN_OUT_{ch}", f"HPF_N1_{ch}", B, fp=FP_C1210, MPN="ECH-U1H683JX5", Manufacturer="Panasonic")
-        b.C(f"C{n}12", "68nF film", f"GAIN_OUT_{ch}", f"HPF_N1_{ch}", B, fp=FP_C1210, MPN="ECH-U1H683JX5", Manufacturer="Panasonic")
+        # 2026-09-30: HPF moved AHEAD of the Gain stage to match the plugin (RevCStages.h: pre-HPF -> Gain
+        # -> [Tube Screamer] -> [Comp | Off | Limit] -> post-LPF). Both stages are linear, so response and
+        # overall level are unchanged, but the springs put a lot of subsonic energy on TANK_MIX and this
+        # strips it before the Gain stage can amplify it by up to 18 dB into the TS808 clipper.
+        b.C(f"C{n}02", "68nF film", f"TANK_MIX_{ch}", f"HPF_N1_{ch}", B, fp=FP_C1210, MPN="ECH-U1H683JX5", Manufacturer="Panasonic")
+        b.C(f"C{n}12", "68nF film", f"TANK_MIX_{ch}", f"HPF_N1_{ch}", B, fp=FP_C1210, MPN="ECH-U1H683JX5", Manufacturer="Panasonic")
         b.C(f"C{n}03", "68nF film", f"HPF_N1_{ch}", f"HPF_P_{ch}", B, fp=FP_C1210, MPN="ECH-U1H683JX5", Manufacturer="Panasonic")
         b.C(f"C{n}13", "68nF film", f"HPF_N1_{ch}", f"HPF_P_{ch}", B, fp=FP_C1210, MPN="ECH-U1H683JX5", Manufacturer="Panasonic")
         b.R(f"R{n}04", "499R", f"HPF_N1_{ch}", f"HPF_{ch}1_W", B)
@@ -67,8 +70,10 @@ def build():
         b.R(f"R{n}06", "5.9k", f"HPF_OUT_{ch}", f"HPF_FB_{ch}", B)
         b.R(f"R{n}07", "10k", f"HPF_FB_{ch}", "AGND", B)
         b.R(f"R{n}08", "1M", f"HPF_P_{ch}", "AGND", B)
-        # pad to pedal level
-        b.R(f"R{n}15", "47k", f"HPF_OUT_{ch}", f"PAD_{ch}", B)
+        # Gain pot stage, now fed from the HPF output
+        gain = pot_stage(b, f"{n}0", f"HPF_OUT_{ch}", f"GAIN_{ch}_HI", f"GAIN_{ch}_W", f"GAIN_{ch}_LO", f"GAIN_OUT_{ch}", None, None, B)
+        # pad to pedal level, off the Gain stage output
+        b.R(f"R{n}15", "47k", f"GAIN_OUT_{ch}", f"PAD_{ch}", B)
         b.R(f"R{n}16", "680R", f"PAD_{ch}", "AGND", B, Description="0.01426: 6.93 Vpk bus -> 0.1 Vpk")
         # LPF Sallen-Key unity, Q 0.74
         b.R(f"R{n}11", "100k", f"BUS_{ch}", "AGND", B)
@@ -78,8 +83,11 @@ def build():
         b.C(f"C{n}14", "15nF film", f"LPF_N1_{ch}", f"LPF_OUT_{ch}", B, fp=FP_C1206, MPN="ECH-U1H153JX5", Manufacturer="Panasonic")
         b.C(f"C{n}05", "6.8nF film", f"LPF_P_{ch}", "AGND", B, fp=FP_C0805, MPN="ECH-U1H682JX5", Manufacturer="Panasonic")
         b.C(f"C{n}15", "6.8nF film", f"LPF_P_{ch}", "AGND", B, fp=FP_C0805, MPN="ECH-U1H682JX5", Manufacturer="Panasonic")
-        b.OPA4(f"U{n}01", {1: ("AGND", f"MIX_N_{ch}", f"TANK_MIX_{ch}"), 2: gain,
-                           3: (f"HPF_P_{ch}", f"HPF_FB_{ch}", f"HPF_OUT_{ch}"), 4: (f"LPF_P_{ch}", f"LPF_OUT_{ch}", f"LPF_OUT_{ch}")}, B)
+        # Units follow the signal order (1 Ext Mix sum, 2 HPF, 3 Gain, 4 LPF) so the traces run
+        # straight down the quad instead of doubling back. Swapped with the stage order, 2026-09-30.
+        b.OPA4(f"U{n}01", {1: ("AGND", f"MIX_N_{ch}", f"TANK_MIX_{ch}"),
+                           2: (f"HPF_P_{ch}", f"HPF_FB_{ch}", f"HPF_OUT_{ch}"), 3: gain,
+                           4: (f"LPF_P_{ch}", f"LPF_OUT_{ch}", f"LPF_OUT_{ch}")}, B)
         dec(b, f"C{n}07", "+15VA", B); dec(b, f"C{n}08", "-15VA", B)
 
         B = f"Output, feedback, make-ups {ch}"
@@ -202,7 +210,7 @@ def build():
 
     # ---------------------------------------------------------------- relays
     B = "Relays: Dirt, Comp, Limit, FB phase, MEGAVERB (Omron G6K-2F-Y 5 V)"
-    b.RELAY("K1", "CTL_DIRT", "DYN_IN_L", "HPF_OUT_L", "TS_OUT_L", "DYN_IN_R", "HPF_OUT_R", "TS_OUT_R", B, Description="Gain pull: Dirt")
+    b.RELAY("K1", "CTL_DIRT", "DYN_IN_L", "GAIN_OUT_L", "TS_OUT_L", "DYN_IN_R", "GAIN_OUT_R", "TS_OUT_R", B, Description="Gain pull: Dirt")
     b.RELAY("K2", "CTL_COMP", "DYN_MID_L", "DYN_IN_L", "FET_OUT_L", "DYN_MID_R", "DYN_IN_R", "FET_OUT_R", B, Description="FB Dyn up: Comp")
     b.RELAY("K3", "CTL_LIMIT", "BUS_L", "DYN_MID_L", "VCA_OUT_L", "BUS_R", "DYN_MID_R", "VCA_OUT_R", B, Description="FB Dyn down: Limit")
     b.RELAY("K4", "CTL_FB_INV", "FB_SEL_L", "FB_BUF_L", "FB_INV_L", "FB_SEL_R", "FB_BUF_R", "FB_INV_R", B, Description="FB Phase")

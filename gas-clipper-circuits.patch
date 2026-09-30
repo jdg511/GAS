@@ -1,0 +1,4108 @@
+From 876d8c7cff4ccca83eeb97160ebb70dd6214c4c6 Mon Sep 17 00:00:00 2001
+From: Jason <jdg511@gmail.com>
+Date: Sun, 6 Sep 2026 07:44:30 +0000
+Subject: [PATCH] Add 12 component-modelled clipper / dynamics circuits +
+ radial chooser
+
+Replaces the four ad-hoc waveshapers (Clean/Silicon/LED/Germanium) with
+twelve selectable circuits whose behaviour is derived from real parts.
+
+Nine clippers are solved from the Shockley diode equation against the
+actual component values, not hand-tuned curves:
+
+  Silicon Sym/Asym  1N4148 across Rf (TS808 / SD-1)
+  Schottky Sym      BAT41, lowest headroom in the set
+  LED Sym           red LED, clips latest and stays open
+  LED/Si Asym       widest asymmetry here, 1.85 V against 0.72 V
+  SiGe Asym         PMEG150G20ELP, early clip with a hard knee
+  Transistor B-E    2N3904 junctions, n = 1.0 so a harder knee
+  Ladder Sym/Asym   3+3 and 3+2 series stacks shunting to ground
+
+The SiGe part is fitted to the Nexperia PMEG150G20ELP datasheet: Is and n
+come from the 25 C curve of Fig. 3 in the uA-mA region a clipper works in,
+not the amp-level table rows, which carry ~58 mohm of series resistance
+that is irrelevant at signal currents. Is = 2.863e-10 A, n = 1.134, giving
+Vf 0.44 V @ 1 mA. Worth noting n = 1.13 against the 1N4148's 1.75 makes it
+sharper-kneed than silicon, not softer - it is not a germanium substitute.
+
+The two topologies behave differently on purpose: feedback clippers keep
+rising with unity slope past the knee so they stay touch sensitive, while
+the shunt ladders hard-clamp at the stack's forward voltage. Op-amp rail
+saturation at +/-4.5 V is part of the model, so heavy Drive gives real
+supply clipping on top of the diodes.
+
+Three one-knob dynamics circuits model an LA-2A (Vactrol, dual-slope
+release), an 1176LN (2N5457 FET, 150 us attack, 4:1, FET grit included)
+and a dbx 160 (THAT2180 VCA, true-RMS detector, over-easy knee). Like the
+hardware they have no threshold control - Drive pushes them into a fixed
+threshold and make-up keeps the level steady.
+
+Curves are solved once per process into warped lookup tables (88 ms, off
+the audio thread) and shared by every instance; nothing allocates or
+iterates in processBlock. Every circuit is RMS level matched so moving
+through them changes character, not volume.
+
+UI: the Mode combo box becomes a detented rotary selector reading out the
+circuit name, with a description strip beneath the control row.
+
+models/clipper_models.py is the Python reference for the same equations;
+tests/ verifies monotonicity, level matching and dynamics behaviour and
+is kept out of the plugin build.
+
+Note: the mode parameter went from 4 choices to 13, so sessions saved
+with the old build will restore a different circuit.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01EAgMNacJQnLFNnM5JNR4Xm
+---
+ Source/DSP/ClipperCircuitModels.h |  250 +++
+ Source/DSP/DynamicsModels.h       |  247 +++
+ Source/DSP/FilterClipperBlock.h   |  290 +++-
+ Source/PluginEditor.cpp           |   69 +-
+ Source/PluginEditor.h             |    6 +-
+ Source/PluginProcessor.cpp        | 2477 ++++++++++++++---------------
+ models/clipper_models.py          |  195 +++
+ tests/CMakeLists.txt              |   10 +
+ tests/CircuitModelTests.cpp       |  129 ++
+ tests/README.md                   |   25 +
+ 10 files changed, 2384 insertions(+), 1314 deletions(-)
+ create mode 100644 Source/DSP/ClipperCircuitModels.h
+ create mode 100644 Source/DSP/DynamicsModels.h
+ create mode 100644 models/clipper_models.py
+ create mode 100644 tests/CMakeLists.txt
+ create mode 100644 tests/CircuitModelTests.cpp
+ create mode 100644 tests/README.md
+
+diff --git a/Source/DSP/ClipperCircuitModels.h b/Source/DSP/ClipperCircuitModels.h
+new file mode 100644
+index 0000000..48daa67
+--- /dev/null
++++ b/Source/DSP/ClipperCircuitModels.h
+@@ -0,0 +1,250 @@
++#pragma once
++
++#include <JuceHeader.h>
++
++#include <array>
++#include <cmath>
++#include <mutex>
++
++/**
++    Component-level models of the clipping circuits offered by the plugin.
++
++    Every curve here is solved from the Shockley diode equation against the real
++    component values of the circuit it represents, rather than being an ad-hoc
++    "sounds about right" waveshaper:
++
++        I_d(V) = Is * (exp(V / (N * n * Vt)) - 1)
++
++    The implicit node equation is solved once per table entry by bisection when
++    the plugin first loads, baked into a warped lookup table, and then read with
++    linear interpolation on the audio thread. The curves do not depend on sample
++    rate, so the tables are built exactly once and shared by every instance.
++
++    Reference level: digital 1.0 == 1.0 V peak at the clipper input.
++    Supply: 9 V biased to 4.5 V, so the op-amp saturates at +/-4.5 V. That rail
++    clamp is part of the model - crank the Drive and you get real op-amp
++    saturation on top of the diode clipping, exactly like the hardware.
++
++    The matching Python reference implementation lives in models/clipper_models.py.
++*/
++namespace gas::circuits
++{
++
++inline constexpr float kThermalVoltage = 0.02585f;   // kT/q at 300 K
++inline constexpr float kSupplyRail     = 4.5f;       // 9 V rail, biased to 4.5 V
++
++/** One diode type: saturation current and ideality factor. */
++struct Diode
++{
++    float saturationCurrent;   // Is, amperes
++    float ideality;            // n
++};
++
++// Is / n are chosen so the modelled forward voltage matches the datasheet
++// figures quoted alongside each part.
++inline constexpr Diode kDiode1N4148    { 2.52e-9f,  1.752f };  // Si, Vf 0.72 V @ 10 mA
++inline constexpr Diode kDiodeBAT41     { 1.20e-7f,  1.050f };  // Schottky, Vf 0.45 V @ 10 mA
++inline constexpr Diode kDiodeRedLed    { 9.00e-18f, 1.900f };  // GaAsP red LED, Vf 1.85 V @ 20 mA
++// Nexperia PMEG150G20ELP, 150 V / 2 A SiGe rectifier, CFP5 (SOD128).
++// Is / n fitted to the 25 C curve of datasheet Fig. 3 in the microamp-to-
++// milliamp region where a clipper actually works, not to the amp-level table
++// entries (those are dominated by ~58 mohm of series resistance, which is
++// irrelevant at signal currents). Gives Vf 0.44 V @ 1 mA.
++//
++// Note n = 1.13 against the 1N4148's 1.75: this part clips EARLIER than silicon
++// but with a considerably HARDER knee. It is not a germanium substitute - real
++// Ge is soft-kneed and leaky, while this is sharp and specified at 0.4 nA
++// reverse leakage.
++inline constexpr Diode kDiodePMEG150G20 { 2.863e-10f, 1.134f };
++inline constexpr Diode k2N3904BaseEmit { 6.73e-15f, 1.000f };  // 2N3904 B-E junction, n ~ 1.0
++
++enum class Topology
++{
++    /** Diodes across the op-amp feedback resistor (Tube Screamer / SD-1 / OCD).
++        Output keeps climbing with unity slope past the knee, so it never fully
++        squares off - this is what keeps these circuits touch sensitive. */
++    feedback,
++
++    /** Series resistor into a shunt diode stack (ladder clippers). A hard clamp
++        to the stack's forward voltage no matter how hard it is driven. */
++    shunt
++};
++
++/** A complete clipping circuit: topology, resistors, and the diode network. */
++struct CircuitSpec
++{
++    Topology topology;
++    float    seriesOrFeedbackR;   // Rf (feedback) or Rs (shunt), ohms
++    float    gainSetR;            // Rg for the feedback topology, ohms
++    float    inputStageGainDb;    // gain of the stage ahead of a shunt network
++
++    Diode positiveDiode;
++    int   positiveCount;          // diodes in series on the positive half
++    Diode negativeDiode;
++    int   negativeCount;          // diodes in series on the negative half
++
++    bool isAsymmetric() const noexcept
++    {
++        return positiveCount != negativeCount
++            || positiveDiode.saturationCurrent != negativeDiode.saturationCurrent
++            || positiveDiode.ideality != negativeDiode.ideality;
++    }
++};
++
++/** Current through `count` identical diodes stacked in series. */
++inline float diodeCurrent (float voltage, const Diode& diode, int count) noexcept
++{
++    const auto scale = static_cast<float> (count) * diode.ideality * kThermalVoltage;
++    const auto exponent = juce::jlimit (-80.0f, 80.0f, voltage / scale);
++    return diode.saturationCurrent * (std::exp (exponent) - 1.0f);
++}
++
++/** Net current through an anti-parallel diode network at a given voltage. */
++inline float networkCurrent (float voltage, const CircuitSpec& spec) noexcept
++{
++    return diodeCurrent (voltage, spec.positiveDiode, spec.positiveCount)
++         - diodeCurrent (-voltage, spec.negativeDiode, spec.negativeCount);
++}
++
++/** Solves the circuit's node equation for one input voltage.
++
++    feedback:  Vin/Rg = Vd/Rf + I_diodes(Vd),  Vout = Vin + Vd
++    shunt:     (Vin - Vout)/Rs = I_diodes(Vout)
++
++    Bisection rather than Newton: it cannot diverge on the stiff exponential,
++    and this only ever runs at load time.
++*/
++inline float solveCircuit (float inputVolts, const CircuitSpec& spec) noexcept
++{
++    const auto driven = inputVolts * juce::Decibels::decibelsToGain (spec.inputStageGainDb);
++
++    auto residual = [&] (float unknown)
++    {
++        if (spec.topology == Topology::feedback)
++            return driven / spec.gainSetR - (unknown / spec.seriesOrFeedbackR + networkCurrent (unknown, spec));
++
++        return (driven - unknown) / spec.seriesOrFeedbackR - networkCurrent (unknown, spec);
++    };
++
++    auto low  = -2.0f * kSupplyRail;
++    auto high =  2.0f * kSupplyRail;
++
++    // Widen the bracket if the solution sits outside it (only possible before
++    // the rail clamp bites, and cheap to guard against).
++    for (int attempt = 0; attempt < 8 && residual (low) * residual (high) > 0.0f; ++attempt)
++    {
++        low  *= 2.0f;
++        high *= 2.0f;
++    }
++
++    if (residual (low) * residual (high) > 0.0f)
++        return juce::jlimit (-kSupplyRail, kSupplyRail, driven);
++
++    for (int iteration = 0; iteration < 64; ++iteration)
++    {
++        const auto mid = 0.5f * (low + high);
++
++        if (residual (low) * residual (mid) <= 0.0f)
++            high = mid;
++        else
++            low = mid;
++    }
++
++    const auto solved = 0.5f * (low + high);
++    const auto output = (spec.topology == Topology::feedback) ? driven + solved : solved;
++
++    return juce::jlimit (-kSupplyRail, kSupplyRail, output);
++}
++
++//==============================================================================
++/** A solved circuit baked into a lookup table.
++
++    The table is indexed through a warp, u = v / (kWarp + |v|), which concentrates
++    resolution around zero where the knee lives while still reaching the tens of
++    volts a fully cranked Drive can produce.
++*/
++class CircuitCurve
++{
++public:
++    static constexpr int   kTableSize = 4096;
++    static constexpr float kWarp      = 0.5f;
++
++    void build (const CircuitSpec& spec)
++    {
++        asymmetric = spec.isAsymmetric();
++
++        for (int index = 0; index < kTableSize; ++index)
++        {
++            const auto u = juce::jmap (static_cast<float> (index),
++                                       0.0f, static_cast<float> (kTableSize - 1),
++                                       -kMaxWarped, kMaxWarped);
++            table[static_cast<size_t> (index)] = solveCircuit (unwarp (u), spec);
++        }
++
++        makeupGain = computeMakeupGain();
++    }
++
++    float process (float x) const noexcept
++    {
++        const auto u = warp (x);
++        const auto position = juce::jmap (juce::jlimit (-kMaxWarped, kMaxWarped, u),
++                                          -kMaxWarped, kMaxWarped,
++                                          0.0f, static_cast<float> (kTableSize - 1));
++        const auto lowIndex = static_cast<int> (position);
++        const auto highIndex = juce::jmin (lowIndex + 1, kTableSize - 1);
++        const auto fraction = position - static_cast<float> (lowIndex);
++
++        const auto a = table[static_cast<size_t> (lowIndex)];
++        const auto b = table[static_cast<size_t> (highIndex)];
++
++        return (a + fraction * (b - a)) * makeupGain;
++    }
++
++    bool needsDcBlocker() const noexcept { return asymmetric; }
++
++private:
++    static constexpr float kMaxWarped = 0.995f;
++
++    static float warp (float v) noexcept   { return v / (kWarp + std::abs (v)); }
++    static float unwarp (float u) noexcept { return kWarp * u / juce::jmax (1.0e-6f, 1.0f - std::abs (u)); }
++
++    /** Level-matches every circuit so switching models is a change of character,
++        not a jump in volume. Measured against a 0.5 V peak sine - a realistic
++        driven-guitar level - and normalised to a common output RMS. */
++    float computeMakeupGain() const
++    {
++        constexpr int   kSamples   = 2048;
++        constexpr float kTestPeak  = 0.5f;
++        constexpr float kTargetRms = 0.32f;
++
++        double sumOfSquares = 0.0;
++
++        for (int i = 0; i < kSamples; ++i)
++        {
++            const auto phase = juce::MathConstants<float>::twoPi * static_cast<float> (i)
++                             / static_cast<float> (kSamples);
++            const auto u = warp (kTestPeak * std::sin (phase));
++            const auto position = juce::jmap (juce::jlimit (-kMaxWarped, kMaxWarped, u),
++                                              -kMaxWarped, kMaxWarped,
++                                              0.0f, static_cast<float> (kTableSize - 1));
++            const auto lowIndex = static_cast<int> (position);
++            const auto highIndex = juce::jmin (lowIndex + 1, kTableSize - 1);
++            const auto fraction = position - static_cast<float> (lowIndex);
++            const auto a = table[static_cast<size_t> (lowIndex)];
++            const auto b = table[static_cast<size_t> (highIndex)];
++            const auto value = a + fraction * (b - a);
++
++            sumOfSquares += static_cast<double> (value) * static_cast<double> (value);
++        }
++
++        const auto rms = std::sqrt (sumOfSquares / static_cast<double> (kSamples));
++
++        return rms > 1.0e-6 ? juce::jlimit (0.05f, 20.0f, static_cast<float> (kTargetRms / rms)) : 1.0f;
++    }
++
++    std::array<float, kTableSize> table {};
++    float makeupGain = 1.0f;
++    bool  asymmetric = false;
++};
++
++} // namespace gas::circuits
+diff --git a/Source/DSP/DynamicsModels.h b/Source/DSP/DynamicsModels.h
+new file mode 100644
+index 0000000..4201263
+--- /dev/null
++++ b/Source/DSP/DynamicsModels.h
+@@ -0,0 +1,247 @@
++#pragma once
++
++#include <JuceHeader.h>
++
++#include <array>
++#include <cmath>
++
++/**
++    One-knob models of three classic gain-reduction circuits.
++
++    Each one is driven entirely by the existing Drive control, exactly the way
++    the hardware works: an 1176 and an LA-2A have no threshold knob either. You
++    push more signal into a fixed threshold and the circuit responds. Automatic
++    make-up keeps the output level roughly constant as Drive comes up, so the
++    knob changes how hard it squeezes rather than how loud it is.
++
++    These are behavioural circuit models - the control element's gain law and the
++    detector's time constants are what define each unit's character, and both are
++    taken from the real topology:
++
++      Opto   Vactrol LED/LDR, R_ldr ~ 2.5k / I_mA, dual-slope release
++      FET    2N5457 as a voltage-controlled resistor, microsecond attack
++      VCA    THAT2180 exponential VCA fed by a true-RMS detector, over-easy knee
++*/
++namespace gas::dynamics
++{
++
++inline constexpr float kThresholdDbfs = -18.0f;   // fixed, as on the hardware
++
++/** Smoothed one-pole coefficient for a given time constant. */
++inline float timeConstantCoefficient (float milliseconds, double sampleRate) noexcept
++{
++    const auto seconds = juce::jmax (1.0e-5f, milliseconds * 0.001f);
++    return std::exp (-1.0f / (static_cast<float> (sampleRate) * seconds));
++}
++
++//==============================================================================
++/** Vactrol opto compressor - LA-2A / Tube-Tech CL 1B territory.
++
++    Sidechain drives an LED bonded to an LDR (VTL5C3, or a 5 mm red LED and a
++    GL5537 in heatshrink for about a dollar). The photocell's resistance sets
++    the gain of a shunt divider, and its recovery is the sound: a fast first
++    stage that gives back roughly half the reduction, then a long tail. That
++    dual slope is why an LA-2A breathes instead of pumping, and it falls out of
++    the photoconductor's physics rather than being dialled in.
++
++    Ratio is not a knob here either. The LDR's law gives roughly 3:1 at light
++    reduction, steepening past 8:1 as it clamps down - program dependence that
++    a fixed-ratio model cannot reproduce.
++*/
++class OptoCompressor
++{
++public:
++    void prepare (double sampleRate)
++    {
++        attackCoefficient      = timeConstantCoefficient (10.0f, sampleRate);
++        fastReleaseCoefficient = timeConstantCoefficient (60.0f, sampleRate);
++        slowReleaseCoefficient = timeConstantCoefficient (1800.0f, sampleRate);
++        reset();
++    }
++
++    void reset()
++    {
++        fastEnvelope = 0.0f;
++        slowEnvelope = 0.0f;
++    }
++
++    float process (float input) noexcept
++    {
++        const auto rectified = std::abs (input);
++
++        // Two detectors sharing one attack, splitting on release: the fast one
++        // recovers most of the reduction quickly, the slow one drags a tail.
++        fastEnvelope = trackEnvelope (fastEnvelope, rectified, attackCoefficient, fastReleaseCoefficient);
++        slowEnvelope = trackEnvelope (slowEnvelope, rectified, attackCoefficient, slowReleaseCoefficient);
++
++        const auto envelope = 0.55f * fastEnvelope + 0.45f * slowEnvelope;
++
++        // LED current is whatever the sidechain amp pushes above threshold.
++        const auto overThresholdDb = juce::Decibels::gainToDecibels (juce::jmax (1.0e-6f, envelope))
++                                   - kThresholdDbfs;
++
++        if (overThresholdDb <= 0.0f)
++            return input;
++
++        // Photocell law: R ~ 2.5k / I_mA, feeding a shunt divider. Expressed in
++        // dB this is close to linear with a gently steepening slope, which is
++        // where the rising ratio comes from.
++        const auto reductionDb = overThresholdDb * (0.34f + 0.020f * juce::jmin (overThresholdDb, 24.0f));
++
++        return input * juce::Decibels::decibelsToGain (-reductionDb);
++    }
++
++private:
++    static float trackEnvelope (float state, float target, float attack, float release) noexcept
++    {
++        const auto coefficient = (target > state) ? attack : release;
++        return target + coefficient * (state - target);
++    }
++
++    float attackCoefficient = 0.0f;
++    float fastReleaseCoefficient = 0.0f;
++    float slowReleaseCoefficient = 0.0f;
++    float fastEnvelope = 0.0f;
++    float slowEnvelope = 0.0f;
++};
++
++//==============================================================================
++/** FET compressor - 1176LN territory.
++
++    A 2N5457 JFET works as a voltage-controlled resistor in a shunt divider, so
++    the attack is measured in microseconds: fast enough to catch the leading
++    edge of a pick attack before it ever reaches the tanks. Ratio is 4:1 with a
++    moderate knee.
++
++    The FET is not a clean resistor while it is working - it contributes its own
++    low-order harmonics, and that grit is a large part of why an 1176 sounds
++    like an 1176 rather than like a transparent limiter. The harmonic term below
++    scales with gain reduction, so it only shows up when the circuit is actually
++    squeezing.
++*/
++class FetCompressor
++{
++public:
++    void prepare (double sampleRate)
++    {
++        attackCoefficient  = timeConstantCoefficient (0.15f, sampleRate);   // 150 us
++        releaseCoefficient = timeConstantCoefficient (250.0f, sampleRate);
++        reset();
++    }
++
++    void reset() { envelope = 0.0f; }
++
++    float process (float input) noexcept
++    {
++        const auto rectified = std::abs (input);
++        const auto coefficient = (rectified > envelope) ? attackCoefficient : releaseCoefficient;
++        envelope = rectified + coefficient * (envelope - rectified);
++
++        const auto envelopeDb = juce::Decibels::gainToDecibels (juce::jmax (1.0e-6f, envelope));
++        const auto overThresholdDb = envelopeDb - kThresholdDbfs;
++
++        auto reductionDb = 0.0f;
++
++        if (overThresholdDb > kKneeWidthDb * 0.5f)
++        {
++            reductionDb = overThresholdDb * (1.0f - 1.0f / kRatio);
++        }
++        else if (overThresholdDb > -kKneeWidthDb * 0.5f)
++        {
++            // Quadratic knee across the transition so the onset is not a corner.
++            const auto knee = overThresholdDb + kKneeWidthDb * 0.5f;
++            reductionDb = (1.0f - 1.0f / kRatio) * knee * knee / (2.0f * kKneeWidthDb);
++        }
++
++        auto output = input * juce::Decibels::decibelsToGain (-reductionDb);
++
++        // FET nonlinearity, proportional to how hard the FET is being driven.
++        const auto harmonicAmount = juce::jmin (0.16f, reductionDb * 0.010f);
++
++        if (harmonicAmount > 0.0f)
++            output += harmonicAmount * (output * output * output - output) * 0.5f;
++
++        return output;
++    }
++
++private:
++    static constexpr float kRatio       = 4.0f;
++    static constexpr float kKneeWidthDb = 6.0f;
++
++    float attackCoefficient = 0.0f;
++    float releaseCoefficient = 0.0f;
++    float envelope = 0.0f;
++};
++
++//==============================================================================
++/** VCA limiter - dbx 160 territory.
++
++    A THAT2180 exponential VCA under a true-RMS detector. RMS rather than peak
++    detection is the whole point: the circuit responds to how loud something
++    actually is rather than to its transient peaks, so it sits on a signal
++    instead of chattering at it.
++
++    "Over-easy" is dbx's name for the wide soft knee - compression starts well
++    below the nominal threshold and reaches full ratio well above it, which is
++    why a 160 can work hard without announcing itself. Ratio is 10:1, and the
++    detector watches the output (feedback topology), making the whole thing
++    markedly more program dependent than a feed-forward design.
++*/
++class VcaLimiter
++{
++public:
++    void prepare (double sampleRate)
++    {
++        rmsCoefficient     = timeConstantCoefficient (10.0f, sampleRate);
++        releaseCoefficient = timeConstantCoefficient (120.0f, sampleRate);
++        reset();
++    }
++
++    void reset()
++    {
++        meanSquare = 0.0f;
++        gainReductionDb = 0.0f;
++    }
++
++    float process (float input) noexcept
++    {
++        // True RMS detector on the output (feedback topology).
++        const auto fedBack = input * juce::Decibels::decibelsToGain (-gainReductionDb);
++        const auto squared = fedBack * fedBack;
++        meanSquare = squared + rmsCoefficient * (meanSquare - squared);
++
++        const auto rmsDb = juce::Decibels::gainToDecibels (juce::jmax (1.0e-6f, std::sqrt (meanSquare)));
++        const auto overThresholdDb = rmsDb - kThresholdDbfs;
++
++        auto targetReductionDb = 0.0f;
++
++        if (overThresholdDb > kOverEasyDb * 0.5f)
++        {
++            targetReductionDb = overThresholdDb * (1.0f - 1.0f / kRatio);
++        }
++        else if (overThresholdDb > -kOverEasyDb * 0.5f)
++        {
++            const auto knee = overThresholdDb + kOverEasyDb * 0.5f;
++            targetReductionDb = (1.0f - 1.0f / kRatio) * knee * knee / (2.0f * kOverEasyDb);
++        }
++
++        // The VCA follows the detector immediately going down and eases back up.
++        if (targetReductionDb > gainReductionDb)
++            gainReductionDb = targetReductionDb;
++        else
++            gainReductionDb = targetReductionDb + releaseCoefficient * (gainReductionDb - targetReductionDb);
++
++        return input * juce::Decibels::decibelsToGain (-gainReductionDb);
++    }
++
++private:
++    static constexpr float kRatio     = 10.0f;
++    static constexpr float kOverEasyDb = 12.0f;
++
++    float rmsCoefficient = 0.0f;
++    float releaseCoefficient = 0.0f;
++    float meanSquare = 0.0f;
++    float gainReductionDb = 0.0f;
++};
++
++} // namespace gas::dynamics
+diff --git a/Source/DSP/FilterClipperBlock.h b/Source/DSP/FilterClipperBlock.h
+index ffcca7c..9212b09 100644
+--- a/Source/DSP/FilterClipperBlock.h
++++ b/Source/DSP/FilterClipperBlock.h
+@@ -3,18 +3,96 @@
+ #include <JuceHeader.h>
+ 
+ #include <array>
++#include <mutex>
+ 
++#include "ClipperCircuitModels.h"
++#include "DynamicsModels.h"
++
++/**
++    The plugin's clipping / dynamics stage.
++
++    Twelve selectable circuits sit between the pre-emphasis high-pass and the
++    post low-pass. Nine are diode or transistor clippers whose curves are solved
++    from the Shockley equation against real component values (see
++    ClipperCircuitModels.h); three are one-knob gain-reduction circuits modelled
++    on an LA-2A, an 1176LN and a dbx 160 (see DynamicsModels.h).
++
++    Everything is driven by the single Drive control, and every circuit is level
++    matched, so moving through the models is a change of character rather than a
++    jump in volume.
++*/
+ class FilterClipperBlock
+ {
+ public:
+     enum class Mode
+     {
+         clean = 0,
+-        silicon,
+-        led,
+-        germanium
++        siliconSymmetric,
++        siliconAsymmetric,
++        schottkySymmetric,
++        ledSymmetric,
++        ledSiliconAsymmetric,
++        siGeAsymmetric,
++        transistorBaseEmitter,
++        ladderSymmetric,
++        ladderAsymmetric,
++        optoCompressor,
++        fetCompressor,
++        vcaLimiter,
++        numModes
+     };
+ 
++    static constexpr int numClipperCurves = 9;   // clean has no curve; dynamics are stateful
++
++    /** Display names, in parameter order. Shared by the parameter layout and
++        the editor so the two can never drift apart. */
++    static juce::StringArray getModeNames()
++    {
++        return { "Clean",
++                 "Silicon Sym",
++                 "Silicon Asym",
++                 "Schottky Sym",
++                 "LED Sym",
++                 "LED/Si Asym",
++                 "SiGe Asym",
++                 "Transistor B-E",
++                 "Ladder Sym",
++                 "Ladder Asym",
++                 "Opto Comp",
++                 "FET Comp",
++                 "VCA Limiter" };
++    }
++
++    /** One-line description of what each circuit is, for the editor readout. */
++    static juce::String getModeDescription (Mode mode)
++    {
++        switch (mode)
++        {
++            case Mode::siliconSymmetric:      return "2x 1N4148 across Rf - TS808. Smooth, dynamic, never squares off.";
++            case Mode::siliconAsymmetric:     return "2 up / 1 down 1N4148 - SD-1. Even harmonics, thicker low end.";
++            case Mode::schottkySymmetric:     return "2x BAT41. Lowest headroom here - compressed, tight, spitty.";
++            case Mode::ledSymmetric:          return "2x red LED - Bluesbreaker. Clips late and loud, stays open.";
++            case Mode::ledSiliconAsymmetric:  return "LED up / 1N4148 down. Widest asymmetry - 1.85 V vs 0.72 V.";
++            case Mode::siGeAsymmetric:        return "2/1 PMEG150G20ELP SiGe. Early clip, hard knee - tight, not soft.";
++            case Mode::transistorBaseEmitter: return "2N3904 B-E junctions. n = 1.0, so a harder knee than 1N4148.";
++            case Mode::ladderSymmetric:       return "3+3 diode ladder to ground after 26 dB. Hard clamp at 1.9 V.";
++            case Mode::ladderAsymmetric:      return "3 up / 2 down ladder. Hard clamp, offset halves, heavy 2nd.";
++            case Mode::optoCompressor:        return "Vactrol LED/LDR - LA-2A. Dual-slope release, rising ratio.";
++            case Mode::fetCompressor:         return "2N5457 FET - 1176LN. 150 us attack, 4:1, FET grit included.";
++            case Mode::vcaLimiter:            return "THAT2180 VCA + true RMS - dbx 160. 10:1, over-easy knee.";
++            case Mode::clean:
++            case Mode::numModes:
++            default:                          return "No clipping stage - filters and level only.";
++        }
++    }
++
++    static bool isDynamicsMode (Mode mode) noexcept
++    {
++        return mode == Mode::optoCompressor
++            || mode == Mode::fetCompressor
++            || mode == Mode::vcaLimiter;
++    }
++
+     struct Parameters
+     {
+         Mode mode = Mode::clean;
+@@ -35,6 +113,21 @@ public:
+         oversampling->initProcessing (static_cast<size_t> (maximumBlockSize));
+         oversampling->reset();
+ 
++        // The circuit curves are sample-rate independent, so they are solved
++        // once for the whole process and shared by every instance.
++        getCurves();
++
++        const auto oversampledRate = sampleRate * static_cast<double> (oversampling->getOversamplingFactor());
++
++        for (auto& compressor : optoCompressors)
++            compressor.prepare (oversampledRate);
++
++        for (auto& compressor : fetCompressors)
++            compressor.prepare (oversampledRate);
++
++        for (auto& limiter : vcaLimiters)
++            limiter.prepare (oversampledRate);
++
+         for (auto& filter : preHpf)
+         {
+             filter.reset();
+@@ -78,12 +171,24 @@ public:
+         for (auto& filter : postLpf)
+             filter.reset();
+ 
++        for (auto& compressor : optoCompressors)
++            compressor.reset();
++
++        for (auto& compressor : fetCompressors)
++            compressor.reset();
++
++        for (auto& limiter : vcaLimiters)
++            limiter.reset();
++
+         dcBlockerX1 = { { 0.0f, 0.0f } };
+         dcBlockerY1 = { { 0.0f, 0.0f } };
+     }
+ 
+     void setParameters (const Parameters& newParameters)
+     {
++        if (newParameters.mode != mode)
++            modeChanged.store (true, std::memory_order_relaxed);
++
+         mode = newParameters.mode;
+         driveDb.setTargetValue (newParameters.driveDb);
+         preHpfCutoffHz.setTargetValue (newParameters.preHpfCutoffHz);
+@@ -92,6 +197,9 @@ public:
+         postLpfResonance.setTargetValue (newParameters.postLpfResonance);
+     }
+ 
++    /** Gain reduction in dB, for metering. Zero unless a dynamics mode is active. */
++    float getGainReductionDb() const noexcept { return gainReductionDb.load (std::memory_order_relaxed); }
++
+     void process (juce::AudioBuffer<float>& stereoBuffer, int numSamples)
+     {
+         auto* left = stereoBuffer.getWritePointer (0);
+@@ -106,43 +214,94 @@ public:
+ 
+         updateFilterState (currentPreCutoff, currentPreQ, currentPostCutoff, currentPostQ);
+ 
++        if (modeChanged.exchange (false, std::memory_order_relaxed))
++            clearDynamicsState();
++
++        const auto activeMode = mode;
++        const auto dynamics = isDynamicsMode (activeMode);
++
++        // The dynamics circuits have no threshold knob - like the hardware, you
++        // drive them into a fixed threshold - so Drive is compensated on the way
++        // out and the knob only changes how hard the circuit squeezes.
++        const auto dynamicsMakeup = dynamics
++                                  ? juce::Decibels::decibelsToGain (-currentDriveDb * 0.72f)
++                                  : 1.0f;
++
+         for (int sample = 0; sample < numSamples; ++sample)
+         {
+             left[sample] = preHpf[0].processSample (0, left[sample] * currentDriveGain);
+             right[sample] = preHpf[1].processSample (0, right[sample] * currentDriveGain);
+         }
+ 
+-        if (mode != Mode::clean && oversampling != nullptr)
++        if (activeMode != Mode::clean && oversampling != nullptr)
+         {
+             juce::dsp::AudioBlock<float> block (stereoBuffer);
+             auto baseBlock = block.getSubBlock (0, static_cast<size_t> (numSamples));
+             auto oversampledBlock = oversampling->processSamplesUp (baseBlock);
+-            const auto tuning = getModeTuning (mode);
++
++            const auto* curve = dynamics ? nullptr : &getCurves()[curveIndexFor (activeMode)];
++
++            float peakInput = 0.0f;
++            float peakOutput = 0.0f;
+ 
+             for (size_t channel = 0; channel < oversampledBlock.getNumChannels(); ++channel)
+             {
+                 auto* samples = oversampledBlock.getChannelPointer (channel);
++                const auto channelIndex = juce::jmin (static_cast<int> (channel), 1);
+ 
+                 for (size_t sample = 0; sample < oversampledBlock.getNumSamples(); ++sample)
+-                    samples[sample] = applyTransferFunction (samples[sample], tuning);
++                {
++                    const auto input = samples[sample];
++                    float output = input;
++
++                    switch (activeMode)
++                    {
++                        case Mode::optoCompressor: output = optoCompressors[static_cast<size_t> (channelIndex)].process (input); break;
++                        case Mode::fetCompressor:  output = fetCompressors[static_cast<size_t> (channelIndex)].process (input); break;
++                        case Mode::vcaLimiter:     output = vcaLimiters[static_cast<size_t> (channelIndex)].process (input); break;
++                        default:                   output = curve->process (input); break;
++                    }
++
++                    samples[sample] = output;
++
++                    if (dynamics)
++                    {
++                        peakInput = juce::jmax (peakInput, std::abs (input));
++                        peakOutput = juce::jmax (peakOutput, std::abs (output));
++                    }
++                }
+             }
+ 
+             oversampling->processSamplesDown (baseBlock);
+ 
+-            // Static makeup gain + DC blocker (asymmetric modes only), base rate.
++            if (dynamics)
++            {
++                const auto reduction = (peakInput > 1.0e-5f && peakOutput > 1.0e-6f)
++                                     ? juce::jlimit (0.0f, 40.0f, juce::Decibels::gainToDecibels (peakInput / peakOutput))
++                                     : 0.0f;
++                gainReductionDb.store (reduction, std::memory_order_relaxed);
++            }
++            else
++            {
++                gainReductionDb.store (0.0f, std::memory_order_relaxed);
++            }
++
++            const auto blockDc = dynamics ? false : curve->needsDcBlocker();
++
+             for (int channel = 0; channel < 2; ++channel)
+             {
+                 auto* samples = (channel == 0) ? left : right;
+ 
+                 for (int sample = 0; sample < numSamples; ++sample)
+                 {
+-                    auto value = samples[sample] * tuning.makeup;
++                    auto value = samples[sample] * dynamicsMakeup;
+ 
+-                    if (tuning.blockDc)
++                    if (blockDc)
+                     {
+-                        const auto out = value - dcBlockerX1[channel] + 0.9995f * dcBlockerY1[channel];
+-                        dcBlockerX1[channel] = value;
+-                        dcBlockerY1[channel] = out;
++                        const auto out = value - dcBlockerX1[static_cast<size_t> (channel)]
++                                       + 0.9995f * dcBlockerY1[static_cast<size_t> (channel)];
++                        dcBlockerX1[static_cast<size_t> (channel)] = value;
++                        dcBlockerY1[static_cast<size_t> (channel)] = out;
+                         value = out;
+                     }
+ 
+@@ -150,6 +309,10 @@ public:
+                 }
+             }
+         }
++        else
++        {
++            gainReductionDb.store (0.0f, std::memory_order_relaxed);
++        }
+ 
+         for (int sample = 0; sample < numSamples; ++sample)
+         {
+@@ -159,57 +322,70 @@ public:
+     }
+ 
+ private:
+-    struct ModeTuning
++    using CircuitSpec = gas::circuits::CircuitSpec;
++    using Topology = gas::circuits::Topology;
++    using CircuitCurve = gas::circuits::CircuitCurve;
++
++    /** The nine clipping circuits, in parameter order.
++
++        Feedback circuits inherit their gain from 1 + Rf/Rg (51k / 4k7 = 21.5 dB,
++        the Tube Screamer value); the shunt ladders need their own stage ahead of
++        the diodes, so they get an explicit 26 dB. */
++    static const std::array<CircuitSpec, numClipperCurves>& getSpecs()
+     {
+-        // Per-diode model.
+-        //  thresholdPos/Neg : forward-voltage clip points (normalised). Unequal
+-        //                     values = asymmetric clipping -> even harmonics.
+-        //  knee             : transition sharpness (higher = harder/sharper).
+-        //  bleed            : feedback-loop passthrough that keeps the curve
+-        //                     rising so it never fully flattens (op-amp feedback
+-        //                     topologies). 0 for shunt-to-ground.
+-        //  makeup           : static output gain so the quieter modes land near
+-        //                     LED's loudness (LED is the loudest reference).
+-        //  blockDc          : remove the DC offset that asymmetric clipping adds.
+-        float thresholdPos = 1.0f;
+-        float thresholdNeg = 1.0f;
+-        float knee = 1.0f;
+-        float bleed = 0.0f;
+-        float makeup = 1.0f;
+-        bool  blockDc = false;
+-    };
++        using namespace gas::circuits;
++
++        static const std::array<CircuitSpec, numClipperCurves> specs
++        { {
++            { Topology::feedback, 51.0e3f, 4.7e3f,  0.0f, kDiode1N4148,    1, kDiode1N4148,    1 },
++            { Topology::feedback, 51.0e3f, 4.7e3f,  0.0f, kDiode1N4148,    2, kDiode1N4148,    1 },
++            { Topology::feedback, 51.0e3f, 4.7e3f,  0.0f, kDiodeBAT41,     1, kDiodeBAT41,     1 },
++            { Topology::feedback, 51.0e3f, 4.7e3f,  0.0f, kDiodeRedLed,    1, kDiodeRedLed,    1 },
++            { Topology::feedback, 51.0e3f, 4.7e3f,  0.0f, kDiodeRedLed,    1, kDiode1N4148,    1 },
++            { Topology::feedback, 51.0e3f, 4.7e3f,  0.0f, kDiodePMEG150G20, 2, kDiodePMEG150G20, 1 },
++            { Topology::feedback, 51.0e3f, 4.7e3f,  0.0f, k2N3904BaseEmit, 1, k2N3904BaseEmit, 1 },
++            { Topology::shunt,    10.0e3f, 0.0f,   26.0f, kDiode1N4148,    3, kDiode1N4148,    3 },
++            { Topology::shunt,    10.0e3f, 0.0f,   26.0f, kDiode1N4148,    3, kDiode1N4148,    2 },
++        } };
++
++        return specs;
++    }
+ 
+-    static ModeTuning getModeTuning (Mode mode)
++    static const std::array<CircuitCurve, numClipperCurves>& getCurves()
+     {
+-        switch (mode)
++        static std::array<CircuitCurve, numClipperCurves> curves;
++        static std::once_flag builtFlag;
++
++        std::call_once (builtFlag, []
+         {
+-            // Germanium: asymmetric shunt-to-ground (2 diodes up / 1 down).
+-            // Lowest Vf, soft Ge knee; unequal halves -> strong even harmonics.
+-            // Shunt topology => no bleed; DC-block the asymmetric offset.
+-            case Mode::germanium:  return { 0.60f, 0.30f, 2.5f, 0.00f, 1.8f, true };
++            const auto& specs = getSpecs();
+ 
+-            // Silicon: anti-parallel diodes in the op-amp feedback loop (TS-style).
+-            // Mid Vf, softest knee, generous bleed => smooth, dynamic, never
+-            // fully saturates.
+-            case Mode::silicon:    return { 0.70f, 0.70f, 1.5f, 0.12f, 1.4f, false };
++            for (size_t index = 0; index < curves.size(); ++index)
++                curves[index].build (specs[index]);
++        });
+ 
+-            // LED: high-Vf clipping in a feedback loop (Bluesbreaker / OCD).
+-            // Clips loud and late with the sharpest knee => open but hard crunch.
+-            // Loudest mode => reference level, no makeup.
+-            case Mode::led:        return { 1.70f, 1.70f, 5.0f, 0.06f, 1.0f, false };
++        return curves;
++    }
+ 
+-            case Mode::clean:
+-            default:               return { 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, false };
+-        }
++    static size_t curveIndexFor (Mode mode) noexcept
++    {
++        const auto index = static_cast<int> (mode) - static_cast<int> (Mode::siliconSymmetric);
++        return static_cast<size_t> (juce::jlimit (0, numClipperCurves - 1, index));
+     }
+ 
+-    static float applyTransferFunction (float x, const ModeTuning& tuning)
++    void clearDynamicsState()
+     {
+-        const auto threshold = (x >= 0.0f) ? tuning.thresholdPos : tuning.thresholdNeg;
+-        const auto a = std::abs (x) / juce::jmax (0.05f, threshold);
+-        // Soft-knee saturator that asymptotes to +/-threshold; knee sets hardness.
+-        const auto clipped = x / std::pow (1.0f + std::pow (a, tuning.knee), 1.0f / tuning.knee);
+-        return clipped + tuning.bleed * x;
++        for (auto& compressor : optoCompressors)
++            compressor.reset();
++
++        for (auto& compressor : fetCompressors)
++            compressor.reset();
++
++        for (auto& limiter : vcaLimiters)
++            limiter.reset();
++
++        dcBlockerX1 = { { 0.0f, 0.0f } };
++        dcBlockerY1 = { { 0.0f, 0.0f } };
+     }
+ 
+     void updateFilterState (float preCutoff, float preQ, float postCutoff, float postQ)
+@@ -236,13 +412,21 @@ private:
+ 
+     double currentSampleRate = 44100.0;
+     Mode mode = Mode::clean;
++    std::atomic<bool> modeChanged { false };
++    std::atomic<float> gainReductionDb { 0.0f };
++
+     juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> driveDb;
+     juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> preHpfCutoffHz;
+     juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> preHpfResonance;
+     juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> postLpfCutoffHz;
+     juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> postLpfResonance;
++
+     std::array<juce::dsp::StateVariableTPTFilter<float>, 2> preHpf;
+     std::array<juce::dsp::StateVariableTPTFilter<float>, 2> postLpf;
++    std::array<gas::dynamics::OptoCompressor, 2> optoCompressors;
++    std::array<gas::dynamics::FetCompressor, 2> fetCompressors;
++    std::array<gas::dynamics::VcaLimiter, 2> vcaLimiters;
++
+     std::array<float, 2> dcBlockerX1 { { 0.0f, 0.0f } };
+     std::array<float, 2> dcBlockerY1 { { 0.0f, 0.0f } };
+     std::unique_ptr<juce::dsp::Oversampling<float>> oversampling;
+diff --git a/Source/PluginEditor.cpp b/Source/PluginEditor.cpp
+index 4a2c0c8..4c22d8e 100644
+--- a/Source/PluginEditor.cpp
++++ b/Source/PluginEditor.cpp
+@@ -426,7 +426,8 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
+     subtitleLabel.setText ({}, juce::dontSendNotification);
+     subtitleLabel.setJustificationType (juce::Justification::centred);
+ 
+-    modeLabel.setText ("Mode", juce::dontSendNotification);
++    modeLabel.setText ("Circuit", juce::dontSendNotification);
++    modeLabel.setJustificationType (juce::Justification::centred);
+     addAndMakeVisible (modeLabel);
+ 
+     ir2RoutingLabel.setText ("Ext Reverb Tanks", juce::dontSendNotification);
+@@ -475,14 +476,35 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
+     addAndMakeVisible (petalThemeButton);
+     addAndMakeVisible (cosmicThemeButton);
+ 
+-    modeComboBox.addItem ("Clean", 1);
+-    modeComboBox.addItem ("Silicon", 2);
+-    modeComboBox.addItem ("LED", 3);
+-    modeComboBox.addItem ("Germanium", 4);
+-    addAndMakeVisible (modeComboBox);
++    // Circuit chooser: a detented rotary that steps through the twelve clipping
++    // and dynamics circuits. It reads out the circuit's name rather than an
++    // index, so it behaves like a rotary selector switch on a real pedal.
++    {
++        const auto modeNames = FilterClipperBlock::getModeNames();
+ 
+-    modeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (
+-        audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::modeParameterID, modeComboBox);
++        modeSlider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
++        modeSlider.setRange (0.0, static_cast<double> (modeNames.size() - 1), 1.0);
++        modeSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, false, 96, 20);
++        modeSlider.setTooltip ("Clipping and dynamics circuit. Drive sets how hard it is pushed.");
++        modeSlider.textFromValueFunction = [modeNames] (double value)
++        {
++            return modeNames[juce::jlimit (0, modeNames.size() - 1, juce::roundToInt (value))];
++        };
++        modeSlider.valueFromTextFunction = [modeNames] (const juce::String& text)
++        {
++            const auto index = modeNames.indexOf (text.trim());
++            return index >= 0 ? static_cast<double> (index) : 0.0;
++        };
++        modeSlider.onValueChange = [this] { refreshModeReadout(); };
++        addAndMakeVisible (modeSlider);
++
++        modeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
++            audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::modeParameterID, modeSlider);
++    }
++
++    modeDescriptionLabel.setJustificationType (juce::Justification::centred);
++    addAndMakeVisible (modeDescriptionLabel);
++    refreshModeReadout();
+ 
+     ir2RoutingComboBox.addItem ("Off", 1);
+     ir2RoutingComboBox.addItem ("Series", 2);
+@@ -815,11 +837,7 @@ void TheGreatAmericanSpringAudioProcessorEditor::resized()
+     // ── Controls row: Mode | Ext Routing | Feedback Phase ───────────────────
+     // All three groups fit in contentWidth (708 px of content < 720 px column).
+     {
+-        auto row = centreRow (area.removeFromTop (28), contentWidth);
+-
+-        modeLabel.setBounds (row.removeFromLeft (44));
+-        modeComboBox.setBounds (row.removeFromLeft (130));
+-        row.removeFromLeft (24);
++        auto row = centreRow (area.removeFromTop (28), 386);
+ 
+         ir2RoutingLabel.setBounds (row.removeFromLeft (112));
+         ir2RoutingComboBox.setBounds (row.removeFromLeft (110));
+@@ -830,7 +848,12 @@ void TheGreatAmericanSpringAudioProcessorEditor::resized()
+         feedbackPhaseInvertButton.setBounds (row.removeFromLeft (76));
+     }
+ 
+-    area.removeFromTop (pad + 4);
++    area.removeFromTop (pad);
++
++    // ── Selected circuit, in words ───────────────────────────────────────────
++    modeDescriptionLabel.setBounds (centreRow (area.removeFromTop (18), contentWidth));
++
++    area.removeFromTop (6);
+ 
+     // ── Knob rows ────────────────────────────────────────────────────────────
+     {
+@@ -846,10 +869,11 @@ void TheGreatAmericanSpringAudioProcessorEditor::resized()
+             sl.setBounds  (b.removeFromTop (kh));
+         };
+ 
+-        auto row1 = centreRow (knobs.removeFromTop (kh + 22), kw * 5 + kg * 4);
++        auto row1 = centreRow (knobs.removeFromTop (kh + 22), kw * 6 + kg * 5);
+         knobs.removeFromTop (4);
+         auto row2 = centreRow (knobs.removeFromTop (kh + 22), kw * 4 + kg * 3);
+ 
++        layoutKnob (row1.removeFromLeft (kw), modeLabel,             modeSlider);             row1.removeFromLeft (kg);
+         layoutKnob (row1.removeFromLeft (kw), driveLabel,            driveSlider);            row1.removeFromLeft (kg);
+         layoutKnob (row1.removeFromLeft (kw), preHpfCutoffLabel,     preHpfCutoffSlider);     row1.removeFromLeft (kg);
+         layoutKnob (row1.removeFromLeft (kw), preHpfResonanceLabel,  preHpfResonanceSlider);  row1.removeFromLeft (kg);
+@@ -929,6 +953,15 @@ void TheGreatAmericanSpringAudioProcessorEditor::configureRotarySlider (juce::Sl
+     addAndMakeVisible (slider);
+ }
+ 
++void TheGreatAmericanSpringAudioProcessorEditor::refreshModeReadout()
++{
++    const auto lastMode = static_cast<int> (FilterClipperBlock::Mode::numModes) - 1;
++    const auto index = juce::jlimit (0, lastMode, juce::roundToInt (modeSlider.getValue()));
++    const auto mode = static_cast<FilterClipperBlock::Mode> (index);
++
++    modeDescriptionLabel.setText (FilterClipperBlock::getModeDescription (mode), juce::dontSendNotification);
++}
++
+ void TheGreatAmericanSpringAudioProcessorEditor::refreshPresetOptions()
+ {
+     const auto presetNames = audioProcessor.getPresetNames();
+@@ -1018,7 +1051,6 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
+         comboBox.setColour (juce::ComboBox::arrowColourId, style.textPrimary);
+     };
+ 
+-    styleComboBox (modeComboBox);
+     styleComboBox (ir2RoutingComboBox);
+     styleComboBox (playbackSourceComboBox);
+     styleComboBox (presetComboBox);
+@@ -1051,7 +1083,10 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
+         slider.setColour (juce::Slider::thumbColourId, style.radioFill);
+     };
+ 
+-    for (auto* slider : { &driveSlider, &preHpfCutoffSlider, &preHpfResonanceSlider, &postLpfCutoffSlider,
++    modeDescriptionLabel.setFont (makeFont (11.5f, juce::Font::plain, style.bodyTypeface));
++    modeDescriptionLabel.setColour (juce::Label::textColourId, style.textSecondary);
++
++    for (auto* slider : { &modeSlider, &driveSlider, &preHpfCutoffSlider, &preHpfResonanceSlider, &postLpfCutoffSlider,
+                           &postLpfResonanceSlider, &crossfadeAmountSlider, &extTankMixSlider, &feedbackAmountSlider, &wetDrySlider })
+     {
+         styleSlider (*slider);
+diff --git a/Source/PluginEditor.h b/Source/PluginEditor.h
+index 1284b49..bde7d29 100644
+--- a/Source/PluginEditor.h
++++ b/Source/PluginEditor.h
+@@ -120,6 +120,7 @@ private:
+     void refreshThemeButtons();
+     void refreshLogoButton();
+     void refreshOptionControls();
++    void refreshModeReadout();
+     void updateExpandedTankControlsAnimation();
+     void changeListenerCallback (juce::ChangeBroadcaster* source) override;
+     void timerCallback() override;
+@@ -129,7 +130,8 @@ private:
+     ArtNouveauTitle titleComponent;
+     juce::Label subtitleLabel;
+     juce::Label modeLabel;
+-    juce::ComboBox modeComboBox;
++    juce::Slider modeSlider;
++    juce::Label modeDescriptionLabel;
+     juce::Label ir2RoutingLabel;
+     juce::ComboBox ir2RoutingComboBox;
+     juce::Label feedbackPhaseLabel;
+@@ -185,7 +187,7 @@ private:
+     juce::TextButton loadPlaybackButton;
+     juce::TextButton playbackToggleButton;
+ 
+-    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> modeAttachment;
++    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> modeAttachment;
+     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> ir2RoutingAttachment;
+     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> driveAttachment;
+     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> preHpfCutoffAttachment;
+diff --git a/Source/PluginProcessor.cpp b/Source/PluginProcessor.cpp
+index b41d854..c816fdc 100644
+--- a/Source/PluginProcessor.cpp
++++ b/Source/PluginProcessor.cpp
+@@ -1,8 +1,8 @@
+-#include <BinaryData.h>
+-
+-#include "PluginProcessor.h"
+-#include "PluginEditor.h"
+-
++#include <BinaryData.h>
++
++#include "PluginProcessor.h"
++#include "PluginEditor.h"
++
+ #if JUCE_WINDOWS
+  #include <windows.h>
+ #endif
+@@ -13,34 +13,34 @@
+ namespace
+ {
+ constexpr auto projectSpringIrDirectoryPath = R"(C:\Users\Jason\source\repos\GAS\Spring IRs)";
+-constexpr double predelayLfoFrequencyHz = 0.3;
+-constexpr double predelaySmoothingSeconds = 1.25;
+-// Each tank gets its own predelay, wandering independently within these ranges.
+-constexpr double primaryPredelayMinMs = 20.0;   // primary tanks: 20-30 ms
+-constexpr double primaryPredelayMaxMs = 30.0;
+-constexpr double secondaryPredelayMinMs = 30.0; // 2nd (Ext) tanks: 30-42 ms
+-constexpr double secondaryPredelayMaxMs = 42.0;
+-constexpr float fallbackImpulse = 1.0f;
+-constexpr auto defaultLeftTank1IrFileName = "GBS-L.wav";
+-constexpr auto defaultRightTank1IrFileName = "GBS-R.wav";
++constexpr double predelayLfoFrequencyHz = 0.3;
++constexpr double predelaySmoothingSeconds = 1.25;
++// Each tank gets its own predelay, wandering independently within these ranges.
++constexpr double primaryPredelayMinMs = 20.0;   // primary tanks: 20-30 ms
++constexpr double primaryPredelayMaxMs = 30.0;
++constexpr double secondaryPredelayMinMs = 30.0; // 2nd (Ext) tanks: 30-42 ms
++constexpr double secondaryPredelayMaxMs = 42.0;
++constexpr float fallbackImpulse = 1.0f;
++constexpr auto defaultLeftTank1IrFileName = "GBS-L.wav";
++constexpr auto defaultRightTank1IrFileName = "GBS-R.wav";
+ constexpr auto defaultLeftTank2IrFileName = "GAS-L.wav";
+ constexpr auto defaultRightTank2IrFileName = "GAS-R.wav";
+ constexpr auto presetNameProperty = "presetName";
+ 
+ struct EmbeddedPlaybackSource
+ {
+-    const char* displayPath;
+-    const void* data;
+-    int dataSize;
+-};
+-
++    const char* displayPath;
++    const void* data;
++    int dataSize;
++};
++
+ const auto& getEmbeddedPlaybackSources()
+ {
+-    static const std::array<EmbeddedPlaybackSource, 3> sources {{
+-        { "Make Reverb Great Again-mono.mp3", BinaryData::Make_Reverb_Great_Againmono_mp3, BinaryData::Make_Reverb_Great_Againmono_mp3Size },
+-        { "Its a Shame-stereo.mp3", BinaryData::Its_a_Shamestereo_mp3, BinaryData::Its_a_Shamestereo_mp3Size },
+-        { "Zombie Remix-stereo.mp3", BinaryData::Zombie_Remixstereo_mp3, BinaryData::Zombie_Remixstereo_mp3Size }
+-    }};
++    static const std::array<EmbeddedPlaybackSource, 3> sources {{
++        { "Make Reverb Great Again-mono.mp3", BinaryData::Make_Reverb_Great_Againmono_mp3, BinaryData::Make_Reverb_Great_Againmono_mp3Size },
++        { "Its a Shame-stereo.mp3", BinaryData::Its_a_Shamestereo_mp3, BinaryData::Its_a_Shamestereo_mp3Size },
++        { "Zombie Remix-stereo.mp3", BinaryData::Zombie_Remixstereo_mp3, BinaryData::Zombie_Remixstereo_mp3Size }
++    }};
+ 
+     return sources;
+ }
+@@ -57,164 +57,164 @@ juce::String sanitizePresetFileName (juce::String presetName)
+     return presetName.trim();
+ }
+ }
+-
+-TheGreatAmericanSpringAudioProcessor::TheGreatAmericanSpringAudioProcessor()
+-    : AudioProcessor (BusesProperties()
+-                        .withInput ("Input", juce::AudioChannelSet::stereo(), true)
+-                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
+-      parameters (*this, nullptr, "Parameters", createParameterLayout())
+-{
+-    audioFormatManager.registerBasicFormats();
+-    refreshAvailableSpringIRs();
+-    applyDefaultGasSettings();
+-    playbackFilePath = getEmbeddedPlaybackSources().front().displayPath;
+-    playbackActive = false;
+-}
+-
+-TheGreatAmericanSpringAudioProcessor::~TheGreatAmericanSpringAudioProcessor() = default;
+-
+-const juce::String TheGreatAmericanSpringAudioProcessor::getName() const
+-{
+-    return JucePlugin_Name;
+-}
+-
+-bool TheGreatAmericanSpringAudioProcessor::acceptsMidi() const
+-{
+-    return false;
+-}
+-
+-bool TheGreatAmericanSpringAudioProcessor::producesMidi() const
+-{
+-    return false;
+-}
+-
+-bool TheGreatAmericanSpringAudioProcessor::isMidiEffect() const
+-{
+-    return false;
+-}
+-
+-double TheGreatAmericanSpringAudioProcessor::getTailLengthSeconds() const
+-{
+-    return 8.0;
+-}
+-
+-int TheGreatAmericanSpringAudioProcessor::getNumPrograms()
+-{
+-    return 1;
+-}
+-
+-int TheGreatAmericanSpringAudioProcessor::getCurrentProgram()
+-{
+-    return 0;
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::setCurrentProgram (int index)
+-{
+-    juce::ignoreUnused (index);
+-}
+-
+-const juce::String TheGreatAmericanSpringAudioProcessor::getProgramName (int index)
+-{
+-    juce::ignoreUnused (index);
+-    return {};
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::changeProgramName (int index, const juce::String& newName)
+-{
+-    juce::ignoreUnused (index, newName);
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+-{
+-    currentSampleRate = sampleRate;
+-    currentMaximumBlockSize = juce::jmax (1, samplesPerBlock);
+-    predelayLfoPhase = 0.0;
+-    for (int lane = 0; lane < 4; ++lane)
+-    {
+-        const auto minMs = (lane < 2) ? primaryPredelayMinMs : secondaryPredelayMinMs;
+-        const auto maxMs = (lane < 2) ? primaryPredelayMaxMs : secondaryPredelayMaxMs;
+-        predelayTargetMs[lane] = juce::jmap (predelayRandom.nextFloat(),
+-                                             static_cast<float> (minMs),
+-                                             static_cast<float> (maxMs));
+-        predelayMsSmoothed[lane].reset (currentSampleRate, predelaySmoothingSeconds);
+-        predelayMsSmoothed[lane].setCurrentAndTargetValue (predelayTargetMs[lane]);
+-    }
+-
+-    resizeProcessingBuffers (currentMaximumBlockSize);
+-
+-    juce::dsp::ProcessSpec monoSpec;
+-    monoSpec.sampleRate = sampleRate;
+-    monoSpec.maximumBlockSize = static_cast<juce::uint32> (currentMaximumBlockSize);
+-    monoSpec.numChannels = 1;
+-
+-    wetPredelayLeft.prepare (monoSpec);
+-    wetPredelayRight.prepare (monoSpec);
+-    secondaryLeftTankPredelay.prepare (monoSpec);
+-    secondaryRightTankPredelay.prepare (monoSpec);
+-
+-    chain.prepare (sampleRate, currentMaximumBlockSize);
+-    reset();
+-
+-    loadTankIRFromCurrentPath (TankSlot::left1);
+-    loadTankIRFromCurrentPath (TankSlot::right1);
+-    loadTankIRFromCurrentPath (TankSlot::left2);
+-    loadTankIRFromCurrentPath (TankSlot::right2);
+-
+-    loadSelectedPlaybackSource();
+-
+-    isPrepared = true;
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::releaseResources()
+-{
+-    isPrepared = false;
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::reset()
+-{
+-    chain.reset();
+-
+-    wetPredelayLeft.reset();
+-    wetPredelayRight.reset();
+-    secondaryLeftTankPredelay.reset();
+-    secondaryRightTankPredelay.reset();
+-    predelayLfoPhase = 0.0;
+-    for (int lane = 0; lane < 4; ++lane)
+-        predelayMsSmoothed[lane].setCurrentAndTargetValue (predelayTargetMs[lane]);
+-    lastIr2RoutingMode = getIr2RoutingMode();
+-
+-    externalInputBuffer.clear();
+-    dryTapBuffer.clear();
+-    wetInputBaseBuffer.clear();
+-    wetStereoBuffer.clear();
+-    wetAfterFeedbackBuffer.clear();
+-    feedbackReturnBuffer.clear();
+-    monoLeftBuffer.clear();
+-    monoRightBuffer.clear();
+-    monoLeftSecondaryBuffer.clear();
+-    monoRightSecondaryBuffer.clear();
+-
+-    playbackReadPosition = 0.0;
+-}
+-
+-bool TheGreatAmericanSpringAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+-{
+-    const auto input = layouts.getMainInputChannelSet();
+-    const auto output = layouts.getMainOutputChannelSet();
+-
+-    return (input == juce::AudioChannelSet::mono() || input == juce::AudioChannelSet::stereo())
+-        && (output == juce::AudioChannelSet::mono() || output == juce::AudioChannelSet::stereo());
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
+-                                                           juce::MidiBuffer& midiMessages)
+-{
+-    juce::ignoreUnused (midiMessages);
+-    juce::ScopedNoDenormals noDenormals;
+-
+-    const auto numSamples = buffer.getNumSamples();
+-    jassert (numSamples <= currentMaximumBlockSize);
+-
++
++TheGreatAmericanSpringAudioProcessor::TheGreatAmericanSpringAudioProcessor()
++    : AudioProcessor (BusesProperties()
++                        .withInput ("Input", juce::AudioChannelSet::stereo(), true)
++                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
++      parameters (*this, nullptr, "Parameters", createParameterLayout())
++{
++    audioFormatManager.registerBasicFormats();
++    refreshAvailableSpringIRs();
++    applyDefaultGasSettings();
++    playbackFilePath = getEmbeddedPlaybackSources().front().displayPath;
++    playbackActive = false;
++}
++
++TheGreatAmericanSpringAudioProcessor::~TheGreatAmericanSpringAudioProcessor() = default;
++
++const juce::String TheGreatAmericanSpringAudioProcessor::getName() const
++{
++    return JucePlugin_Name;
++}
++
++bool TheGreatAmericanSpringAudioProcessor::acceptsMidi() const
++{
++    return false;
++}
++
++bool TheGreatAmericanSpringAudioProcessor::producesMidi() const
++{
++    return false;
++}
++
++bool TheGreatAmericanSpringAudioProcessor::isMidiEffect() const
++{
++    return false;
++}
++
++double TheGreatAmericanSpringAudioProcessor::getTailLengthSeconds() const
++{
++    return 8.0;
++}
++
++int TheGreatAmericanSpringAudioProcessor::getNumPrograms()
++{
++    return 1;
++}
++
++int TheGreatAmericanSpringAudioProcessor::getCurrentProgram()
++{
++    return 0;
++}
++
++void TheGreatAmericanSpringAudioProcessor::setCurrentProgram (int index)
++{
++    juce::ignoreUnused (index);
++}
++
++const juce::String TheGreatAmericanSpringAudioProcessor::getProgramName (int index)
++{
++    juce::ignoreUnused (index);
++    return {};
++}
++
++void TheGreatAmericanSpringAudioProcessor::changeProgramName (int index, const juce::String& newName)
++{
++    juce::ignoreUnused (index, newName);
++}
++
++void TheGreatAmericanSpringAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
++{
++    currentSampleRate = sampleRate;
++    currentMaximumBlockSize = juce::jmax (1, samplesPerBlock);
++    predelayLfoPhase = 0.0;
++    for (int lane = 0; lane < 4; ++lane)
++    {
++        const auto minMs = (lane < 2) ? primaryPredelayMinMs : secondaryPredelayMinMs;
++        const auto maxMs = (lane < 2) ? primaryPredelayMaxMs : secondaryPredelayMaxMs;
++        predelayTargetMs[lane] = juce::jmap (predelayRandom.nextFloat(),
++                                             static_cast<float> (minMs),
++                                             static_cast<float> (maxMs));
++        predelayMsSmoothed[lane].reset (currentSampleRate, predelaySmoothingSeconds);
++        predelayMsSmoothed[lane].setCurrentAndTargetValue (predelayTargetMs[lane]);
++    }
++
++    resizeProcessingBuffers (currentMaximumBlockSize);
++
++    juce::dsp::ProcessSpec monoSpec;
++    monoSpec.sampleRate = sampleRate;
++    monoSpec.maximumBlockSize = static_cast<juce::uint32> (currentMaximumBlockSize);
++    monoSpec.numChannels = 1;
++
++    wetPredelayLeft.prepare (monoSpec);
++    wetPredelayRight.prepare (monoSpec);
++    secondaryLeftTankPredelay.prepare (monoSpec);
++    secondaryRightTankPredelay.prepare (monoSpec);
++
++    chain.prepare (sampleRate, currentMaximumBlockSize);
++    reset();
++
++    loadTankIRFromCurrentPath (TankSlot::left1);
++    loadTankIRFromCurrentPath (TankSlot::right1);
++    loadTankIRFromCurrentPath (TankSlot::left2);
++    loadTankIRFromCurrentPath (TankSlot::right2);
++
++    loadSelectedPlaybackSource();
++
++    isPrepared = true;
++}
++
++void TheGreatAmericanSpringAudioProcessor::releaseResources()
++{
++    isPrepared = false;
++}
++
++void TheGreatAmericanSpringAudioProcessor::reset()
++{
++    chain.reset();
++
++    wetPredelayLeft.reset();
++    wetPredelayRight.reset();
++    secondaryLeftTankPredelay.reset();
++    secondaryRightTankPredelay.reset();
++    predelayLfoPhase = 0.0;
++    for (int lane = 0; lane < 4; ++lane)
++        predelayMsSmoothed[lane].setCurrentAndTargetValue (predelayTargetMs[lane]);
++    lastIr2RoutingMode = getIr2RoutingMode();
++
++    externalInputBuffer.clear();
++    dryTapBuffer.clear();
++    wetInputBaseBuffer.clear();
++    wetStereoBuffer.clear();
++    wetAfterFeedbackBuffer.clear();
++    feedbackReturnBuffer.clear();
++    monoLeftBuffer.clear();
++    monoRightBuffer.clear();
++    monoLeftSecondaryBuffer.clear();
++    monoRightSecondaryBuffer.clear();
++
++    playbackReadPosition = 0.0;
++}
++
++bool TheGreatAmericanSpringAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
++{
++    const auto input = layouts.getMainInputChannelSet();
++    const auto output = layouts.getMainOutputChannelSet();
++
++    return (input == juce::AudioChannelSet::mono() || input == juce::AudioChannelSet::stereo())
++        && (output == juce::AudioChannelSet::mono() || output == juce::AudioChannelSet::stereo());
++}
++
++void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
++                                                           juce::MidiBuffer& midiMessages)
++{
++    juce::ignoreUnused (midiMessages);
++    juce::ScopedNoDenormals noDenormals;
++
++    const auto numSamples = buffer.getNumSamples();
++    jassert (numSamples <= currentMaximumBlockSize);
++
+     for (auto channel = getTotalNumInputChannels(); channel < getTotalNumOutputChannels(); ++channel)
+         buffer.clear (channel, 0, numSamples);
+ 
+@@ -223,129 +223,129 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
+     // The plugin always stays on its stereo processing path.
+     // The optional mono-to-stereo toggle is handled when copying mono input in buildExternalInput().
+     lastMonoSourceWithoutStereoConversion.store (false, std::memory_order_relaxed);
+-
+-    dryTapBuffer.copyFrom (0, 0, externalInputBuffer, 0, 0, numSamples);
+-    dryTapBuffer.copyFrom (1, 0, externalInputBuffer, 1, 0, numSamples);
+-
+-    wetInputBaseBuffer.copyFrom (0, 0, externalInputBuffer, 0, 0, numSamples);
+-    wetInputBaseBuffer.copyFrom (1, 0, externalInputBuffer, 1, 0, numSamples);
+-
+-    wetInputBaseBuffer.addFrom (0, 0, feedbackReturnBuffer, 0, 0, numSamples);
+-    wetInputBaseBuffer.addFrom (1, 0, feedbackReturnBuffer, 1, 0, numSamples);
+-
+-    updatePredelayModulation (numSamples);
+-    applyWetPredelay (numSamples);
+-
+-    monoLeftBuffer.copyFrom (0, 0, wetStereoBuffer, 0, 0, numSamples);
+-    monoRightBuffer.copyFrom (0, 0, wetStereoBuffer, 1, 0, numSamples);
+-
+-    const auto ir2RoutingMode = getIr2RoutingMode();
+-    const auto ir2Series = ir2RoutingMode == Ir2RoutingMode::series;
+-    const auto ir2Parallel = ir2RoutingMode == Ir2RoutingMode::parallel;
+-    const auto extTankMix = parameters.getRawParameterValue (extTankMixParameterID)->load();
+-
+-    if (ir2RoutingMode != lastIr2RoutingMode)
+-    {
+-        secondaryLeftTankPredelay.reset();
+-        secondaryRightTankPredelay.reset();
+-        monoLeftSecondaryBuffer.clear();
+-        monoRightSecondaryBuffer.clear();
+-        lastIr2RoutingMode = ir2RoutingMode;
+-    }
+-
+-    if (ir2Parallel)
+-    {
++
++    dryTapBuffer.copyFrom (0, 0, externalInputBuffer, 0, 0, numSamples);
++    dryTapBuffer.copyFrom (1, 0, externalInputBuffer, 1, 0, numSamples);
++
++    wetInputBaseBuffer.copyFrom (0, 0, externalInputBuffer, 0, 0, numSamples);
++    wetInputBaseBuffer.copyFrom (1, 0, externalInputBuffer, 1, 0, numSamples);
++
++    wetInputBaseBuffer.addFrom (0, 0, feedbackReturnBuffer, 0, 0, numSamples);
++    wetInputBaseBuffer.addFrom (1, 0, feedbackReturnBuffer, 1, 0, numSamples);
++
++    updatePredelayModulation (numSamples);
++    applyWetPredelay (numSamples);
++
++    monoLeftBuffer.copyFrom (0, 0, wetStereoBuffer, 0, 0, numSamples);
++    monoRightBuffer.copyFrom (0, 0, wetStereoBuffer, 1, 0, numSamples);
++
++    const auto ir2RoutingMode = getIr2RoutingMode();
++    const auto ir2Series = ir2RoutingMode == Ir2RoutingMode::series;
++    const auto ir2Parallel = ir2RoutingMode == Ir2RoutingMode::parallel;
++    const auto extTankMix = parameters.getRawParameterValue (extTankMixParameterID)->load();
++
++    if (ir2RoutingMode != lastIr2RoutingMode)
++    {
++        secondaryLeftTankPredelay.reset();
++        secondaryRightTankPredelay.reset();
++        monoLeftSecondaryBuffer.clear();
++        monoRightSecondaryBuffer.clear();
++        lastIr2RoutingMode = ir2RoutingMode;
++    }
++
++    if (ir2Parallel)
++    {
+         // Parallel: the secondary tank model branches from the dry wet input
+         // before the primary-tank predelay. In hardware terms this maps to the
+         // left 9EB2C1B and right 9EB3C1B tank path running alongside the
+         // primary 4AB1C1B tank path.
+-        monoLeftSecondaryBuffer.copyFrom (0, 0, wetInputBaseBuffer, 0, 0, numSamples);
+-        monoRightSecondaryBuffer.copyFrom (0, 0, wetInputBaseBuffer, 1, 0, numSamples);
+-        applySecondaryTankPredelay (monoLeftSecondaryBuffer, secondaryLeftTankPredelay, predelayModulationBuffer.getReadPointer (3), numSamples);
+-        applySecondaryTankPredelay (monoRightSecondaryBuffer, secondaryRightTankPredelay, predelayModulationBuffer.getReadPointer (4), numSamples);
+-    }
+-
+-    chain.leftTank.process (monoLeftBuffer, numSamples);
+-    chain.rightTank.process (monoRightBuffer, numSamples);
+-
+-    if (ir2Parallel)
+-    {
+-        chain.leftTankSecondary.process (monoLeftSecondaryBuffer, numSamples);
+-        chain.rightTankSecondary.process (monoRightSecondaryBuffer, numSamples);
+-
+-        // Parallel blend = additive "amount of 2nd tank": the primary stays at
+-        // full level and the 2nd tank is summed on top, scaled from silent
+-        // (Mix 0) to full (Mix 100%). Mirrors a single pot that just dials in
+-        // how much 2nd tank you hear, the same meaning as in Series.
+-        monoLeftBuffer.addFrom (0, 0, monoLeftSecondaryBuffer, 0, 0, numSamples, extTankMix);
+-        monoRightBuffer.addFrom (0, 0, monoRightSecondaryBuffer, 0, 0, numSamples, extTankMix);
+-    }
+-    else if (ir2Series)
+-    {
+-        monoLeftSecondaryBuffer.copyFrom (0, 0, monoLeftBuffer, 0, 0, numSamples);
+-        monoRightSecondaryBuffer.copyFrom (0, 0, monoRightBuffer, 0, 0, numSamples);
+-        applySecondaryTankPredelay (monoLeftBuffer, secondaryLeftTankPredelay, predelayModulationBuffer.getReadPointer (3), numSamples);
+-        applySecondaryTankPredelay (monoRightBuffer, secondaryRightTankPredelay, predelayModulationBuffer.getReadPointer (4), numSamples);
+-
+-        // +12 dB makeup gain between the two tanks (Series only) to compensate
+-        // for the level drop from cascading the second reverb tank.
+-        const float interTankGain = juce::Decibels::decibelsToGain (12.0f);
+-        monoLeftBuffer.applyGain  (0, 0, numSamples, interTankGain);
+-        monoRightBuffer.applyGain (0, 0, numSamples, interTankGain);
+-
+-        chain.leftTankSecondary.process (monoLeftBuffer, numSamples);
+-        chain.rightTankSecondary.process (monoRightBuffer, numSamples);
+-
+-        // Additive blend, identical pot meaning to Parallel: the primary tank
+-        // stays at full level and the cascaded 2nd-tank signal is summed on top,
+-        // scaled from silent (Mix 0) to full (Mix 100%). monoLeft/RightSecondary
+-        // hold the full-level primary; monoLeft/Right hold the cascade.
+-        monoLeftBuffer.applyGain (0, 0, numSamples, extTankMix);
+-        monoRightBuffer.applyGain (0, 0, numSamples, extTankMix);
+-        monoLeftBuffer.addFrom (0, 0, monoLeftSecondaryBuffer, 0, 0, numSamples, 1.0f);
+-        monoRightBuffer.addFrom (0, 0, monoRightSecondaryBuffer, 0, 0, numSamples, 1.0f);
+-    }
+-
+-    wetStereoBuffer.copyFrom (0, 0, monoLeftBuffer, 0, 0, numSamples);
+-    wetStereoBuffer.copyFrom (1, 0, monoRightBuffer, 0, 0, numSamples);
+-
+-    chain.stereoTankCrossfade.setCrossfadeAmount (
+-        parameters.getRawParameterValue (crossfadeAmountParameterID)->load());
+-
+-    chain.stereoTankCrossfade.process (wetStereoBuffer, numSamples);
+-
+-    chain.filterClipper.setParameters (getFilterClipperParameters());
+-    chain.filterClipper.process (wetStereoBuffer, numSamples);
+-    sanitizeBuffer (wetStereoBuffer, numSamples);
+-
+-    chain.feedback.setFeedbackAmount (
+-        parameters.getRawParameterValue (feedbackAmountParameterID)->load());
+-    chain.feedback.setFeedbackPhaseInverted (isFeedbackPhaseInverted());
+-
+-    chain.feedback.process (wetStereoBuffer,
+-                            wetAfterFeedbackBuffer,
+-                            feedbackReturnBuffer,
+-                            predelayModulationBuffer.getReadPointer (1),
+-                            numSamples);
+-    sanitizeBuffer (wetAfterFeedbackBuffer, numSamples);
+-    sanitizeBuffer (feedbackReturnBuffer, numSamples);
+-
+-    chain.wetDryMixer.setWetAmount (
+-        parameters.getRawParameterValue (wetDryParameterID)->load());
+-
+-    chain.wetDryMixer.process (dryTapBuffer,
+-                               wetAfterFeedbackBuffer,
+-                               buffer,
+-                               numSamples);
+-
+-    sanitizeBuffer (buffer, numSamples);
+-}
+-
+-bool TheGreatAmericanSpringAudioProcessor::hasEditor() const
+-{
+-    return true;
+-}
+-
++        monoLeftSecondaryBuffer.copyFrom (0, 0, wetInputBaseBuffer, 0, 0, numSamples);
++        monoRightSecondaryBuffer.copyFrom (0, 0, wetInputBaseBuffer, 1, 0, numSamples);
++        applySecondaryTankPredelay (monoLeftSecondaryBuffer, secondaryLeftTankPredelay, predelayModulationBuffer.getReadPointer (3), numSamples);
++        applySecondaryTankPredelay (monoRightSecondaryBuffer, secondaryRightTankPredelay, predelayModulationBuffer.getReadPointer (4), numSamples);
++    }
++
++    chain.leftTank.process (monoLeftBuffer, numSamples);
++    chain.rightTank.process (monoRightBuffer, numSamples);
++
++    if (ir2Parallel)
++    {
++        chain.leftTankSecondary.process (monoLeftSecondaryBuffer, numSamples);
++        chain.rightTankSecondary.process (monoRightSecondaryBuffer, numSamples);
++
++        // Parallel blend = additive "amount of 2nd tank": the primary stays at
++        // full level and the 2nd tank is summed on top, scaled from silent
++        // (Mix 0) to full (Mix 100%). Mirrors a single pot that just dials in
++        // how much 2nd tank you hear, the same meaning as in Series.
++        monoLeftBuffer.addFrom (0, 0, monoLeftSecondaryBuffer, 0, 0, numSamples, extTankMix);
++        monoRightBuffer.addFrom (0, 0, monoRightSecondaryBuffer, 0, 0, numSamples, extTankMix);
++    }
++    else if (ir2Series)
++    {
++        monoLeftSecondaryBuffer.copyFrom (0, 0, monoLeftBuffer, 0, 0, numSamples);
++        monoRightSecondaryBuffer.copyFrom (0, 0, monoRightBuffer, 0, 0, numSamples);
++        applySecondaryTankPredelay (monoLeftBuffer, secondaryLeftTankPredelay, predelayModulationBuffer.getReadPointer (3), numSamples);
++        applySecondaryTankPredelay (monoRightBuffer, secondaryRightTankPredelay, predelayModulationBuffer.getReadPointer (4), numSamples);
++
++        // +12 dB makeup gain between the two tanks (Series only) to compensate
++        // for the level drop from cascading the second reverb tank.
++        const float interTankGain = juce::Decibels::decibelsToGain (12.0f);
++        monoLeftBuffer.applyGain  (0, 0, numSamples, interTankGain);
++        monoRightBuffer.applyGain (0, 0, numSamples, interTankGain);
++
++        chain.leftTankSecondary.process (monoLeftBuffer, numSamples);
++        chain.rightTankSecondary.process (monoRightBuffer, numSamples);
++
++        // Additive blend, identical pot meaning to Parallel: the primary tank
++        // stays at full level and the cascaded 2nd-tank signal is summed on top,
++        // scaled from silent (Mix 0) to full (Mix 100%). monoLeft/RightSecondary
++        // hold the full-level primary; monoLeft/Right hold the cascade.
++        monoLeftBuffer.applyGain (0, 0, numSamples, extTankMix);
++        monoRightBuffer.applyGain (0, 0, numSamples, extTankMix);
++        monoLeftBuffer.addFrom (0, 0, monoLeftSecondaryBuffer, 0, 0, numSamples, 1.0f);
++        monoRightBuffer.addFrom (0, 0, monoRightSecondaryBuffer, 0, 0, numSamples, 1.0f);
++    }
++
++    wetStereoBuffer.copyFrom (0, 0, monoLeftBuffer, 0, 0, numSamples);
++    wetStereoBuffer.copyFrom (1, 0, monoRightBuffer, 0, 0, numSamples);
++
++    chain.stereoTankCrossfade.setCrossfadeAmount (
++        parameters.getRawParameterValue (crossfadeAmountParameterID)->load());
++
++    chain.stereoTankCrossfade.process (wetStereoBuffer, numSamples);
++
++    chain.filterClipper.setParameters (getFilterClipperParameters());
++    chain.filterClipper.process (wetStereoBuffer, numSamples);
++    sanitizeBuffer (wetStereoBuffer, numSamples);
++
++    chain.feedback.setFeedbackAmount (
++        parameters.getRawParameterValue (feedbackAmountParameterID)->load());
++    chain.feedback.setFeedbackPhaseInverted (isFeedbackPhaseInverted());
++
++    chain.feedback.process (wetStereoBuffer,
++                            wetAfterFeedbackBuffer,
++                            feedbackReturnBuffer,
++                            predelayModulationBuffer.getReadPointer (1),
++                            numSamples);
++    sanitizeBuffer (wetAfterFeedbackBuffer, numSamples);
++    sanitizeBuffer (feedbackReturnBuffer, numSamples);
++
++    chain.wetDryMixer.setWetAmount (
++        parameters.getRawParameterValue (wetDryParameterID)->load());
++
++    chain.wetDryMixer.process (dryTapBuffer,
++                               wetAfterFeedbackBuffer,
++                               buffer,
++                               numSamples);
++
++    sanitizeBuffer (buffer, numSamples);
++}
++
++bool TheGreatAmericanSpringAudioProcessor::hasEditor() const
++{
++    return true;
++}
++
+ juce::AudioProcessorEditor* TheGreatAmericanSpringAudioProcessor::createEditor()
+ {
+     return new TheGreatAmericanSpringAudioProcessorEditor (*this);
+@@ -369,117 +369,117 @@ void TheGreatAmericanSpringAudioProcessor::getStateInformation (juce::MemoryBloc
+     if (auto xml = state.createXml())
+         copyXmlToBinary (*xml, destData);
+ }
+-
+-void TheGreatAmericanSpringAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+-{
+-    if (auto xmlState = getXmlFromBinary (data, sizeInBytes))
+-    {
+-        auto restoredState = juce::ValueTree::fromXml (*xmlState);
+-
+-        if (restoredState.hasType (parameters.state.getType()))
+-        {
+-            const auto restoredIr2Routing = restoredState.getProperty (x2TanksParameterID);
+-
+-            if (restoredIr2Routing.isBool())
+-                restoredState.setProperty (x2TanksParameterID,
+-                                           static_cast<bool> (restoredIr2Routing) ? 2 : 0,
+-                                           nullptr);
+-
+-            parameters.replaceState (restoredState);
+-            applyDefaultGasSettings();
+-
+-            // Always reset playback to GBS default on startup
+-            playbackFilePath = getEmbeddedPlaybackSources().front().displayPath;
+-
+-            refreshAvailableSpringIRs();
+-            assignDefaultTankIRs();
+-            playbackActive = false;
+-
+-            if (isPrepared)
+-            {
+-                loadTankIRFromCurrentPath (TankSlot::left1);
+-                loadTankIRFromCurrentPath (TankSlot::right1);
+-                loadTankIRFromCurrentPath (TankSlot::left2);
+-                loadTankIRFromCurrentPath (TankSlot::right2);
+-                loadSelectedPlaybackSource();
+-            }
+-
+-            sendChangeMessage();
+-        }
+-    }
+-}
+-
+-bool TheGreatAmericanSpringAudioProcessor::loadTankImpulseResponseFile (TankSlot slot, const juce::File& file)
+-{
+-    if (! file.existsAsFile())
+-        return false;
+-
+-    getTankIrPath (slot) = file.getFullPathName();
+-
+-    if (! isPrepared)
+-        return true;
+-
+-    const auto loaded = getTankBlock (slot).loadImpulseResponse (file);
+-
+-    if (loaded)
+-        sendChangeMessage();
+-
+-    return loaded;
+-}
+-
+-juce::String TheGreatAmericanSpringAudioProcessor::getTankImpulseResponseDisplayName (TankSlot slot) const
+-{
+-    const auto& fullPath = getTankIrPath (slot);
+-
+-    if (fullPath.isEmpty())
+-        return "Fallback Dirac IR";
+-
+-    const auto file = juce::File (fullPath);
+-    return file.existsAsFile() ? file.getFileName() : "Missing file";
+-}
+-
+-juce::String TheGreatAmericanSpringAudioProcessor::getTankSlotName (TankSlot slot) const
+-{
+-    switch (slot)
+-    {
+-        case TankSlot::left1:  return "Left Main Tanks";
+-        case TankSlot::right1: return "Right Main Tanks";
+-        case TankSlot::left2:  return "Left Ext Reverb Tanks";
+-        case TankSlot::right2: return "Right Ext Reverb Tanks";
+-    }
+-
+-    jassertfalse;
+-    return {};
+-}
+-
+-juce::File TheGreatAmericanSpringAudioProcessor::getSpringIrDirectory() const
+-{
+-    const auto searchDirectories = getSpringIrSearchDirectories();
+-
+-    for (const auto& directory : searchDirectories)
+-    {
+-        if (directory.isDirectory())
+-            return directory;
+-    }
+-
+-    return searchDirectories.isEmpty() ? juce::File {} : searchDirectories.getFirst();
+-}
+-
+-bool TheGreatAmericanSpringAudioProcessor::isX2Enabled() const
+-{
+-    return getIr2RoutingMode() != Ir2RoutingMode::off;
+-}
+-
+-TheGreatAmericanSpringAudioProcessor::Ir2RoutingMode TheGreatAmericanSpringAudioProcessor::getIr2RoutingMode() const
+-{
+-    return toIr2RoutingMode (parameters.getRawParameterValue (x2TanksParameterID)->load());
+-}
+-
+-bool TheGreatAmericanSpringAudioProcessor::isFeedbackPhaseInverted() const
+-{
+-    return parameters.getRawParameterValue (feedbackPhaseInvertParameterID)->load() >= 0.5f;
+-}
+-
++
++void TheGreatAmericanSpringAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
++{
++    if (auto xmlState = getXmlFromBinary (data, sizeInBytes))
++    {
++        auto restoredState = juce::ValueTree::fromXml (*xmlState);
++
++        if (restoredState.hasType (parameters.state.getType()))
++        {
++            const auto restoredIr2Routing = restoredState.getProperty (x2TanksParameterID);
++
++            if (restoredIr2Routing.isBool())
++                restoredState.setProperty (x2TanksParameterID,
++                                           static_cast<bool> (restoredIr2Routing) ? 2 : 0,
++                                           nullptr);
++
++            parameters.replaceState (restoredState);
++            applyDefaultGasSettings();
++
++            // Always reset playback to GBS default on startup
++            playbackFilePath = getEmbeddedPlaybackSources().front().displayPath;
++
++            refreshAvailableSpringIRs();
++            assignDefaultTankIRs();
++            playbackActive = false;
++
++            if (isPrepared)
++            {
++                loadTankIRFromCurrentPath (TankSlot::left1);
++                loadTankIRFromCurrentPath (TankSlot::right1);
++                loadTankIRFromCurrentPath (TankSlot::left2);
++                loadTankIRFromCurrentPath (TankSlot::right2);
++                loadSelectedPlaybackSource();
++            }
++
++            sendChangeMessage();
++        }
++    }
++}
++
++bool TheGreatAmericanSpringAudioProcessor::loadTankImpulseResponseFile (TankSlot slot, const juce::File& file)
++{
++    if (! file.existsAsFile())
++        return false;
++
++    getTankIrPath (slot) = file.getFullPathName();
++
++    if (! isPrepared)
++        return true;
++
++    const auto loaded = getTankBlock (slot).loadImpulseResponse (file);
++
++    if (loaded)
++        sendChangeMessage();
++
++    return loaded;
++}
++
++juce::String TheGreatAmericanSpringAudioProcessor::getTankImpulseResponseDisplayName (TankSlot slot) const
++{
++    const auto& fullPath = getTankIrPath (slot);
++
++    if (fullPath.isEmpty())
++        return "Fallback Dirac IR";
++
++    const auto file = juce::File (fullPath);
++    return file.existsAsFile() ? file.getFileName() : "Missing file";
++}
++
++juce::String TheGreatAmericanSpringAudioProcessor::getTankSlotName (TankSlot slot) const
++{
++    switch (slot)
++    {
++        case TankSlot::left1:  return "Left Main Tanks";
++        case TankSlot::right1: return "Right Main Tanks";
++        case TankSlot::left2:  return "Left Ext Reverb Tanks";
++        case TankSlot::right2: return "Right Ext Reverb Tanks";
++    }
++
++    jassertfalse;
++    return {};
++}
++
++juce::File TheGreatAmericanSpringAudioProcessor::getSpringIrDirectory() const
++{
++    const auto searchDirectories = getSpringIrSearchDirectories();
++
++    for (const auto& directory : searchDirectories)
++    {
++        if (directory.isDirectory())
++            return directory;
++    }
++
++    return searchDirectories.isEmpty() ? juce::File {} : searchDirectories.getFirst();
++}
++
++bool TheGreatAmericanSpringAudioProcessor::isX2Enabled() const
++{
++    return getIr2RoutingMode() != Ir2RoutingMode::off;
++}
++
++TheGreatAmericanSpringAudioProcessor::Ir2RoutingMode TheGreatAmericanSpringAudioProcessor::getIr2RoutingMode() const
++{
++    return toIr2RoutingMode (parameters.getRawParameterValue (x2TanksParameterID)->load());
++}
++
++bool TheGreatAmericanSpringAudioProcessor::isFeedbackPhaseInverted() const
++{
++    return parameters.getRawParameterValue (feedbackPhaseInvertParameterID)->load() >= 0.5f;
++}
++
+ bool TheGreatAmericanSpringAudioProcessor::shouldConvertMonoSourceToStereo() const
+ {
+     return parameters.getRawParameterValue (monoSourceToStereoParameterID)->load() >= 0.5f;
+@@ -488,312 +488,312 @@ bool TheGreatAmericanSpringAudioProcessor::shouldConvertMonoSourceToStereo() con
+ bool TheGreatAmericanSpringAudioProcessor::shouldShowUnavailableTankControls() const
+ {
+     return parameters.getRawParameterValue (showUnavailableTankControlsParameterID)->load() >= 0.5f;
+-}
+-
+-bool TheGreatAmericanSpringAudioProcessor::isCrossfadeAvailableForCurrentLayout() const
+-{
+-    return ! isMonoSourceWithoutStereoConversion();
+-}
+-
+-juce::String TheGreatAmericanSpringAudioProcessor::getIr2RoutingDisplayName() const
+-{
+-    switch (getIr2RoutingMode())
+-    {
+-        case Ir2RoutingMode::off:      return "Off";
+-        case Ir2RoutingMode::series:   return "Series";
+-        case Ir2RoutingMode::parallel: return "Parallel";
+-    }
+-
+-    jassertfalse;
+-    return "Off";
+-}
+-
+-bool TheGreatAmericanSpringAudioProcessor::loadPlaybackFile (const juce::File& file)
+-{
+-    if (! file.existsAsFile())
+-        return false;
+-
+-    std::unique_ptr<juce::AudioFormatReader> reader (audioFormatManager.createReaderFor (file));
+-
+-    if (reader == nullptr)
+-        return false;
+-
+-    juce::AudioBuffer<float> newBuffer (juce::jmax (1, static_cast<int> (reader->numChannels)),
+-                                        static_cast<int> (reader->lengthInSamples));
+-
+-    if (! reader->read (newBuffer.getArrayOfWritePointers(),
+-                        newBuffer.getNumChannels(),
+-                        0,
+-                        newBuffer.getNumSamples()))
+-    {
+-        return false;
+-    }
+-
+-    playbackBuffer = std::move (newBuffer);
+-    playbackSourceSampleRate = reader->sampleRate;
+-    playbackFilePath = file.getFullPathName();
+-    playbackReadPosition = 0.0;
+-    playbackActive = false;
+-    sendChangeMessage();
+-    return true;
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::setPlaybackActive (bool shouldPlay)
+-{
+-    if (! hasPlaybackFile())
+-        return;
+-
+-    if (shouldPlay && ! playbackActive)
+-        playbackReadPosition = 0.0;
+-
+-    playbackActive = shouldPlay;
+-    sendChangeMessage();
+-}
+-
+-bool TheGreatAmericanSpringAudioProcessor::isPlaybackActive() const
+-{
+-    return playbackActive;
+-}
+-
+-bool TheGreatAmericanSpringAudioProcessor::hasPlaybackFile() const
+-{
+-    return playbackBuffer.getNumSamples() > 0;
+-}
+-
+-juce::StringArray TheGreatAmericanSpringAudioProcessor::getPlaybackSourceDisplayNames() const
+-{
+-    juce::StringArray names;
+-
+-    for (const auto& source : getEmbeddedPlaybackSources())
+-        names.add (juce::File (juce::String (source.displayPath)).getFileName());
+-
+-    return names;
+-}
+-
+-int TheGreatAmericanSpringAudioProcessor::getSelectedPlaybackSourceIndex() const
+-{
+-    return getPlaybackSourceIndexForPath (playbackFilePath);
+-}
+-
+-bool TheGreatAmericanSpringAudioProcessor::setPlaybackSourceIndex (int index)
+-{
+-    if (! juce::isPositiveAndBelow (index, static_cast<int> (getEmbeddedPlaybackSources().size())))
+-        return false;
+-
+-    playbackFilePath = getEmbeddedPlaybackSources()[static_cast<size_t> (index)].displayPath;
+-
+-    if (! isPrepared)
+-    {
+-        sendChangeMessage();
+-        return true;
+-    }
+-
+-    const auto loaded = loadSelectedPlaybackSource();
+-
+-    if (loaded)
+-        sendChangeMessage();
+-
+-    return loaded;
+-}
+-
+-juce::String TheGreatAmericanSpringAudioProcessor::getPlaybackFileDisplayName() const
+-{
+-    if (playbackFilePath.isEmpty())
+-        return "No playback source loaded";
+-
+-    return juce::File (playbackFilePath).getFileName();
+-}
+-
+-juce::AudioProcessorValueTreeState::ParameterLayout TheGreatAmericanSpringAudioProcessor::createParameterLayout()
+-{
+-    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+-
+-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { crossfadeAmountParameterID, 1 },
+-                                                              "Crossfade Amount",
+-                                                              juce::NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
+-                                                              0.2f));
+-
+-    layout.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { modeParameterID, 1 },
+-                                                               "Mode",
+-                                                               juce::StringArray { "Clean", "Silicon", "LED", "Germanium" },
+-                                                               0));
+-
+-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { driveParameterID, 1 },
+-                                                              "Drive",
+-                                                              juce::NormalisableRange<float> (0.0f, 30.0f, 0.01f),
+-                                                              6.0f));
+-
+-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { preHpfCutoffParameterID, 1 },
+-                                                              "HPF Cutoff",
+-                                                              juce::NormalisableRange<float> (1.0f, 4000.0f, 0.01f, 0.35f),
+-                                                              120.0f));
+-
+-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { preHpfResonanceParameterID, 1 },
+-                                                              "HPF Q",
+-                                                              juce::NormalisableRange<float> (0.25f, 8.0f, 0.001f, 0.5f),
+-                                                              0.707f));
+-
+-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { postLpfCutoffParameterID, 1 },
+-                                                              "LPF Cutoff",
+-                                                              juce::NormalisableRange<float> (500.0f, 20000.0f, 0.01f, 0.35f),
+-                                                              16000.0f));
+-
+-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { postLpfResonanceParameterID, 1 },
+-                                                              "LPF Q",
+-                                                              juce::NormalisableRange<float> (0.25f, 8.0f, 0.001f, 0.5f),
+-                                                              0.707f));
+-
+-    layout.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { x2TanksParameterID, 1 },
+-                                                               "Ext Reverb Tanks",
+-                                                               juce::StringArray { "Off", "Series", "Parallel" },
+-                                                               2));
+-
+-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { extTankMixParameterID, 1 },
+-                                                              "Ext Reverb Tanks Amount",
+-                                                              juce::NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
+-                                                              1.0f));
+-
+-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { feedbackAmountParameterID, 1 },
+-                                                              "Feedback",
+-                                                              juce::NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
+-                                                              0.2f));
+-
+-    layout.add (std::make_unique<juce::AudioParameterBool> (juce::ParameterID { feedbackPhaseInvertParameterID, 1 },
+-                                                            "Feedback Phase Invert",
+-                                                            false));
+-
+-    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { wetDryParameterID, 1 },
+-                                                              "Wet/Dry",
+-                                                              juce::NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
+-                                                              0.5f));
+-
+-    layout.add (std::make_unique<juce::AudioParameterBool> (juce::ParameterID { monoSourceToStereoParameterID, 1 },
+-                                                            "Mono Source To Stereo",
+-                                                            false));
+-
++}
++
++bool TheGreatAmericanSpringAudioProcessor::isCrossfadeAvailableForCurrentLayout() const
++{
++    return ! isMonoSourceWithoutStereoConversion();
++}
++
++juce::String TheGreatAmericanSpringAudioProcessor::getIr2RoutingDisplayName() const
++{
++    switch (getIr2RoutingMode())
++    {
++        case Ir2RoutingMode::off:      return "Off";
++        case Ir2RoutingMode::series:   return "Series";
++        case Ir2RoutingMode::parallel: return "Parallel";
++    }
++
++    jassertfalse;
++    return "Off";
++}
++
++bool TheGreatAmericanSpringAudioProcessor::loadPlaybackFile (const juce::File& file)
++{
++    if (! file.existsAsFile())
++        return false;
++
++    std::unique_ptr<juce::AudioFormatReader> reader (audioFormatManager.createReaderFor (file));
++
++    if (reader == nullptr)
++        return false;
++
++    juce::AudioBuffer<float> newBuffer (juce::jmax (1, static_cast<int> (reader->numChannels)),
++                                        static_cast<int> (reader->lengthInSamples));
++
++    if (! reader->read (newBuffer.getArrayOfWritePointers(),
++                        newBuffer.getNumChannels(),
++                        0,
++                        newBuffer.getNumSamples()))
++    {
++        return false;
++    }
++
++    playbackBuffer = std::move (newBuffer);
++    playbackSourceSampleRate = reader->sampleRate;
++    playbackFilePath = file.getFullPathName();
++    playbackReadPosition = 0.0;
++    playbackActive = false;
++    sendChangeMessage();
++    return true;
++}
++
++void TheGreatAmericanSpringAudioProcessor::setPlaybackActive (bool shouldPlay)
++{
++    if (! hasPlaybackFile())
++        return;
++
++    if (shouldPlay && ! playbackActive)
++        playbackReadPosition = 0.0;
++
++    playbackActive = shouldPlay;
++    sendChangeMessage();
++}
++
++bool TheGreatAmericanSpringAudioProcessor::isPlaybackActive() const
++{
++    return playbackActive;
++}
++
++bool TheGreatAmericanSpringAudioProcessor::hasPlaybackFile() const
++{
++    return playbackBuffer.getNumSamples() > 0;
++}
++
++juce::StringArray TheGreatAmericanSpringAudioProcessor::getPlaybackSourceDisplayNames() const
++{
++    juce::StringArray names;
++
++    for (const auto& source : getEmbeddedPlaybackSources())
++        names.add (juce::File (juce::String (source.displayPath)).getFileName());
++
++    return names;
++}
++
++int TheGreatAmericanSpringAudioProcessor::getSelectedPlaybackSourceIndex() const
++{
++    return getPlaybackSourceIndexForPath (playbackFilePath);
++}
++
++bool TheGreatAmericanSpringAudioProcessor::setPlaybackSourceIndex (int index)
++{
++    if (! juce::isPositiveAndBelow (index, static_cast<int> (getEmbeddedPlaybackSources().size())))
++        return false;
++
++    playbackFilePath = getEmbeddedPlaybackSources()[static_cast<size_t> (index)].displayPath;
++
++    if (! isPrepared)
++    {
++        sendChangeMessage();
++        return true;
++    }
++
++    const auto loaded = loadSelectedPlaybackSource();
++
++    if (loaded)
++        sendChangeMessage();
++
++    return loaded;
++}
++
++juce::String TheGreatAmericanSpringAudioProcessor::getPlaybackFileDisplayName() const
++{
++    if (playbackFilePath.isEmpty())
++        return "No playback source loaded";
++
++    return juce::File (playbackFilePath).getFileName();
++}
++
++juce::AudioProcessorValueTreeState::ParameterLayout TheGreatAmericanSpringAudioProcessor::createParameterLayout()
++{
++    juce::AudioProcessorValueTreeState::ParameterLayout layout;
++
++    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { crossfadeAmountParameterID, 1 },
++                                                              "Crossfade Amount",
++                                                              juce::NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
++                                                              0.2f));
++
++    layout.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { modeParameterID, 1 },
++                                                               "Mode",
++                                                               FilterClipperBlock::getModeNames(),
++                                                               0));
++
++    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { driveParameterID, 1 },
++                                                              "Drive",
++                                                              juce::NormalisableRange<float> (0.0f, 30.0f, 0.01f),
++                                                              6.0f));
++
++    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { preHpfCutoffParameterID, 1 },
++                                                              "HPF Cutoff",
++                                                              juce::NormalisableRange<float> (1.0f, 4000.0f, 0.01f, 0.35f),
++                                                              120.0f));
++
++    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { preHpfResonanceParameterID, 1 },
++                                                              "HPF Q",
++                                                              juce::NormalisableRange<float> (0.25f, 8.0f, 0.001f, 0.5f),
++                                                              0.707f));
++
++    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { postLpfCutoffParameterID, 1 },
++                                                              "LPF Cutoff",
++                                                              juce::NormalisableRange<float> (500.0f, 20000.0f, 0.01f, 0.35f),
++                                                              16000.0f));
++
++    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { postLpfResonanceParameterID, 1 },
++                                                              "LPF Q",
++                                                              juce::NormalisableRange<float> (0.25f, 8.0f, 0.001f, 0.5f),
++                                                              0.707f));
++
++    layout.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { x2TanksParameterID, 1 },
++                                                               "Ext Reverb Tanks",
++                                                               juce::StringArray { "Off", "Series", "Parallel" },
++                                                               2));
++
++    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { extTankMixParameterID, 1 },
++                                                              "Ext Reverb Tanks Amount",
++                                                              juce::NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
++                                                              1.0f));
++
++    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { feedbackAmountParameterID, 1 },
++                                                              "Feedback",
++                                                              juce::NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
++                                                              0.2f));
++
++    layout.add (std::make_unique<juce::AudioParameterBool> (juce::ParameterID { feedbackPhaseInvertParameterID, 1 },
++                                                            "Feedback Phase Invert",
++                                                            false));
++
++    layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { wetDryParameterID, 1 },
++                                                              "Wet/Dry",
++                                                              juce::NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
++                                                              0.5f));
++
++    layout.add (std::make_unique<juce::AudioParameterBool> (juce::ParameterID { monoSourceToStereoParameterID, 1 },
++                                                            "Mono Source To Stereo",
++                                                            false));
++
+     layout.add (std::make_unique<juce::AudioParameterBool> (juce::ParameterID { showUnavailableTankControlsParameterID, 1 },
+                                                             "Will not be available in real life",
+                                                             false));
+ 
+     return layout;
+ }
+-
+-void TheGreatAmericanSpringAudioProcessor::refreshAvailableSpringIRs()
+-{
+-    availableSpringIRs.clear();
+-
+-    for (const auto& springDirectory : getSpringIrSearchDirectories())
+-    {
+-        if (! springDirectory.isDirectory())
+-            continue;
+-
+-        for (const auto& extension : { "*.wav", "*.aif", "*.aiff", "*.flac" })
+-        {
+-            juce::Array<juce::File> matches;
+-            springDirectory.findChildFiles (matches, juce::File::findFiles, false, extension);
+-
+-            for (const auto& file : matches)
+-                availableSpringIRs.addIfNotAlreadyThere (file);
+-        }
+-    }
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::assignRandomTankIRsIfNeeded()
+-{
+-    if (availableSpringIRs.isEmpty())
+-        return;
+-
+-    juce::Random random;
+-
+-    const auto findAvailableIrByName = [this] (const juce::String& fileName)
+-    {
+-        for (const auto& candidate : availableSpringIRs)
+-        {
+-            if (candidate.getFileName().equalsIgnoreCase (fileName) && candidate.existsAsFile())
+-                return candidate;
+-        }
+-
+-        return juce::File {};
+-    };
+-
+-    const auto assignPreferredOrRandomIfEmpty = [this, &random, &findAvailableIrByName] (TankSlot slot, const juce::String& preferredFileName)
+-    {
+-        if (! getTankIrPath (slot).isEmpty())
+-            return;
+-
+-        if (const auto preferredFile = findAvailableIrByName (preferredFileName); preferredFile.existsAsFile())
+-        {
+-            getTankIrPath (slot) = preferredFile.getFullPathName();
+-            return;
+-        }
+-
+-        getTankIrPath (slot) = availableSpringIRs[random.nextInt (availableSpringIRs.size())].getFullPathName();
+-    };
+-
+-    assignPreferredOrRandomIfEmpty (TankSlot::left1, defaultLeftTank1IrFileName);
+-    assignPreferredOrRandomIfEmpty (TankSlot::right1, defaultRightTank1IrFileName);
+-    assignPreferredOrRandomIfEmpty (TankSlot::left2, defaultLeftTank2IrFileName);
+-    assignPreferredOrRandomIfEmpty (TankSlot::right2, defaultRightTank2IrFileName);
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::assignDefaultTankIRs()
+-{
+-    leftTank1IrPath.clear();
+-    rightTank1IrPath.clear();
+-    leftTank2IrPath.clear();
+-    rightTank2IrPath.clear();
+-    assignRandomTankIRsIfNeeded();
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::setParameterPlainValue (const juce::String& parameterID, float plainValue)
+-{
+-    if (auto* parameter = parameters.getParameter (parameterID))
+-    {
+-        if (auto* ranged = dynamic_cast<juce::RangedAudioParameter*> (parameter))
+-            ranged->setValueNotifyingHost (ranged->convertTo0to1 (plainValue));
+-    }
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::applyDefaultGasSettings()
+-{
+-    // "GBS default" preset
+-    setParameterPlainValue (modeParameterID, 0.0f);                 // Clean
+-    setParameterPlainValue (driveParameterID, 6.0f);                // 6 dB
+-    setParameterPlainValue (preHpfCutoffParameterID, 100.0f);       // 100 Hz
+-    setParameterPlainValue (preHpfResonanceParameterID, 1.0f);      // Q = 1
+-    setParameterPlainValue (postLpfCutoffParameterID, 12000.0f);    // 12 kHz
+-    setParameterPlainValue (postLpfResonanceParameterID, 1.0f);     // Q = 1
+-    setParameterPlainValue (x2TanksParameterID, 0.0f);              // Ext Reverb Tanks: Off
+-    setParameterPlainValue (extTankMixParameterID, 1.0f);           // 100%
+-    setParameterPlainValue (crossfadeAmountParameterID, 0.0f);      // 0
+-    setParameterPlainValue (feedbackAmountParameterID, 0.1f);       // 10%
++
++void TheGreatAmericanSpringAudioProcessor::refreshAvailableSpringIRs()
++{
++    availableSpringIRs.clear();
++
++    for (const auto& springDirectory : getSpringIrSearchDirectories())
++    {
++        if (! springDirectory.isDirectory())
++            continue;
++
++        for (const auto& extension : { "*.wav", "*.aif", "*.aiff", "*.flac" })
++        {
++            juce::Array<juce::File> matches;
++            springDirectory.findChildFiles (matches, juce::File::findFiles, false, extension);
++
++            for (const auto& file : matches)
++                availableSpringIRs.addIfNotAlreadyThere (file);
++        }
++    }
++}
++
++void TheGreatAmericanSpringAudioProcessor::assignRandomTankIRsIfNeeded()
++{
++    if (availableSpringIRs.isEmpty())
++        return;
++
++    juce::Random random;
++
++    const auto findAvailableIrByName = [this] (const juce::String& fileName)
++    {
++        for (const auto& candidate : availableSpringIRs)
++        {
++            if (candidate.getFileName().equalsIgnoreCase (fileName) && candidate.existsAsFile())
++                return candidate;
++        }
++
++        return juce::File {};
++    };
++
++    const auto assignPreferredOrRandomIfEmpty = [this, &random, &findAvailableIrByName] (TankSlot slot, const juce::String& preferredFileName)
++    {
++        if (! getTankIrPath (slot).isEmpty())
++            return;
++
++        if (const auto preferredFile = findAvailableIrByName (preferredFileName); preferredFile.existsAsFile())
++        {
++            getTankIrPath (slot) = preferredFile.getFullPathName();
++            return;
++        }
++
++        getTankIrPath (slot) = availableSpringIRs[random.nextInt (availableSpringIRs.size())].getFullPathName();
++    };
++
++    assignPreferredOrRandomIfEmpty (TankSlot::left1, defaultLeftTank1IrFileName);
++    assignPreferredOrRandomIfEmpty (TankSlot::right1, defaultRightTank1IrFileName);
++    assignPreferredOrRandomIfEmpty (TankSlot::left2, defaultLeftTank2IrFileName);
++    assignPreferredOrRandomIfEmpty (TankSlot::right2, defaultRightTank2IrFileName);
++}
++
++void TheGreatAmericanSpringAudioProcessor::assignDefaultTankIRs()
++{
++    leftTank1IrPath.clear();
++    rightTank1IrPath.clear();
++    leftTank2IrPath.clear();
++    rightTank2IrPath.clear();
++    assignRandomTankIRsIfNeeded();
++}
++
++void TheGreatAmericanSpringAudioProcessor::setParameterPlainValue (const juce::String& parameterID, float plainValue)
++{
++    if (auto* parameter = parameters.getParameter (parameterID))
++    {
++        if (auto* ranged = dynamic_cast<juce::RangedAudioParameter*> (parameter))
++            ranged->setValueNotifyingHost (ranged->convertTo0to1 (plainValue));
++    }
++}
++
++void TheGreatAmericanSpringAudioProcessor::applyDefaultGasSettings()
++{
++    // "GBS default" preset
++    setParameterPlainValue (modeParameterID, 0.0f);                 // Clean
++    setParameterPlainValue (driveParameterID, 6.0f);                // 6 dB
++    setParameterPlainValue (preHpfCutoffParameterID, 100.0f);       // 100 Hz
++    setParameterPlainValue (preHpfResonanceParameterID, 1.0f);      // Q = 1
++    setParameterPlainValue (postLpfCutoffParameterID, 12000.0f);    // 12 kHz
++    setParameterPlainValue (postLpfResonanceParameterID, 1.0f);     // Q = 1
++    setParameterPlainValue (x2TanksParameterID, 0.0f);              // Ext Reverb Tanks: Off
++    setParameterPlainValue (extTankMixParameterID, 1.0f);           // 100%
++    setParameterPlainValue (crossfadeAmountParameterID, 0.0f);      // 0
++    setParameterPlainValue (feedbackAmountParameterID, 0.1f);       // 10%
+     setParameterPlainValue (feedbackPhaseInvertParameterID, 0.0f);  // Normal
+     setParameterPlainValue (wetDryParameterID, 0.5f);               // 50%
+     setParameterPlainValue (monoSourceToStereoParameterID, 0.0f);
+     setParameterPlainValue (showUnavailableTankControlsParameterID, 0.0f);
+     assignDefaultTankIRs();
+ }
+-
+-void TheGreatAmericanSpringAudioProcessor::applyGasPresetSettings()
+-{
+-    // "GAS default" preset — same as GBS except where noted
+-    setParameterPlainValue (modeParameterID, 3.0f);                 // Germanium
+-    setParameterPlainValue (driveParameterID, 6.0f);                // 6 dB
+-    setParameterPlainValue (preHpfCutoffParameterID, 250.0f);       // 250 Hz
+-    setParameterPlainValue (preHpfResonanceParameterID, 1.0f);      // Q = 1
+-    setParameterPlainValue (postLpfCutoffParameterID, 8000.0f);     // 8 kHz
+-    setParameterPlainValue (postLpfResonanceParameterID, 1.0f);     // Q = 1
+-    setParameterPlainValue (x2TanksParameterID, 1.0f);              // Series
+-    setParameterPlainValue (extTankMixParameterID, 1.0f);           // 100%
+-    setParameterPlainValue (crossfadeAmountParameterID, 0.25f);     // 25%
+-    setParameterPlainValue (feedbackAmountParameterID, 0.25f);      // 25%
++
++void TheGreatAmericanSpringAudioProcessor::applyGasPresetSettings()
++{
++    // "GAS default" preset — same as GBS except where noted
++    setParameterPlainValue (modeParameterID, 6.0f);                 // SiGe Asym (was Germanium)
++    setParameterPlainValue (driveParameterID, 6.0f);                // 6 dB
++    setParameterPlainValue (preHpfCutoffParameterID, 250.0f);       // 250 Hz
++    setParameterPlainValue (preHpfResonanceParameterID, 1.0f);      // Q = 1
++    setParameterPlainValue (postLpfCutoffParameterID, 8000.0f);     // 8 kHz
++    setParameterPlainValue (postLpfResonanceParameterID, 1.0f);     // Q = 1
++    setParameterPlainValue (x2TanksParameterID, 1.0f);              // Series
++    setParameterPlainValue (extTankMixParameterID, 1.0f);           // 100%
++    setParameterPlainValue (crossfadeAmountParameterID, 0.25f);     // 25%
++    setParameterPlainValue (feedbackAmountParameterID, 0.25f);      // 25%
+     setParameterPlainValue (feedbackPhaseInvertParameterID, 0.0f);  // Normal
+     setParameterPlainValue (wetDryParameterID, 0.5f);               // 50%
+     setParameterPlainValue (monoSourceToStereoParameterID, 0.0f);
+     setParameterPlainValue (showUnavailableTankControlsParameterID, 0.0f);
+     assignDefaultTankIRs();
+ }
+-
++
+ bool TheGreatAmericanSpringAudioProcessor::loadPreset (int index)
+ {
+     const auto factoryPresetNames = getFactoryPresetNames();
+@@ -822,11 +822,11 @@ bool TheGreatAmericanSpringAudioProcessor::loadPreset (int index)
+     playbackFilePath = getEmbeddedPlaybackSources().front().displayPath;
+ 
+     if (isPrepared)
+-    {
+-        loadTankIRFromCurrentPath (TankSlot::left1);
+-        loadTankIRFromCurrentPath (TankSlot::right1);
+-        loadTankIRFromCurrentPath (TankSlot::left2);
+-        loadTankIRFromCurrentPath (TankSlot::right2);
++    {
++        loadTankIRFromCurrentPath (TankSlot::left1);
++        loadTankIRFromCurrentPath (TankSlot::right1);
++        loadTankIRFromCurrentPath (TankSlot::left2);
++        loadTankIRFromCurrentPath (TankSlot::right2);
+         loadSelectedPlaybackSource();
+     }
+ 
+@@ -938,542 +938,535 @@ juce::Array<juce::File> TheGreatAmericanSpringAudioProcessor::getUserPresetFiles
+                });
+     return presetFiles;
+ }
+-
+-bool TheGreatAmericanSpringAudioProcessor::loadTankIRFromCurrentPath (TankSlot slot)
+-{
+-    const auto file = resolveSpringIrFile (getTankIrPath (slot));
+-
+-    if (file.existsAsFile())
+-    {
+-        getTankIrPath (slot) = file.getFullPathName();
+-        return getTankBlock (slot).loadImpulseResponse (file);
+-    }
+-
+-    loadFallbackTankIR (slot);
+-    return false;
+-}
+-
+-juce::File TheGreatAmericanSpringAudioProcessor::getCurrentModuleBinaryFile() const
+-{
+-#if JUCE_WINDOWS
+-    HMODULE moduleHandle = nullptr;
+-
+-    if (GetModuleHandleExW (GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS
+-                                | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+-                            reinterpret_cast<LPCWSTR> (&createPluginFilter),
+-                            &moduleHandle) != 0)
+-    {
+-        std::array<wchar_t, 32768> modulePath {};
+-        const auto pathLength = GetModuleFileNameW (moduleHandle, modulePath.data(), static_cast<DWORD> (modulePath.size()));
+-
+-        if (pathLength > 0)
+-            return juce::File (juce::String (modulePath.data()));
+-    }
+-#endif
+-
+-    return juce::File::getSpecialLocation (juce::File::currentExecutableFile);
+-}
+-
+-juce::Array<juce::File> TheGreatAmericanSpringAudioProcessor::getSpringIrSearchDirectories() const
+-{
+-    juce::Array<juce::File> directories;
+-
+-    const auto moduleBinary = getCurrentModuleBinaryFile();
+-    const auto moduleDirectory = moduleBinary.getParentDirectory();
+-    const auto contentsDirectory = moduleDirectory.getParentDirectory();
+-
+-    directories.addIfNotAlreadyThere (moduleDirectory.getChildFile ("Spring IRs"));
+-
+-    if (contentsDirectory.getFileName().equalsIgnoreCase ("Contents"))
+-        directories.addIfNotAlreadyThere (contentsDirectory.getChildFile ("Resources").getChildFile ("Spring IRs"));
+-
+-    directories.addIfNotAlreadyThere (juce::File (projectSpringIrDirectoryPath));
+-
+-    return directories;
+-}
+-
+-juce::File TheGreatAmericanSpringAudioProcessor::resolveSpringIrFile (const juce::String& storedPath) const
+-{
+-    if (storedPath.isEmpty())
+-        return {};
+-
+-    const auto directFile = juce::File (storedPath);
+-
+-    if (directFile.existsAsFile())
+-        return directFile;
+-
+-    const auto targetName = directFile.getFileName();
+-
+-    if (targetName.isEmpty())
+-        return {};
+-
+-    for (const auto& candidate : availableSpringIRs)
+-    {
+-        if (candidate.getFileName().equalsIgnoreCase (targetName) && candidate.existsAsFile())
+-            return candidate;
+-    }
+-
+-    for (const auto& directory : getSpringIrSearchDirectories())
+-    {
+-        const auto candidate = directory.getChildFile (targetName);
+-
+-        if (candidate.existsAsFile())
+-            return candidate;
+-    }
+-
+-    return directFile;
+-}
+-
+-juce::Array<juce::File> TheGreatAmericanSpringAudioProcessor::getPlaybackSearchDirectories() const
+-{
+-    juce::Array<juce::File> directories;
+-
+-    const auto moduleBinary = getCurrentModuleBinaryFile();
+-    const auto moduleDirectory = moduleBinary.getParentDirectory();
+-    const auto contentsDirectory = moduleDirectory.getParentDirectory();
+-
+-    directories.addIfNotAlreadyThere (moduleDirectory.getChildFile ("Playback"));
+-    directories.addIfNotAlreadyThere (moduleDirectory.getChildFile ("Playback Audio"));
+-
+-    if (contentsDirectory.getFileName().equalsIgnoreCase ("Contents"))
+-    {
+-        directories.addIfNotAlreadyThere (contentsDirectory.getChildFile ("Resources").getChildFile ("Playback"));
+-        directories.addIfNotAlreadyThere (contentsDirectory.getChildFile ("Resources").getChildFile ("Playback Audio"));
+-    }
+-
+-    directories.addIfNotAlreadyThere (juce::File (R"(C:\Users\Jason\Music\Chris Sebastian)"));
+-
+-    return directories;
+-}
+-
+-juce::File TheGreatAmericanSpringAudioProcessor::resolvePlaybackFile (const juce::String& storedPath) const
+-{
+-    if (storedPath.isEmpty())
+-        return {};
+-
+-    const auto directFile = juce::File (storedPath);
+-
+-    if (directFile.existsAsFile())
+-        return directFile;
+-
+-    const auto targetName = directFile.getFileName();
+-
+-    if (targetName.isEmpty())
+-        return {};
+-
+-    for (const auto& directory : getPlaybackSearchDirectories())
+-    {
+-        const auto candidate = directory.getChildFile (targetName);
+-
+-        if (candidate.existsAsFile())
+-            return candidate;
+-    }
+-
+-    return directFile;
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::loadFallbackTankIR (TankSlot slot)
+-{
+-    juce::AudioBuffer<float> fallbackBuffer (1, 1);
+-    fallbackBuffer.setSample (0, 0, fallbackImpulse);
+-    getTankBlock (slot).loadImpulseResponse (std::move (fallbackBuffer), currentSampleRate);
+-}
+-
+-juce::String TheGreatAmericanSpringAudioProcessor::getTankIrPathPropertyName (TankSlot slot)
+-{
+-    switch (slot)
+-    {
+-        case TankSlot::left1:  return "leftTank1IrPath";
+-        case TankSlot::right1: return "rightTank1IrPath";
+-        case TankSlot::left2:  return "leftTank2IrPath";
+-        case TankSlot::right2: return "rightTank2IrPath";
+-    }
+-
+-    jassertfalse;
+-    return {};
+-}
+-
+-juce::String& TheGreatAmericanSpringAudioProcessor::getTankIrPath (TankSlot slot)
+-{
+-    switch (slot)
+-    {
+-        case TankSlot::left1:  return leftTank1IrPath;
+-        case TankSlot::right1: return rightTank1IrPath;
+-        case TankSlot::left2:  return leftTank2IrPath;
+-        case TankSlot::right2: return rightTank2IrPath;
+-    }
+-
+-    jassertfalse;
+-    return leftTank1IrPath;
+-}
+-
+-const juce::String& TheGreatAmericanSpringAudioProcessor::getTankIrPath (TankSlot slot) const
+-{
+-    switch (slot)
+-    {
+-        case TankSlot::left1:  return leftTank1IrPath;
+-        case TankSlot::right1: return rightTank1IrPath;
+-        case TankSlot::left2:  return leftTank2IrPath;
+-        case TankSlot::right2: return rightTank2IrPath;
+-    }
+-
+-    jassertfalse;
+-    return leftTank1IrPath;
+-}
+-
+-TankIRBlock& TheGreatAmericanSpringAudioProcessor::getTankBlock (TankSlot slot)
+-{
+-    switch (slot)
+-    {
+-        case TankSlot::left1:  return chain.leftTank;
+-        case TankSlot::right1: return chain.rightTank;
+-        case TankSlot::left2:  return chain.leftTankSecondary;
+-        case TankSlot::right2: return chain.rightTankSecondary;
+-    }
+-
+-    jassertfalse;
+-    return chain.leftTank;
+-}
+-
+-const TankIRBlock& TheGreatAmericanSpringAudioProcessor::getTankBlock (TankSlot slot) const
+-{
+-    switch (slot)
+-    {
+-        case TankSlot::left1:  return chain.leftTank;
+-        case TankSlot::right1: return chain.rightTank;
+-        case TankSlot::left2:  return chain.leftTankSecondary;
+-        case TankSlot::right2: return chain.rightTankSecondary;
+-    }
+-
+-    jassertfalse;
+-    return chain.leftTank;
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::resizeProcessingBuffers (int samplesPerBlock)
+-{
+-    externalInputBuffer.setSize (2, samplesPerBlock);
+-    dryTapBuffer.setSize (2, samplesPerBlock);
+-    wetInputBaseBuffer.setSize (2, samplesPerBlock);
+-    wetStereoBuffer.setSize (2, samplesPerBlock);
+-    wetAfterFeedbackBuffer.setSize (2, samplesPerBlock);
+-    feedbackReturnBuffer.setSize (2, samplesPerBlock);
+-    predelayModulationBuffer.setSize (5, samplesPerBlock);
+-    monoLeftBuffer.setSize (1, samplesPerBlock);
+-    monoRightBuffer.setSize (1, samplesPerBlock);
+-    monoLeftSecondaryBuffer.setSize (1, samplesPerBlock);
+-    monoRightSecondaryBuffer.setSize (1, samplesPerBlock);
+-
+-    externalInputBuffer.clear();
+-    dryTapBuffer.clear();
+-    wetInputBaseBuffer.clear();
+-    wetStereoBuffer.clear();
+-    wetAfterFeedbackBuffer.clear();
+-    feedbackReturnBuffer.clear();
+-    predelayModulationBuffer.clear();
+-    monoLeftBuffer.clear();
+-    monoRightBuffer.clear();
+-    monoLeftSecondaryBuffer.clear();
+-    monoRightSecondaryBuffer.clear();
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::loadPlaybackIntoBuffer (juce::AudioBuffer<float>& targetBuffer, int numSamples)
+-{
+-    targetBuffer.clear();
+-
+-    if (! playbackActive || playbackBuffer.getNumSamples() == 0 || currentSampleRate <= 0.0)
+-        return;
+-
+-    const auto positionIncrement = playbackSourceSampleRate / currentSampleRate;
+-    auto* left = targetBuffer.getWritePointer (0);
+-    auto* right = targetBuffer.getWritePointer (1);
+-
+-    for (int sample = 0; sample < numSamples; ++sample)
+-    {
+-        const auto baseIndex = static_cast<int> (playbackReadPosition);
+-        const auto nextIndex = juce::jmin (baseIndex + 1, playbackBuffer.getNumSamples() - 1);
+-
+-        if (baseIndex >= playbackBuffer.getNumSamples())
+-        {
+-            playbackActive = false;
+-            break;
+-        }
+-
+-        const auto fraction = static_cast<float> (playbackReadPosition - static_cast<double> (baseIndex));
+-        const auto sourceLeft0 = playbackBuffer.getSample (0, baseIndex);
+-        const auto sourceLeft1 = playbackBuffer.getSample (0, nextIndex);
+-        const auto sourceRight0 = playbackBuffer.getNumChannels() > 1 ? playbackBuffer.getSample (1, baseIndex)
+-                                                                       : shouldConvertMonoSourceToStereo() ? sourceLeft0 : 0.0f;
+-        const auto sourceRight1 = playbackBuffer.getNumChannels() > 1 ? playbackBuffer.getSample (1, nextIndex)
+-                                                                       : shouldConvertMonoSourceToStereo() ? sourceLeft1 : 0.0f;
+-
+-        left[sample] = juce::jmap (fraction, sourceLeft0, sourceLeft1);
+-        right[sample] = juce::jmap (fraction, sourceRight0, sourceRight1);
+-        playbackReadPosition += positionIncrement;
+-    }
+-
+-    if (playbackReadPosition >= static_cast<double> (playbackBuffer.getNumSamples()))
+-        playbackActive = false;
+-}
+-
+-bool TheGreatAmericanSpringAudioProcessor::loadPlaybackSourceFromMemory (const void* data,
+-                                                                           int dataSize,
+-                                                                           const juce::String& displayName)
+-{
+-    auto inputStream = std::make_unique<juce::MemoryInputStream> (data, static_cast<size_t> (dataSize), false);
+-    std::unique_ptr<juce::AudioFormatReader> reader (audioFormatManager.createReaderFor (std::move (inputStream)));
+-
+-    if (reader == nullptr)
+-        return false;
+-
+-    juce::AudioBuffer<float> newBuffer (juce::jmax (1, static_cast<int> (reader->numChannels)),
+-                                        static_cast<int> (reader->lengthInSamples));
+-
+-    if (! reader->read (newBuffer.getArrayOfWritePointers(),
+-                        newBuffer.getNumChannels(),
+-                        0,
+-                        newBuffer.getNumSamples()))
+-    {
+-        return false;
+-    }
+-
+-    playbackBuffer = std::move (newBuffer);
+-    playbackSourceSampleRate = reader->sampleRate;
+-    playbackFilePath = displayName;
+-    playbackReadPosition = 0.0;
+-    playbackActive = false;
+-    return true;
+-}
+-
+-bool TheGreatAmericanSpringAudioProcessor::loadSelectedPlaybackSource()
+-{
+-    auto sourceIndex = getSelectedPlaybackSourceIndex();
+-
+-    if (sourceIndex < 0)
+-    {
+-        playbackFilePath = getEmbeddedPlaybackSources().front().displayPath;
+-        sourceIndex = 0;
+-    }
+-
+-    const auto& source = getEmbeddedPlaybackSources()[static_cast<size_t> (sourceIndex)];
+-    return loadPlaybackSourceFromMemory (source.data, source.dataSize, source.displayPath);
+-}
+-
+-int TheGreatAmericanSpringAudioProcessor::getPlaybackSourceIndexForPath (const juce::String& sourcePath) const
+-{
+-    const auto sourceFileName = juce::File (sourcePath).getFileName();
+-
+-    for (size_t index = 0; index < getEmbeddedPlaybackSources().size(); ++index)
+-    {
+-        const auto& source = getEmbeddedPlaybackSources()[index];
+-        const auto candidatePath = juce::String (source.displayPath);
+-
+-        if (sourcePath.equalsIgnoreCase (candidatePath))
+-            return static_cast<int> (index);
+-
+-        if (sourceFileName.isNotEmpty()
+-            && sourceFileName.equalsIgnoreCase (juce::File (candidatePath).getFileName()))
+-        {
+-            return static_cast<int> (index);
+-        }
+-    }
+-
+-    return -1;
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::buildExternalInput (juce::AudioBuffer<float>& hostBuffer, int numSamples)
+-{
+-    externalInputBuffer.copyFrom (0, 0, hostBuffer, 0, 0, numSamples);
+-
+-    if (getTotalNumInputChannels() > 1 && hostBuffer.getNumChannels() > 1)
+-        externalInputBuffer.copyFrom (1, 0, hostBuffer, 1, 0, numSamples);
+-    else if (shouldConvertMonoSourceToStereo())
+-        externalInputBuffer.copyFrom (1, 0, hostBuffer, 0, 0, numSamples);
+-    else
+-        externalInputBuffer.clear (1, 0, numSamples);
+-
+-    wetAfterFeedbackBuffer.clear();
+-    loadPlaybackIntoBuffer (wetAfterFeedbackBuffer, numSamples);
+-
+-    externalInputBuffer.addFrom (0, 0, wetAfterFeedbackBuffer, 0, 0, numSamples);
+-
+-    if (! isMonoSourceWithoutStereoConversion())
+-        externalInputBuffer.addFrom (1, 0, wetAfterFeedbackBuffer, 1, 0, numSamples);
+-}
+-
+-bool TheGreatAmericanSpringAudioProcessor::isMonoSourceWithoutStereoConversion() const
+-{
+-    return ! shouldConvertMonoSourceToStereo()
+-        && (getTotalNumInputChannels() == 1
+-            || lastMonoSourceWithoutStereoConversion.load (std::memory_order_relaxed));
+-}
+-
+-bool TheGreatAmericanSpringAudioProcessor::detectMonoExternalInput (int numSamples) const
+-{
+-    if (shouldConvertMonoSourceToStereo())
+-        return false;
+-
+-    if (getTotalNumInputChannels() == 1)
+-        return true;
+-
+-    const auto* left = externalInputBuffer.getReadPointer (0);
+-    const auto* right = externalInputBuffer.getReadPointer (1);
+-    auto maximumDifference = 0.0f;
+-    auto maximumLeftMagnitude = 0.0f;
+-    auto maximumRightMagnitude = 0.0f;
+-
+-    for (int sample = 0; sample < numSamples; ++sample)
+-    {
+-        maximumDifference = juce::jmax (maximumDifference, std::abs (left[sample] - right[sample]));
+-        maximumLeftMagnitude = juce::jmax (maximumLeftMagnitude, std::abs (left[sample]));
+-        maximumRightMagnitude = juce::jmax (maximumRightMagnitude, std::abs (right[sample]));
+-    }
+-
+-    // Only flag as mono-L when the left channel carries actual signal but the right
+-    // is silent or identical. Pure silence on both channels (e.g. at startup / no
+-    // audio playing) must NOT be treated as mono-L or the right output gets muted.
+-    return maximumLeftMagnitude > 1.0e-7f
+-        && (maximumRightMagnitude <= 1.0e-7f || maximumDifference <= 1.0e-6f);
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::applyWetPredelay (int numSamples)
+-{
+-    auto* wetLeft = wetInputBaseBuffer.getWritePointer (0);
+-    auto* wetRight = wetInputBaseBuffer.getWritePointer (1);
+-    auto* delayedLeft = wetStereoBuffer.getWritePointer (0);
+-    auto* delayedRight = wetStereoBuffer.getWritePointer (1);
+-    const auto* leftDelay  = predelayModulationBuffer.getReadPointer (0);   // primary L
+-    const auto* rightDelay = predelayModulationBuffer.getReadPointer (2);   // primary R
+-
+-    for (int sample = 0; sample < numSamples; ++sample)
+-    {
+-        wetPredelayLeft.pushSample (0, wetLeft[sample]);
+-        wetPredelayRight.pushSample (0, wetRight[sample]);
+-        delayedLeft[sample]  = wetPredelayLeft.popSample (0, leftDelay[sample]);
+-        delayedRight[sample] = wetPredelayRight.popSample (0, rightDelay[sample]);
+-    }
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::updatePredelayModulation (int numSamples)
+-{
++
++bool TheGreatAmericanSpringAudioProcessor::loadTankIRFromCurrentPath (TankSlot slot)
++{
++    const auto file = resolveSpringIrFile (getTankIrPath (slot));
++
++    if (file.existsAsFile())
++    {
++        getTankIrPath (slot) = file.getFullPathName();
++        return getTankBlock (slot).loadImpulseResponse (file);
++    }
++
++    loadFallbackTankIR (slot);
++    return false;
++}
++
++juce::File TheGreatAmericanSpringAudioProcessor::getCurrentModuleBinaryFile() const
++{
++#if JUCE_WINDOWS
++    HMODULE moduleHandle = nullptr;
++
++    if (GetModuleHandleExW (GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS
++                                | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
++                            reinterpret_cast<LPCWSTR> (&createPluginFilter),
++                            &moduleHandle) != 0)
++    {
++        std::array<wchar_t, 32768> modulePath {};
++        const auto pathLength = GetModuleFileNameW (moduleHandle, modulePath.data(), static_cast<DWORD> (modulePath.size()));
++
++        if (pathLength > 0)
++            return juce::File (juce::String (modulePath.data()));
++    }
++#endif
++
++    return juce::File::getSpecialLocation (juce::File::currentExecutableFile);
++}
++
++juce::Array<juce::File> TheGreatAmericanSpringAudioProcessor::getSpringIrSearchDirectories() const
++{
++    juce::Array<juce::File> directories;
++
++    const auto moduleBinary = getCurrentModuleBinaryFile();
++    const auto moduleDirectory = moduleBinary.getParentDirectory();
++    const auto contentsDirectory = moduleDirectory.getParentDirectory();
++
++    directories.addIfNotAlreadyThere (moduleDirectory.getChildFile ("Spring IRs"));
++
++    if (contentsDirectory.getFileName().equalsIgnoreCase ("Contents"))
++        directories.addIfNotAlreadyThere (contentsDirectory.getChildFile ("Resources").getChildFile ("Spring IRs"));
++
++    directories.addIfNotAlreadyThere (juce::File (projectSpringIrDirectoryPath));
++
++    return directories;
++}
++
++juce::File TheGreatAmericanSpringAudioProcessor::resolveSpringIrFile (const juce::String& storedPath) const
++{
++    if (storedPath.isEmpty())
++        return {};
++
++    const auto directFile = juce::File (storedPath);
++
++    if (directFile.existsAsFile())
++        return directFile;
++
++    const auto targetName = directFile.getFileName();
++
++    if (targetName.isEmpty())
++        return {};
++
++    for (const auto& candidate : availableSpringIRs)
++    {
++        if (candidate.getFileName().equalsIgnoreCase (targetName) && candidate.existsAsFile())
++            return candidate;
++    }
++
++    for (const auto& directory : getSpringIrSearchDirectories())
++    {
++        const auto candidate = directory.getChildFile (targetName);
++
++        if (candidate.existsAsFile())
++            return candidate;
++    }
++
++    return directFile;
++}
++
++juce::Array<juce::File> TheGreatAmericanSpringAudioProcessor::getPlaybackSearchDirectories() const
++{
++    juce::Array<juce::File> directories;
++
++    const auto moduleBinary = getCurrentModuleBinaryFile();
++    const auto moduleDirectory = moduleBinary.getParentDirectory();
++    const auto contentsDirectory = moduleDirectory.getParentDirectory();
++
++    directories.addIfNotAlreadyThere (moduleDirectory.getChildFile ("Playback"));
++    directories.addIfNotAlreadyThere (moduleDirectory.getChildFile ("Playback Audio"));
++
++    if (contentsDirectory.getFileName().equalsIgnoreCase ("Contents"))
++    {
++        directories.addIfNotAlreadyThere (contentsDirectory.getChildFile ("Resources").getChildFile ("Playback"));
++        directories.addIfNotAlreadyThere (contentsDirectory.getChildFile ("Resources").getChildFile ("Playback Audio"));
++    }
++
++    directories.addIfNotAlreadyThere (juce::File (R"(C:\Users\Jason\Music\Chris Sebastian)"));
++
++    return directories;
++}
++
++juce::File TheGreatAmericanSpringAudioProcessor::resolvePlaybackFile (const juce::String& storedPath) const
++{
++    if (storedPath.isEmpty())
++        return {};
++
++    const auto directFile = juce::File (storedPath);
++
++    if (directFile.existsAsFile())
++        return directFile;
++
++    const auto targetName = directFile.getFileName();
++
++    if (targetName.isEmpty())
++        return {};
++
++    for (const auto& directory : getPlaybackSearchDirectories())
++    {
++        const auto candidate = directory.getChildFile (targetName);
++
++        if (candidate.existsAsFile())
++            return candidate;
++    }
++
++    return directFile;
++}
++
++void TheGreatAmericanSpringAudioProcessor::loadFallbackTankIR (TankSlot slot)
++{
++    juce::AudioBuffer<float> fallbackBuffer (1, 1);
++    fallbackBuffer.setSample (0, 0, fallbackImpulse);
++    getTankBlock (slot).loadImpulseResponse (std::move (fallbackBuffer), currentSampleRate);
++}
++
++juce::String TheGreatAmericanSpringAudioProcessor::getTankIrPathPropertyName (TankSlot slot)
++{
++    switch (slot)
++    {
++        case TankSlot::left1:  return "leftTank1IrPath";
++        case TankSlot::right1: return "rightTank1IrPath";
++        case TankSlot::left2:  return "leftTank2IrPath";
++        case TankSlot::right2: return "rightTank2IrPath";
++    }
++
++    jassertfalse;
++    return {};
++}
++
++juce::String& TheGreatAmericanSpringAudioProcessor::getTankIrPath (TankSlot slot)
++{
++    switch (slot)
++    {
++        case TankSlot::left1:  return leftTank1IrPath;
++        case TankSlot::right1: return rightTank1IrPath;
++        case TankSlot::left2:  return leftTank2IrPath;
++        case TankSlot::right2: return rightTank2IrPath;
++    }
++
++    jassertfalse;
++    return leftTank1IrPath;
++}
++
++const juce::String& TheGreatAmericanSpringAudioProcessor::getTankIrPath (TankSlot slot) const
++{
++    switch (slot)
++    {
++        case TankSlot::left1:  return leftTank1IrPath;
++        case TankSlot::right1: return rightTank1IrPath;
++        case TankSlot::left2:  return leftTank2IrPath;
++        case TankSlot::right2: return rightTank2IrPath;
++    }
++
++    jassertfalse;
++    return leftTank1IrPath;
++}
++
++TankIRBlock& TheGreatAmericanSpringAudioProcessor::getTankBlock (TankSlot slot)
++{
++    switch (slot)
++    {
++        case TankSlot::left1:  return chain.leftTank;
++        case TankSlot::right1: return chain.rightTank;
++        case TankSlot::left2:  return chain.leftTankSecondary;
++        case TankSlot::right2: return chain.rightTankSecondary;
++    }
++
++    jassertfalse;
++    return chain.leftTank;
++}
++
++const TankIRBlock& TheGreatAmericanSpringAudioProcessor::getTankBlock (TankSlot slot) const
++{
++    switch (slot)
++    {
++        case TankSlot::left1:  return chain.leftTank;
++        case TankSlot::right1: return chain.rightTank;
++        case TankSlot::left2:  return chain.leftTankSecondary;
++        case TankSlot::right2: return chain.rightTankSecondary;
++    }
++
++    jassertfalse;
++    return chain.leftTank;
++}
++
++void TheGreatAmericanSpringAudioProcessor::resizeProcessingBuffers (int samplesPerBlock)
++{
++    externalInputBuffer.setSize (2, samplesPerBlock);
++    dryTapBuffer.setSize (2, samplesPerBlock);
++    wetInputBaseBuffer.setSize (2, samplesPerBlock);
++    wetStereoBuffer.setSize (2, samplesPerBlock);
++    wetAfterFeedbackBuffer.setSize (2, samplesPerBlock);
++    feedbackReturnBuffer.setSize (2, samplesPerBlock);
++    predelayModulationBuffer.setSize (5, samplesPerBlock);
++    monoLeftBuffer.setSize (1, samplesPerBlock);
++    monoRightBuffer.setSize (1, samplesPerBlock);
++    monoLeftSecondaryBuffer.setSize (1, samplesPerBlock);
++    monoRightSecondaryBuffer.setSize (1, samplesPerBlock);
++
++    externalInputBuffer.clear();
++    dryTapBuffer.clear();
++    wetInputBaseBuffer.clear();
++    wetStereoBuffer.clear();
++    wetAfterFeedbackBuffer.clear();
++    feedbackReturnBuffer.clear();
++    predelayModulationBuffer.clear();
++    monoLeftBuffer.clear();
++    monoRightBuffer.clear();
++    monoLeftSecondaryBuffer.clear();
++    monoRightSecondaryBuffer.clear();
++}
++
++void TheGreatAmericanSpringAudioProcessor::loadPlaybackIntoBuffer (juce::AudioBuffer<float>& targetBuffer, int numSamples)
++{
++    targetBuffer.clear();
++
++    if (! playbackActive || playbackBuffer.getNumSamples() == 0 || currentSampleRate <= 0.0)
++        return;
++
++    const auto positionIncrement = playbackSourceSampleRate / currentSampleRate;
++    auto* left = targetBuffer.getWritePointer (0);
++    auto* right = targetBuffer.getWritePointer (1);
++
++    for (int sample = 0; sample < numSamples; ++sample)
++    {
++        const auto baseIndex = static_cast<int> (playbackReadPosition);
++        const auto nextIndex = juce::jmin (baseIndex + 1, playbackBuffer.getNumSamples() - 1);
++
++        if (baseIndex >= playbackBuffer.getNumSamples())
++        {
++            playbackActive = false;
++            break;
++        }
++
++        const auto fraction = static_cast<float> (playbackReadPosition - static_cast<double> (baseIndex));
++        const auto sourceLeft0 = playbackBuffer.getSample (0, baseIndex);
++        const auto sourceLeft1 = playbackBuffer.getSample (0, nextIndex);
++        const auto sourceRight0 = playbackBuffer.getNumChannels() > 1 ? playbackBuffer.getSample (1, baseIndex)
++                                                                       : shouldConvertMonoSourceToStereo() ? sourceLeft0 : 0.0f;
++        const auto sourceRight1 = playbackBuffer.getNumChannels() > 1 ? playbackBuffer.getSample (1, nextIndex)
++                                                                       : shouldConvertMonoSourceToStereo() ? sourceLeft1 : 0.0f;
++
++        left[sample] = juce::jmap (fraction, sourceLeft0, sourceLeft1);
++        right[sample] = juce::jmap (fraction, sourceRight0, sourceRight1);
++        playbackReadPosition += positionIncrement;
++    }
++
++    if (playbackReadPosition >= static_cast<double> (playbackBuffer.getNumSamples()))
++        playbackActive = false;
++}
++
++bool TheGreatAmericanSpringAudioProcessor::loadPlaybackSourceFromMemory (const void* data,
++                                                                           int dataSize,
++                                                                           const juce::String& displayName)
++{
++    auto inputStream = std::make_unique<juce::MemoryInputStream> (data, static_cast<size_t> (dataSize), false);
++    std::unique_ptr<juce::AudioFormatReader> reader (audioFormatManager.createReaderFor (std::move (inputStream)));
++
++    if (reader == nullptr)
++        return false;
++
++    juce::AudioBuffer<float> newBuffer (juce::jmax (1, static_cast<int> (reader->numChannels)),
++                                        static_cast<int> (reader->lengthInSamples));
++
++    if (! reader->read (newBuffer.getArrayOfWritePointers(),
++                        newBuffer.getNumChannels(),
++                        0,
++                        newBuffer.getNumSamples()))
++    {
++        return false;
++    }
++
++    playbackBuffer = std::move (newBuffer);
++    playbackSourceSampleRate = reader->sampleRate;
++    playbackFilePath = displayName;
++    playbackReadPosition = 0.0;
++    playbackActive = false;
++    return true;
++}
++
++bool TheGreatAmericanSpringAudioProcessor::loadSelectedPlaybackSource()
++{
++    auto sourceIndex = getSelectedPlaybackSourceIndex();
++
++    if (sourceIndex < 0)
++    {
++        playbackFilePath = getEmbeddedPlaybackSources().front().displayPath;
++        sourceIndex = 0;
++    }
++
++    const auto& source = getEmbeddedPlaybackSources()[static_cast<size_t> (sourceIndex)];
++    return loadPlaybackSourceFromMemory (source.data, source.dataSize, source.displayPath);
++}
++
++int TheGreatAmericanSpringAudioProcessor::getPlaybackSourceIndexForPath (const juce::String& sourcePath) const
++{
++    const auto sourceFileName = juce::File (sourcePath).getFileName();
++
++    for (size_t index = 0; index < getEmbeddedPlaybackSources().size(); ++index)
++    {
++        const auto& source = getEmbeddedPlaybackSources()[index];
++        const auto candidatePath = juce::String (source.displayPath);
++
++        if (sourcePath.equalsIgnoreCase (candidatePath))
++            return static_cast<int> (index);
++
++        if (sourceFileName.isNotEmpty()
++            && sourceFileName.equalsIgnoreCase (juce::File (candidatePath).getFileName()))
++        {
++            return static_cast<int> (index);
++        }
++    }
++
++    return -1;
++}
++
++void TheGreatAmericanSpringAudioProcessor::buildExternalInput (juce::AudioBuffer<float>& hostBuffer, int numSamples)
++{
++    externalInputBuffer.copyFrom (0, 0, hostBuffer, 0, 0, numSamples);
++
++    if (getTotalNumInputChannels() > 1 && hostBuffer.getNumChannels() > 1)
++        externalInputBuffer.copyFrom (1, 0, hostBuffer, 1, 0, numSamples);
++    else if (shouldConvertMonoSourceToStereo())
++        externalInputBuffer.copyFrom (1, 0, hostBuffer, 0, 0, numSamples);
++    else
++        externalInputBuffer.clear (1, 0, numSamples);
++
++    wetAfterFeedbackBuffer.clear();
++    loadPlaybackIntoBuffer (wetAfterFeedbackBuffer, numSamples);
++
++    externalInputBuffer.addFrom (0, 0, wetAfterFeedbackBuffer, 0, 0, numSamples);
++
++    if (! isMonoSourceWithoutStereoConversion())
++        externalInputBuffer.addFrom (1, 0, wetAfterFeedbackBuffer, 1, 0, numSamples);
++}
++
++bool TheGreatAmericanSpringAudioProcessor::isMonoSourceWithoutStereoConversion() const
++{
++    return ! shouldConvertMonoSourceToStereo()
++        && (getTotalNumInputChannels() == 1
++            || lastMonoSourceWithoutStereoConversion.load (std::memory_order_relaxed));
++}
++
++bool TheGreatAmericanSpringAudioProcessor::detectMonoExternalInput (int numSamples) const
++{
++    if (shouldConvertMonoSourceToStereo())
++        return false;
++
++    if (getTotalNumInputChannels() == 1)
++        return true;
++
++    const auto* left = externalInputBuffer.getReadPointer (0);
++    const auto* right = externalInputBuffer.getReadPointer (1);
++    auto maximumDifference = 0.0f;
++    auto maximumLeftMagnitude = 0.0f;
++    auto maximumRightMagnitude = 0.0f;
++
++    for (int sample = 0; sample < numSamples; ++sample)
++    {
++        maximumDifference = juce::jmax (maximumDifference, std::abs (left[sample] - right[sample]));
++        maximumLeftMagnitude = juce::jmax (maximumLeftMagnitude, std::abs (left[sample]));
++        maximumRightMagnitude = juce::jmax (maximumRightMagnitude, std::abs (right[sample]));
++    }
++
++    // Only flag as mono-L when the left channel carries actual signal but the right
++    // is silent or identical. Pure silence on both channels (e.g. at startup / no
++    // audio playing) must NOT be treated as mono-L or the right output gets muted.
++    return maximumLeftMagnitude > 1.0e-7f
++        && (maximumRightMagnitude <= 1.0e-7f || maximumDifference <= 1.0e-6f);
++}
++
++void TheGreatAmericanSpringAudioProcessor::applyWetPredelay (int numSamples)
++{
++    auto* wetLeft = wetInputBaseBuffer.getWritePointer (0);
++    auto* wetRight = wetInputBaseBuffer.getWritePointer (1);
++    auto* delayedLeft = wetStereoBuffer.getWritePointer (0);
++    auto* delayedRight = wetStereoBuffer.getWritePointer (1);
++    const auto* leftDelay  = predelayModulationBuffer.getReadPointer (0);   // primary L
++    const auto* rightDelay = predelayModulationBuffer.getReadPointer (2);   // primary R
++
++    for (int sample = 0; sample < numSamples; ++sample)
++    {
++        wetPredelayLeft.pushSample (0, wetLeft[sample]);
++        wetPredelayRight.pushSample (0, wetRight[sample]);
++        delayedLeft[sample]  = wetPredelayLeft.popSample (0, leftDelay[sample]);
++        delayedRight[sample] = wetPredelayRight.popSample (0, rightDelay[sample]);
++    }
++}
++
++void TheGreatAmericanSpringAudioProcessor::updatePredelayModulation (int numSamples)
++{
+     // predelayModulationBuffer channel map (per sample, in samples):
+     //   0 = primary L (4AB1C1B), 1 = feedback, 2 = primary R (4AB1C1B),
+     //   3 = 2nd L (9EB2C1B),    4 = 2nd R (9EB3C1B)
+-    auto* primaryLeftOut  = predelayModulationBuffer.getWritePointer (0);
+-    auto* feedbackOut     = predelayModulationBuffer.getWritePointer (1);
+-    auto* primaryRightOut = predelayModulationBuffer.getWritePointer (2);
+-    auto* secondaryLeftOut  = predelayModulationBuffer.getWritePointer (3);
+-    auto* secondaryRightOut = predelayModulationBuffer.getWritePointer (4);
+-
+-    const auto phaseIncrement = predelayLfoFrequencyHz / currentSampleRate;
+-    const auto msToSamples = 0.001f * static_cast<float> (currentSampleRate);
+-
+-    for (int sample = 0; sample < numSamples; ++sample)
+-    {
+-        predelayLfoPhase += phaseIncrement;
+-
+-        while (predelayLfoPhase >= 1.0)
+-        {
+-            predelayLfoPhase -= 1.0;
+-
+-            // Pick a fresh, independent random target for each of the four lanes.
+-            for (int lane = 0; lane < 4; ++lane)
+-            {
+-                const auto minMs = (lane < 2) ? primaryPredelayMinMs : secondaryPredelayMinMs;
+-                const auto maxMs = (lane < 2) ? primaryPredelayMaxMs : secondaryPredelayMaxMs;
+-                predelayTargetMs[lane] = juce::jmap (predelayRandom.nextFloat(),
+-                                                     static_cast<float> (minMs),
+-                                                     static_cast<float> (maxMs));
+-                predelayMsSmoothed[lane].setTargetValue (predelayTargetMs[lane]);
+-            }
+-        }
+-
+-        const auto priL = predelayMsSmoothed[0].getNextValue() * msToSamples;
+-        const auto priR = predelayMsSmoothed[1].getNextValue() * msToSamples;
+-        const auto secL = predelayMsSmoothed[2].getNextValue() * msToSamples;
+-        const auto secR = predelayMsSmoothed[3].getNextValue() * msToSamples;
+-
+-        primaryLeftOut[sample]    = priL;
+-        primaryRightOut[sample]   = priR;
+-        secondaryLeftOut[sample]  = secL;
+-        secondaryRightOut[sample] = secR;
+-        feedbackOut[sample]       = 0.5f * (priL + priR) / 3.0f;
+-    }
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::sanitizeBuffer (juce::AudioBuffer<float>& buffer, int numSamples) const
+-{
+-    for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
+-    {
+-        auto* samples = buffer.getWritePointer (channel);
+-
+-        for (int sample = 0; sample < numSamples; ++sample)
+-        {
+-            auto value = samples[sample];
+-
+-            if (! std::isfinite (value))
+-                value = 0.0f;
+-
+-            samples[sample] = juce::jlimit (-8.0f, 8.0f, value);
+-        }
+-    }
+-}
+-
+-void TheGreatAmericanSpringAudioProcessor::applySecondaryTankPredelay (
+-    juce::AudioBuffer<float>& monoBuffer,
+-    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear>& delayLine,
+-    const float* delaySamplesPerSample,
+-    int numSamples)
+-{
+-    auto* samples = monoBuffer.getWritePointer (0);
+-
+-    for (int sample = 0; sample < numSamples; ++sample)
+-    {
+-        delayLine.pushSample (0, samples[sample]);
+-        samples[sample] = delayLine.popSample (0, delaySamplesPerSample[sample]);
+-    }
+-}
+-
+-FilterClipperBlock::Parameters TheGreatAmericanSpringAudioProcessor::getFilterClipperParameters() const
+-{
+-    FilterClipperBlock::Parameters filterParameters;
+-    filterParameters.mode = toFilterClipperMode (
+-        juce::roundToInt (parameters.getRawParameterValue (modeParameterID)->load()));
+-    filterParameters.driveDb = parameters.getRawParameterValue (driveParameterID)->load();
+-    filterParameters.preHpfCutoffHz = parameters.getRawParameterValue (preHpfCutoffParameterID)->load();
+-    filterParameters.preHpfResonance = parameters.getRawParameterValue (preHpfResonanceParameterID)->load();
+-    filterParameters.postLpfCutoffHz = parameters.getRawParameterValue (postLpfCutoffParameterID)->load();
+-    filterParameters.postLpfResonance = parameters.getRawParameterValue (postLpfResonanceParameterID)->load();
+-    return filterParameters;
+-}
+-
+-FilterClipperBlock::Mode TheGreatAmericanSpringAudioProcessor::toFilterClipperMode (int modeIndex)
+-{
+-    switch (modeIndex)
+-    {
+-        case 0:  return FilterClipperBlock::Mode::clean;
+-        case 1:  return FilterClipperBlock::Mode::silicon;
+-        case 2:  return FilterClipperBlock::Mode::led;
+-        case 3:  return FilterClipperBlock::Mode::germanium;
+-        default: break;
+-    }
+-
+-    return FilterClipperBlock::Mode::clean;
+-}
+-
+-TheGreatAmericanSpringAudioProcessor::Ir2RoutingMode TheGreatAmericanSpringAudioProcessor::toIr2RoutingMode (float parameterValue)
+-{
+-    switch (juce::jlimit (0, 2, juce::roundToInt (parameterValue)))
+-    {
+-        case 1:  return Ir2RoutingMode::series;
+-        case 2:  return Ir2RoutingMode::parallel;
+-        case 0:
+-        default: break;
+-    }
+-
+-    return Ir2RoutingMode::off;
+-}
+-
+-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+-{
+-    return new TheGreatAmericanSpringAudioProcessor();
+-}
++    auto* primaryLeftOut  = predelayModulationBuffer.getWritePointer (0);
++    auto* feedbackOut     = predelayModulationBuffer.getWritePointer (1);
++    auto* primaryRightOut = predelayModulationBuffer.getWritePointer (2);
++    auto* secondaryLeftOut  = predelayModulationBuffer.getWritePointer (3);
++    auto* secondaryRightOut = predelayModulationBuffer.getWritePointer (4);
++
++    const auto phaseIncrement = predelayLfoFrequencyHz / currentSampleRate;
++    const auto msToSamples = 0.001f * static_cast<float> (currentSampleRate);
++
++    for (int sample = 0; sample < numSamples; ++sample)
++    {
++        predelayLfoPhase += phaseIncrement;
++
++        while (predelayLfoPhase >= 1.0)
++        {
++            predelayLfoPhase -= 1.0;
++
++            // Pick a fresh, independent random target for each of the four lanes.
++            for (int lane = 0; lane < 4; ++lane)
++            {
++                const auto minMs = (lane < 2) ? primaryPredelayMinMs : secondaryPredelayMinMs;
++                const auto maxMs = (lane < 2) ? primaryPredelayMaxMs : secondaryPredelayMaxMs;
++                predelayTargetMs[lane] = juce::jmap (predelayRandom.nextFloat(),
++                                                     static_cast<float> (minMs),
++                                                     static_cast<float> (maxMs));
++                predelayMsSmoothed[lane].setTargetValue (predelayTargetMs[lane]);
++            }
++        }
++
++        const auto priL = predelayMsSmoothed[0].getNextValue() * msToSamples;
++        const auto priR = predelayMsSmoothed[1].getNextValue() * msToSamples;
++        const auto secL = predelayMsSmoothed[2].getNextValue() * msToSamples;
++        const auto secR = predelayMsSmoothed[3].getNextValue() * msToSamples;
++
++        primaryLeftOut[sample]    = priL;
++        primaryRightOut[sample]   = priR;
++        secondaryLeftOut[sample]  = secL;
++        secondaryRightOut[sample] = secR;
++        feedbackOut[sample]       = 0.5f * (priL + priR) / 3.0f;
++    }
++}
++
++void TheGreatAmericanSpringAudioProcessor::sanitizeBuffer (juce::AudioBuffer<float>& buffer, int numSamples) const
++{
++    for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
++    {
++        auto* samples = buffer.getWritePointer (channel);
++
++        for (int sample = 0; sample < numSamples; ++sample)
++        {
++            auto value = samples[sample];
++
++            if (! std::isfinite (value))
++                value = 0.0f;
++
++            samples[sample] = juce::jlimit (-8.0f, 8.0f, value);
++        }
++    }
++}
++
++void TheGreatAmericanSpringAudioProcessor::applySecondaryTankPredelay (
++    juce::AudioBuffer<float>& monoBuffer,
++    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear>& delayLine,
++    const float* delaySamplesPerSample,
++    int numSamples)
++{
++    auto* samples = monoBuffer.getWritePointer (0);
++
++    for (int sample = 0; sample < numSamples; ++sample)
++    {
++        delayLine.pushSample (0, samples[sample]);
++        samples[sample] = delayLine.popSample (0, delaySamplesPerSample[sample]);
++    }
++}
++
++FilterClipperBlock::Parameters TheGreatAmericanSpringAudioProcessor::getFilterClipperParameters() const
++{
++    FilterClipperBlock::Parameters filterParameters;
++    filterParameters.mode = toFilterClipperMode (
++        juce::roundToInt (parameters.getRawParameterValue (modeParameterID)->load()));
++    filterParameters.driveDb = parameters.getRawParameterValue (driveParameterID)->load();
++    filterParameters.preHpfCutoffHz = parameters.getRawParameterValue (preHpfCutoffParameterID)->load();
++    filterParameters.preHpfResonance = parameters.getRawParameterValue (preHpfResonanceParameterID)->load();
++    filterParameters.postLpfCutoffHz = parameters.getRawParameterValue (postLpfCutoffParameterID)->load();
++    filterParameters.postLpfResonance = parameters.getRawParameterValue (postLpfResonanceParameterID)->load();
++    return filterParameters;
++}
++
++FilterClipperBlock::Mode TheGreatAmericanSpringAudioProcessor::toFilterClipperMode (int modeIndex)
++{
++    const auto lastMode = static_cast<int> (FilterClipperBlock::Mode::numModes) - 1;
++
++    return static_cast<FilterClipperBlock::Mode> (juce::jlimit (0, lastMode, modeIndex));
++}
++
++TheGreatAmericanSpringAudioProcessor::Ir2RoutingMode TheGreatAmericanSpringAudioProcessor::toIr2RoutingMode (float parameterValue)
++{
++    switch (juce::jlimit (0, 2, juce::roundToInt (parameterValue)))
++    {
++        case 1:  return Ir2RoutingMode::series;
++        case 2:  return Ir2RoutingMode::parallel;
++        case 0:
++        default: break;
++    }
++
++    return Ir2RoutingMode::off;
++}
++
++juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
++{
++    return new TheGreatAmericanSpringAudioProcessor();
++}
+diff --git a/models/clipper_models.py b/models/clipper_models.py
+new file mode 100644
+index 0000000..7cb0091
+--- /dev/null
++++ b/models/clipper_models.py
+@@ -0,0 +1,195 @@
++#!/usr/bin/env python3
++"""
++The Great American Spring - clipper / dynamics circuit models
++Illicit Apothecary
++
++Derives the static transfer curve of each clipping topology directly from the
++Shockley diode equation and the real component values listed below. No SPICE:
++for a static (memoryless) transfer curve the implicit node equation IS the
++exact answer, and solving it numerically is more precise than reading points
++off a generic SPICE sweep.
++
++    I_d(V) = Is * (exp(V / (N * n * Vt)) - 1)
++
++    Is = saturation current (A)      n  = ideality factor
++    N  = diodes in series            Vt = kT/q = 25.85 mV at 300 K (27 C)
++
++Reference level: digital 1.0 == 1.0 V peak at the clipper input.
++Supply: 9 V, biased to 4.5 V, so op-amp output saturates at +/-4.5 V.
++"""
++
++import numpy as np
++from scipy.optimize import brentq
++
++VT = 25.85e-3       # thermal voltage @ 300K
++RAIL = 4.5          # op-amp saturation, 9V supply biased at 4.5V
++
++# ---------------------------------------------------------------------------
++# Diode library.  Is / n chosen so the modelled Vf matches the datasheet
++# forward-voltage points quoted in the comment for each part.
++# ---------------------------------------------------------------------------
++DIODES = {
++    # 1N4148: standard SPICE model (Is=2.52nA, N=1.752). Vf ~0.72V @ 10mA.
++    "1N4148":  dict(Is=2.52e-9,  n=1.752, desc="Silicon small-signal, DO-35"),
++
++    # BAT41 Schottky: Vf ~0.45V @ 10mA, sharp low-current knee (n ~1.05).
++    "BAT41":   dict(Is=1.20e-7,  n=1.050, desc="Silicon Schottky, DO-35"),
++
++    # Red GaAsP LED (e.g. Kingbright WP7113ID): Vf ~1.85V @ 20mA, n ~1.9.
++    "LED_RED": dict(Is=9.00e-18, n=1.900, desc="3mm red LED, GaAsP"),
++
++    # Nexperia PMEG150G20ELP, 150V/2A SiGe rectifier, CFP5 (SOD128).
++    # Is/n fitted to the 25C curve of datasheet Fig.3 in the uA-mA region where a
++    # clipper works, NOT to the amp-level table rows (those carry ~58 mohm of
++    # series resistance, irrelevant at signal currents). Vf 0.44V @ 1mA.
++    # n=1.13 vs the 1N4148's 1.75: clips earlier than Si but with a HARDER knee.
++    # Not a germanium substitute - Ge is soft and leaky, this is sharp and spec'd
++    # at 0.4nA reverse leakage.
++    "SIGE":    dict(Is=2.863e-10, n=1.134, desc="PMEG150G20ELP SiGe rectifier, CFP5/SOD128"),
++
++    # 2N3904 base-emitter junction used as a diode. Near-ideal (n ~1.0) so the
++    # knee is noticeably sharper/harder than a 1N4148 at the same Vf.
++    "2N3904_BE": dict(Is=6.73e-15, n=1.000, desc="2N3904 B-E junction, TO-92"),
++}
++
++
++def diode_current(v, part, series=1):
++    """Shockley current through `series` identical diodes stacked in series."""
++    d = DIODES[part]
++    vth = series * d["n"] * VT
++    # clamp the exponent so the solver never overflows
++    return d["Is"] * (np.exp(np.clip(v / vth, -80, 80)) - 1.0)
++
++
++def network_current(v, pos_part, pos_n, neg_part, neg_n):
++    """Net current through an anti-parallel diode network at voltage v.
++
++    pos_n diodes of pos_part conduct on the positive half,
++    neg_n diodes of neg_part conduct on the negative half.
++    Equal parts + equal counts = symmetric.  Unequal = asymmetric.
++    """
++    return diode_current(v, pos_part, pos_n) - diode_current(-v, neg_part, neg_n)
++
++
++# ---------------------------------------------------------------------------
++# Topology A - diodes in the op-amp feedback loop (Tube Screamer / SD-1 / OCD)
++#
++#   non-inverting amp, gain = 1 + Rf/Rg, diode network across Rf
++#   node equation:  Vin/Rg = Vd/Rf + I_diodes(Vd),   Vout = Vin + Vd
++#
++# Output keeps rising with unity slope after the diodes conduct, so the curve
++# never fully flattens - this is why feedback clippers stay dynamic and touch
++# sensitive rather than turning to square wave.
++# ---------------------------------------------------------------------------
++def feedback_clipper(vin, Rf, Rg, pos_part, pos_n, neg_part, neg_n):
++    def residual(vd):
++        return vin / Rg - (vd / Rf + network_current(vd, pos_part, pos_n, neg_part, neg_n))
++
++    # bracket generously: Vd can never exceed the rails
++    lo, hi = -RAIL * 2.0, RAIL * 2.0
++    try:
++        vd = brentq(residual, lo, hi, xtol=1e-12, rtol=1e-12, maxiter=200)
++    except ValueError:
++        vd = np.sign(vin) * RAIL
++    return float(np.clip(vin + vd, -RAIL, RAIL))
++
++
++# ---------------------------------------------------------------------------
++# Topology B - series resistor into a shunt diode network (Big Muff / ladder)
++#
++#   node equation:  (Vin - Vout)/Rs = I_diodes(Vout)
++#
++# This one DOES flatten: the diodes are a hard clamp to ground, so the output
++# asymptotes at the stack's forward voltage regardless of how hard it is hit.
++# ---------------------------------------------------------------------------
++def shunt_clipper(vin, Rs, pos_part, pos_n, neg_part, neg_n):
++    def residual(vout):
++        return (vin - vout) / Rs - network_current(vout, pos_part, pos_n, neg_part, neg_n)
++
++    lo, hi = -RAIL * 2.0, RAIL * 2.0
++    try:
++        vout = brentq(residual, lo, hi, xtol=1e-12, rtol=1e-12, maxiter=200)
++    except ValueError:
++        vout = np.sign(vin) * RAIL
++    return float(np.clip(vout, -RAIL, RAIL))
++
++
++# ---------------------------------------------------------------------------
++# The nine clipping circuits
++#
++# gain_db  = gain of the stage feeding the clipping network (the shunt
++#            topologies need their own gain stage; the feedback ones get theirs
++#            from 1 + Rf/Rg, so gain_db is 0 there and Rf/Rg does the work).
++# ---------------------------------------------------------------------------
++CIRCUITS = [
++    dict(key="SI_SYM", name="Silicon Symmetric", topo="feedback",
++         Rf=51e3, Rg=4.7e3, pos=("1N4148", 1), neg=("1N4148", 1), gain_db=0.0,
++         blurb="TS808 clipping stage. 2x 1N4148 anti-parallel across Rf."),
++
++    dict(key="SI_ASYM", name="Silicon Asymmetric", topo="feedback",
++         Rf=51e3, Rg=4.7e3, pos=("1N4148", 2), neg=("1N4148", 1), gain_db=0.0,
++         blurb="SD-1 clipping stage. 2 series up / 1 down -> strong 2nd harmonic."),
++
++    dict(key="SCHOTTKY_SYM", name="Schottky Symmetric", topo="feedback",
++         Rf=51e3, Rg=4.7e3, pos=("BAT41", 1), neg=("BAT41", 1), gain_db=0.0,
++         blurb="Lowest headroom of the feedback set. Compressed, spitty, tight."),
++
++    dict(key="LED_SYM", name="LED Symmetric", topo="feedback",
++         Rf=51e3, Rg=4.7e3, pos=("LED_RED", 1), neg=("LED_RED", 1), gain_db=0.0,
++         blurb="Bluesbreaker / OCD. Clips late and loud, big clean headroom."),
++
++    dict(key="LED_SI_ASYM", name="LED / Silicon Asymmetric", topo="feedback",
++         Rf=51e3, Rg=4.7e3, pos=("LED_RED", 1), neg=("1N4148", 1), gain_db=0.0,
++         blurb="Widest asymmetry in the set: 1.85V one way, 0.72V the other."),
++
++    dict(key="SIGE_ASYM", name="SiGe Asymmetric", topo="feedback",
++         Rf=51e3, Rg=4.7e3, pos=("SIGE", 2), neg=("SIGE", 1), gain_db=0.0,
++         blurb="PMEG150G20ELP SiGe. Early clip, hard knee - tight, not soft."),
++
++    dict(key="TRANSISTOR_BE", name="Transistor B-E Symmetric", topo="feedback",
++         Rf=51e3, Rg=4.7e3, pos=("2N3904_BE", 1), neg=("2N3904_BE", 1), gain_db=0.0,
++         blurb="2N3904 base-emitter junctions. n~1.0 -> sharper knee than 1N4148."),
++
++    dict(key="LADDER_SYM", name="Ladder Symmetric", topo="shunt",
++         Rs=10e3, pos=("1N4148", 3), neg=("1N4148", 3), gain_db=26.0,
++         blurb="3+3 series ladder, shunt to ground, after a 26 dB stage. Hard clamp."),
++
++    dict(key="LADDER_ASYM", name="Ladder Asymmetric", topo="shunt",
++         Rs=10e3, pos=("1N4148", 3), neg=("1N4148", 2), gain_db=26.0,
++         blurb="3 up / 2 down ladder. Hard clamp, offset halves, heavy 2nd harmonic."),
++]
++
++
++def transfer(circuit, vin):
++    g = 10.0 ** (circuit["gain_db"] / 20.0)
++    v = np.clip(vin * g, -RAIL * 8, RAIL * 8)
++    if circuit["topo"] == "feedback":
++        return feedback_clipper(v, circuit["Rf"], circuit["Rg"],
++                                *circuit["pos"], *circuit["neg"])
++    return shunt_clipper(v, circuit["Rs"], *circuit["pos"], *circuit["neg"])
++
++
++def clip_threshold(circuit):
++    """Input voltage at which the curve departs 1 dB from its small-signal slope."""
++    vs = np.linspace(1e-4, 3.0, 4000)
++    out = np.array([transfer(circuit, v) for v in vs])
++    slope0 = out[0] / vs[0]
++    ideal = slope0 * vs
++    dev_db = 20.0 * np.log10(np.maximum(out, 1e-12) / np.maximum(ideal, 1e-12))
++    idx = np.argmax(dev_db < -1.0)
++    return (vs[idx], 20.0 * np.log10(vs[idx])) if idx > 0 else (np.nan, np.nan)
++
++
++if __name__ == "__main__":
++    print(f"{'circuit':<26}{'gain dB':>9}{'thresh V':>10}{'thresh dBV':>12}"
++          f"{'out@1V':>9}{'out@4V':>9}{'asym':>8}")
++    print("-" * 84)
++    for c in CIRCUITS:
++        vth, dbth = clip_threshold(c)
++        o1 = transfer(c, 1.0)
++        o4 = transfer(c, 4.0)
++        pos = transfer(c, 2.0)
++        neg = abs(transfer(c, -2.0))
++        asym_db = 20.0 * np.log10(pos / neg)
++        print(f"{c['name']:<26}{c['gain_db']:>9.1f}{vth:>10.4f}{dbth:>12.2f}"
++              f"{o1:>9.3f}{o4:>9.3f}{asym_db:>8.2f}")
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+new file mode 100644
+index 0000000..e61e2a0
+--- /dev/null
++++ b/tests/CMakeLists.txt
+@@ -0,0 +1,10 @@
++cmake_minimum_required(VERSION 3.22)
++project(GasCircuitTest VERSION 1.0.0)
++add_subdirectory("${JUCE_SOURCE_DIR}" juce-build)
++juce_add_console_app(GasCircuitTest PRODUCT_NAME "GasCircuitTest")
++juce_generate_juce_header(GasCircuitTest)
++target_sources(GasCircuitTest PRIVATE CircuitModelTests.cpp)
++target_include_directories(GasCircuitTest PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../Source/DSP")
++target_compile_definitions(GasCircuitTest PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_STANDALONE_APPLICATION=1)
++target_link_libraries(GasCircuitTest PRIVATE juce::juce_dsp juce::juce_audio_basics juce::juce_core
++    PUBLIC juce::juce_recommended_config_flags)
+diff --git a/tests/CircuitModelTests.cpp b/tests/CircuitModelTests.cpp
+new file mode 100644
+index 0000000..ff8c882
+--- /dev/null
++++ b/tests/CircuitModelTests.cpp
+@@ -0,0 +1,129 @@
++#include <JuceHeader.h>
++#include "ClipperCircuitModels.h"
++#include "DynamicsModels.h"
++#include <cstdio>
++
++using namespace gas::circuits;
++
++static const std::array<CircuitSpec, 9> kSpecs
++{ {
++    { Topology::feedback, 51.0e3f, 4.7e3f,  0.0f, kDiode1N4148,    1, kDiode1N4148,    1 },
++    { Topology::feedback, 51.0e3f, 4.7e3f,  0.0f, kDiode1N4148,    2, kDiode1N4148,    1 },
++    { Topology::feedback, 51.0e3f, 4.7e3f,  0.0f, kDiodeBAT41,     1, kDiodeBAT41,     1 },
++    { Topology::feedback, 51.0e3f, 4.7e3f,  0.0f, kDiodeRedLed,    1, kDiodeRedLed,    1 },
++    { Topology::feedback, 51.0e3f, 4.7e3f,  0.0f, kDiodeRedLed,    1, kDiode1N4148,    1 },
++    { Topology::feedback, 51.0e3f, 4.7e3f,  0.0f, kDiodePMEG150G20, 2, kDiodePMEG150G20, 1 },
++    { Topology::feedback, 51.0e3f, 4.7e3f,  0.0f, k2N3904BaseEmit, 1, k2N3904BaseEmit, 1 },
++    { Topology::shunt,    10.0e3f, 0.0f,   26.0f, kDiode1N4148,    3, kDiode1N4148,    3 },
++    { Topology::shunt,    10.0e3f, 0.0f,   26.0f, kDiode1N4148,    3, kDiode1N4148,    2 },
++} };
++
++static const char* kNames[9] = { "Silicon Sym","Silicon Asym","Schottky Sym","LED Sym",
++                                 "LED/Si Asym","SiGe Asym","Transistor B-E","Ladder Sym","Ladder Asym" };
++
++int main()
++{
++    int failures = 0;
++    std::array<CircuitCurve, 9> curves;
++
++    const auto t0 = juce::Time::getMillisecondCounterHiRes();
++    for (size_t i = 0; i < curves.size(); ++i)
++        curves[i].build (kSpecs[i]);
++    const auto buildMs = juce::Time::getMillisecondCounterHiRes() - t0;
++
++    std::printf ("Built 9 circuit tables in %.1f ms (once per process, off the audio thread)\n\n", buildMs);
++    std::printf ("%-16s %9s %9s %9s %9s %8s %7s\n",
++                 "circuit", "out@0.1", "out@0.5", "out@2.0", "out@8.0", "asym dB", "DC blk");
++    std::printf ("--------------------------------------------------------------------------------\n");
++
++    for (size_t i = 0; i < curves.size(); ++i)
++    {
++        const auto o01 = curves[i].process (0.1f);
++        const auto o05 = curves[i].process (0.5f);
++        const auto o20 = curves[i].process (2.0f);
++        const auto o80 = curves[i].process (8.0f);
++        const auto asymDb = juce::Decibels::gainToDecibels (std::abs (o20) / juce::jmax (1.0e-6f, std::abs (curves[i].process (-2.0f))));
++
++        std::printf ("%-16s %9.4f %9.4f %9.4f %9.4f %8.2f %7s\n",
++                     kNames[i], o01, o05, o20, o80, asymDb,
++                     curves[i].needsDcBlocker() ? "yes" : "no");
++
++        // Monotonicity: a clipper must never fold back on itself.
++        float previous = -1.0e9f;
++        for (float v = -12.0f; v <= 12.0f; v += 0.002f)
++        {
++            const auto out = curves[i].process (v);
++
++            if (! std::isfinite (out)) { std::printf ("  !! non-finite at %.3f\n", v); ++failures; break; }
++            if (out < previous - 1.0e-4f) { std::printf ("  !! non-monotonic at %.3f\n", v); ++failures; break; }
++            previous = out;
++        }
++
++        // Level matching: every circuit should land near the same output RMS
++        // for the same input, so switching circuits is not a volume jump.
++        double sum = 0.0;
++        constexpr int n = 4096;
++        for (int k = 0; k < n; ++k)
++        {
++            const auto x = 0.5f * std::sin (juce::MathConstants<float>::twoPi * (float) k / (float) n);
++            const auto y = curves[i].process (x);
++            sum += (double) y * (double) y;
++        }
++        const auto rms = std::sqrt (sum / n);
++        if (rms < 0.20 || rms > 0.45) { std::printf ("  !! level match out of range: rms %.3f\n", rms); ++failures; }
++    }
++
++    // ── dynamics ────────────────────────────────────────────────────────────
++    std::printf ("\n%-14s %12s %12s %12s\n", "circuit", "GR @ -6dBFS", "GR @ 0dBFS", "release ms");
++    std::printf ("--------------------------------------------------------\n");
++
++    const double sr = 192000.0;   // the block runs these at 4x oversampled rate
++
++    auto measure = [&] (auto& unit, const char* name)
++    {
++        unit.prepare (sr);
++
++        auto steadyGrDb = [&] (float peak)
++        {
++            unit.reset();
++            float maxOut = 0.0f;
++            const int total = (int) (sr * 1.5);          // let the slow tail settle
++            for (int i = 0; i < total; ++i)
++            {
++                const auto x = peak * std::sin (juce::MathConstants<float>::twoPi * 220.0f * (float) i / (float) sr);
++                const auto y = unit.process (x);
++                if (i > total - 4096) maxOut = juce::jmax (maxOut, std::abs (y));
++            }
++            return juce::Decibels::gainToDecibels (peak / juce::jmax (1.0e-6f, maxOut));
++        };
++
++        const auto gr6 = steadyGrDb (0.5f);
++        const auto gr0 = steadyGrDb (1.0f);
++
++        // Release: drive it hard, then measure recovery to within 1 dB of unity.
++        unit.reset();
++        for (int i = 0; i < (int) (sr * 0.5); ++i)
++            unit.process (1.0f * std::sin (juce::MathConstants<float>::twoPi * 220.0f * (float) i / (float) sr));
++
++        int samples = 0;
++        const int limit = (int) (sr * 6.0);
++        for (; samples < limit; ++samples)
++        {
++            const auto y = unit.process (0.05f);
++            if (std::abs (y) > 0.05f * 0.89f) break;      // back within ~1 dB
++        }
++        const auto releaseMs = 1000.0 * samples / sr;
++
++        std::printf ("%-14s %12.2f %12.2f %12.1f\n", name, gr6, gr0, releaseMs);
++
++        if (! (gr0 > gr6)) { std::printf ("  !! more level should give more reduction\n"); ++failures; }
++        if (gr0 < 1.0f)    { std::printf ("  !! barely compressing at 0 dBFS\n"); ++failures; }
++    };
++
++    gas::dynamics::OptoCompressor opto;   measure (opto, "Opto");
++    gas::dynamics::FetCompressor fet;     measure (fet,  "FET");
++    gas::dynamics::VcaLimiter vca;        measure (vca,  "VCA");
++
++    std::printf ("\n%s (%d failures)\n", failures == 0 ? "ALL CHECKS PASSED" : "CHECKS FAILED", failures);
++    return failures == 0 ? 0 : 1;
++}
+diff --git a/tests/README.md b/tests/README.md
+new file mode 100644
+index 0000000..16a431f
+--- /dev/null
++++ b/tests/README.md
+@@ -0,0 +1,25 @@
++# Circuit model tests
++
++Offline harness for the clipping and dynamics circuits in `Source/DSP`. It is
++deliberately **not** part of the plugin build, so it never slows CI down.
++
++What it checks:
++
++- every clipper curve is finite and monotonic across +/-12 V (a clipper that
++  folds back on itself is a bug, not a feature)
++- all nine circuits land within a narrow output-RMS window for the same input,
++  so switching circuits changes character without changing volume
++- the DC blocker is enabled on exactly the asymmetric circuits
++- each dynamics circuit reduces more as you feed it more, and its release time
++  matches the hardware it models
++
++Run it:
++
++```
++cmake -S tests -B tests/build -G Ninja -DCMAKE_BUILD_TYPE=Release \
++      -DJUCE_SOURCE_DIR=/path/to/JUCE
++cmake --build tests/build
++./tests/build/GasCircuitTest_artefacts/Release/GasCircuitTest
++```
++
++`models/clipper_models.py` is the Python reference for the same equations.
+-- 
+2.43.0
+

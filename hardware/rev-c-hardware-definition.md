@@ -1,5 +1,15 @@
 # GAS Rev C Hardware Definition (2026-09-15, PCBWay release)
 
+> ## Status: this is the LIVE hardware spec
+>
+> Build, order and review from this file. `claude/rev-c-pcb-release-2026-09-16.md` in the project is a **historical record of the 2026-09-16 release only** and is out of date by design; where the two disagree, this file wins.
+>
+> The one standing exception is below: for jacks, panel wiring, the V2181 and the DNP list (sections 1, 4.1, 5, 6, 7), `rev-c-front-stack-and-io-modes.md` still wins over this file.
+>
+> **Board set is now seven:** `circuit-board`, `control-deck`, `filter-pot-riser`, `io-board`, `jack-board`, `power-board`, `tank-board`, each with its own package under `kicad\revc\fab\`.
+>
+> **2026-09-30 update:** the `circuit-board` main path was re-netted so the **HPF sits ahead of the Gain stage** (section 4.3), matching the plugin. Regenerated and re-verified: ERC 0 violations, Freerouting rc 0, 0 unrouted nets, DRC 0 unconnected pads and 0 schematic parity issues; fab package re-exported. Section 4.3 also now names the limiter part (U1303 / U1304 Coolaudio V2181) explicitly rather than saying THAT2180A. Pre-swap backup: `backups\revc-hpf-gain-swap-2026-09-30-064655\`.
+
 > **2026-09-21 update:** the three push-pull pots became plain dual pots plus their own Tube / Dirt / Tape mini toggles (7 toggles in the row); all six dual pots are on the control deck; io P5 split into P5 (Wet/Dry) + P8 (switch lines) and circuit P5 into P5 (HPF) + P9 (Gain).
 >
 > **2026-09-17 update:** jacks moved to the new jack-board, panel parts to the new control-deck, auto line / instrument inputs, DRV135 outputs, footswitch trails bypass, THAT2180 -> Coolaudio V2181, HPF / LPF pots 100k -> 50k. See `rev-c-front-stack-and-io-modes.md`; where it disagrees with this file (sections 1, 4.1, 5, 6, 7 on jacks, panel wiring, THAT2180 and DNP), that file wins. Six boards now: io, circuit, tank, power, control-deck, jack-board.
@@ -10,7 +20,7 @@
 
 Everything is sized for a **6 in PVC DWV pipe, 154 mm bore**, and generated from code so it can be regenerated after any change:
 
-- Generator: `hardware/kicad/revc/gen/` (`core.py`, `gen_sch.py`, `pcb.py`, `route.py`, `build.py`, `boards/*.py`). Run `runb.ps1 -m <board>` (stages sch, pcb, route, pour, drc).
+- Generator: `hardware/kicad/revc/gen/` (`core.py`, `gen_sch.py`, `pcb.py`, `route.py`, `build.py`, `boards/*.py`). Run `runb.ps1 -m <module>` (stages sch, pcb, route, pour, drc). **The `-m` argument is the python module name, so it takes underscores, not the board name's hyphens: `runb.ps1 -m circuit_board`, not `-m circuit-board`.** The hyphenated form fails with `ModuleNotFoundError`. Logs land in `gen\logs\<module>.log` and `.err`, named after the module too. Fab re-export is separate: `& 'C:\Program Files\KiCad\10.0\bin\python.exe' -u export_fab.py circuit-board` from the `gen` folder, and that one does take the **hyphenated** board name.
 - KiCad projects: `hardware/kicad/revc/<board>/`. Fab packages: `hardware/kicad/revc/fab/<board>/`.
 - Mechanical: `hardware/rev-c-tube-layout.*` (side view, sections, DXF) and `rev-c-endcap-fit-check.md` (cap face, unchanged).
 - Tube emulation fit: `hardware/kicad/revc/sim/` (plugin TriodeStage port, ngspice fit and spread check).
@@ -20,7 +30,7 @@ Everything is sized for a **6 in PVC DWV pipe, 154 mm bore**, and generated from
 | Board | Size (mm) | Replaces | Job |
 | --- | --- | --- | --- |
 | `io-board` | 136 x 180 | Rev A io-board | 4 x Neutrik NCJ6FI-H through the cap, balanced receive, Mono > Stereo relay, dry tap, Vol + tube 1, Wet/Dry, Output + tube 2 + Tape, balanced out |
-| `circuit-board` | 120 x 175 | Rev B circuit-board + Rev A crossfade/feedback/wet | Ext Mix, Gain + HPF, Dirt relay (TS808), FET Comp, VCA Limit, LPF, Feedback amount, FB phase, MEGAVERB swap |
+| `circuit-board` | 120 x 175 | Rev B circuit-board + Rev A crossfade/feedback/wet | Ext Mix, HPF + Gain, Dirt relay (TS808), FET Comp, VCA Limit, LPF, Feedback amount, FB phase, MEGAVERB swap |
 | `tank-board` | 120 x 150 | Rev A tank-driver-recovery + ext-tank-routing | wet + feedback sum, 4 drivers, 4 recovery amps, 8 RCA, Off / Series (+6 dB) / Parallel |
 | `power-board` | 120 x 62 | Rev A power-backplane | DC entry, TRACO TEL 12-2423 isolated +/-15 V, RECOM R-78HB +5VAUX, 4 VH-4 outputs |
 
@@ -113,10 +123,22 @@ Polarity: every path into a relay is non-inverted, so pulling a knob never flips
 ### 4.3 circuit-board
 
 - Ext Mix: TANK_MIX = -(PRI_RET + wiper), 100k / 100k / 100k (wiper loading under 2.5 %); pot HI = 2nd tank return, LO = AGND: primary always full, 2nd tank 0 to 100 % added (plugin law, Series and Parallel).
-- Gain pot stage (+/-18 dB) -> HPF (Sallen-Key, K 1.59, Q 0.71, 4-gang 100k) as Rev B.
-- K1 Dirt (Gain pull): DYN_IN = HPF_OUT or TS808 (pad 47k/680R, TL072H Rf 51k / Rg 4.7k, 1N4148W pair, make-up x6.9).
+- HPF (Sallen-Key, K 1.59, Q 0.71, 4-gang 100k) -> Gain pot stage (+/-18 dB). **Order corrected 2026-09-30: the HPF sits AHEAD of the Gain stage, as in the plugin (`RevCStages.h`: pre-HPF -> Gain -> [Tube Screamer] -> [Comp | Off | Limit] -> post-LPF).** This doc previously had Gain first. Both stages are linear so the order changes neither the response nor the level, but it matters for what follows: with the HPF first, subsonic energy is removed before the Gain stage rather than being amplified into the TS808 clipper, which is also what a real Tube Screamer does with its own input high-pass. Springs throw off a lot of low-frequency junk, so this is not academic.
+
+  > **Board swapped to match, 2026-09-30.** Up to this date the generated netlist really was Gain then HPF, and the schematic annotation saying so was correct; it was the generator's own module docstring and board title that had been claiming HPF first. `gen/boards/circuit_board.py` has now been re-netted so the board matches the plugin:
+  >
+  > | Net | Now carries |
+  > | --- | --- |
+  > | `TANK_MIX_{ch}` | Ext Mix sum output into the HPF input caps C{n}02 / C{n}12 |
+  > | `HPF_OUT_{ch}` | HPF output into the Gain pot stage input R{n}01, and the pot HI end at P5 (unchanged) |
+  > | `GAIN_OUT_{ch}` | Gain stage output into the 47k TS808 pad R{n}15 and the K1 Dirt relay |
+  >
+  > The OPA1679 units were reordered with it so they follow the signal (1 Ext Mix, 2 HPF, 3 Gain, 4 LPF) instead of doubling back across the quad. Net **names** keep their old meaning, so the filter-pot riser and P5 are untouched. Inversion count is unchanged (the HPF is non-inverting, the pot stage inverting, either order), so loop polarity and the FB Phase convention still hold.
+  >
+  > Verified after regenerating: **ERC 0 violations, Freerouting rc 0, 0 unrouted nets, DRC 0 unconnected pads and 0 schematic parity issues.** The 14 remaining DRC entries are the pre-existing silkscreen-overlap warnings. Fab package re-exported to `kicad/revc/fab/circuit-board/`. Backup of the pre-swap generator, project and fab package: `backups/revc-hpf-gain-swap-2026-09-30-064655/`.
+- K1 Dirt (Gain pull): DYN_IN = **GAIN_OUT** or TS808 (pad 47k/680R off GAIN_OUT, TL072H Rf 51k / Rg 4.7k, 1N4148W pair, make-up x6.9). Was HPF_OUT before the 2026-09-30 stage swap.
 - Comp: MMBF5457 FET compressor (screen for |Vgs(off)| under 5 V: the trim reaches -5.1 V) fed from DYN_IN, sidechain summer **x4** (20k inputs, 40.2k feedback, the Rev C plugin change), BAT/1N5819HW peak detector 150 us / 220 ms, RV1201 / RV1221 threshold trims.
-- Limit: THAT2180A + discrete log-average detector, 10:1, RV1342 threshold, as Rev B, fed from DYN_IN.
+- Limit: **U1303 / U1304 Coolaudio V2181** (SIP-8, THAT 2181 pinout: 1 IN, 2 EC+, 3 EC-, 4 SYM, 5 V-, 6 GND, 7 V+, 8 OUT; alternates THAT 2181BL08-U, Alfa AS2181) + discrete log-average detector, 10:1, RV1342 threshold, fed from DYN_IN. Same 6.1 mV/dB control law as the Rev B THAT2180A, so no maths changes, but RV1301 / RV1321 50k symmetry trims are **fitted** for the 2181 (they were DNP with the factory-trimmed 2180A). Corrected 2026-09-30: this line previously said THAT2180A.
 - K2 (Comp) and K3 (Limit) select BUS = DYN_IN / FET_OUT / VCA_OUT; toggle centre = Off.
 - LPF (Sallen-Key unity, Q 0.74) -> inverting x-1/1.59 (15.8k / 10k) -> 100R -> WET (to io-board). This inversion makes the loop an even number of inversions, so WET is in phase with the dry signal and FB Phase normal adds, as in the plugin (assuming the tanks themselves are non-inverting: check with a pulse on the bench and flip FB Phase if not).
 - Feedback: pot HI = wet out, wiper follower (amount 0..1 linear) -> K4 FB Phase (normal / inverted) -> K5 MEGAVERB (L and R crossed) -> 100R -> FB_RET (to tank board).
@@ -166,9 +188,9 @@ Every relay control line has a 10k pull-down on its board, so an unplugged or ce
 | Finish / colours | HASL lead-free, green mask, white silk |
 | Min track / space / via | 0.20 / 0.20 mm, 0.6 / 0.3 mm via |
 | Assembly | turnkey, top side only, mixed SMD + THT |
-| THT parts | NCJ6FI-H x4 (io), WIMA MKS2 1 uF film caps, RCJ-041 RCA x8 (tank), TEL 12-2423 and R-78HB (power), THAT2180A SIP-8 (circuit), JST XH / VH headers |
+| THT parts | NCJ6FI-H x4 (io), WIMA MKS2 1 uF film caps, RCJ-041 RCA x8 (tank), TEL 12-2423 and R-78HB (power), Coolaudio V2181 SIP-8 (circuit), JST XH / VH headers |
 | DNP | io C1-C4 (RF caps), circuit RV1301 / RV1321 / R1305 / R1325 (2180A symmetry) |
-| Watch list | THAT2180AL08-U end of life (buy spares or use AS2181 / V2181 with the symmetry trims fitted); OPA1679IDR stock is low at Mouser (115 on 2026-09-15), allow alternate distributors; G6K-2F-Y DC5 no substitutes (footprint); MMBF5457 for the FET compressor: prefer |Vgs(off)| under 5 V |
+| Watch list | **V2181 is the chosen limiter VCA** (U1303 / U1304) and is not at Mouser, DigiKey or LCSC: hobby distributors or consign to PCBWay. The THAT2180AL08-U it replaced is end of life. OPA1679IDR stock is low at Mouser (115 on 2026-09-15), allow alternate distributors; G6K-2F-Y DC5 no substitutes (footprint); MMBF5457 for the FET compressor: prefer |Vgs(off)| under 5 V |
 
 ## 7. Bench trims (all SMD Bourns 3314J)
 

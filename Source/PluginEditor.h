@@ -174,6 +174,96 @@ private:
 };
 
 //==============================================================================
+/** The Left channel's signal path, drawn as monospace rows.
+
+    A monospace face is the whole point: the processor hands over rows whose
+    columns already line up, so the feedback arrows sit directly over their taps
+    and the Parallel tank names sit directly over and under the summing point. The
+    type size is chosen to fit the widest row, so MEGAVERB's extra "to R" and
+    "from R" text shrinks the block rather than running off the edge.
+*/
+class SignalPathDisplay final : public juce::Component
+{
+public:
+    void setRows (const juce::StringArray& newRows)
+    {
+        if (rows == newRows)
+            return;
+
+        rows = newRows;
+        repaint();
+    }
+
+    void setTextColour (juce::Colour colour)
+    {
+        textColour = colour;
+        repaint();
+    }
+
+    void paint (juce::Graphics& g) override
+    {
+        if (rows.isEmpty() || getWidth() <= 0)
+            return;
+
+        int widestRow = 0;
+
+        for (const auto& row : rows)
+            widestRow = juce::jmax (widestRow, row.length());
+
+        if (widestRow == 0)
+            return;
+
+        auto font = monoFont (maximumSize);
+        const auto characterWidth = juce::GlyphArrangement::getStringWidth (font, "0");
+
+        if (characterWidth <= 0.0f)
+            return;
+
+        // Character width scales with the type size, so the fitting size is one
+        // division rather than a search.
+        const auto widthAtMaximum = characterWidth * (float) widestRow;
+        auto size = maximumSize;
+
+        if (widthAtMaximum > (float) getWidth())
+            size = juce::jmax (minimumSize, maximumSize * (float) getWidth() / widthAtMaximum);
+
+        font = monoFont (size);
+        g.setFont (font);
+        g.setColour (textColour);
+
+        const auto blockWidth = juce::GlyphArrangement::getStringWidth (font, "0") * (float) widestRow;
+        const auto rowHeight = font.getHeight() * 1.05f;
+        const auto blockHeight = rowHeight * (float) rows.size();
+
+        auto x = ((float) getWidth() - blockWidth) * 0.5f;
+        auto y = ((float) getHeight() - blockHeight) * 0.5f;
+
+        for (const auto& row : rows)
+        {
+            g.drawText (row,
+                        juce::Rectangle<float> (x, y, blockWidth, rowHeight),
+                        juce::Justification::centredLeft,
+                        false);
+            y += rowHeight;
+        }
+    }
+
+private:
+    static juce::Font monoFont (float height)
+    {
+        return juce::Font (juce::FontOptions (juce::Font::getDefaultMonospacedFontName(),
+                                             height,
+                                             juce::Font::plain));
+    }
+
+    static constexpr float maximumSize = 11.5f;
+    static constexpr float minimumSize = 7.5f;
+
+    juce::StringArray rows;
+    juce::Colour textColour { juce::Colours::white.withAlpha (0.75f) };
+};
+
+//==============================================================================
 /** A rotary knob with a pull-out switch, like a push-pull pot on the board.
 
     Drag turns it as usual. A plain click (press and release without dragging)
@@ -250,8 +340,12 @@ public:
     // whatever the window is dragged to, so nothing is ever clipped.
     static constexpr int baseEditorWidth = 920;
     // Rev C added the Tube / Dirt / Tape switch row (28 px + 8 px pad), so both heights grew by 36.
-    static constexpr int baseCollapsedHeight = 730;
-    static constexpr int baseExpandedHeight = 936;
+    // +14 over the single-bar layout: each meter point now stacks L over R.
+    // +20 again for the signal path, now three monospace rows rather than one line.
+    // The Oversampling row sits in the header's own spare space under the BYOIRs
+    // toggle, so it costs neither height anything.
+    static constexpr int baseCollapsedHeight = 764;
+    static constexpr int baseExpandedHeight = 970;
     static constexpr double minEditorScale = 0.75;
     static constexpr double maxEditorScale = 2.50;
 
@@ -300,7 +394,7 @@ private:
 
     ArtNouveauTitle titleComponent;
     juce::Label subtitleLabel;
-    juce::Label chainDescriptionLabel;
+    SignalPathDisplay chainDescriptionDisplay;
     juce::Label ir2RoutingLabel;
     juce::ComboBox ir2RoutingComboBox;
     juce::Label feedbackPhaseLabel;
@@ -356,12 +450,26 @@ private:
     juce::Label postOutputLevelLabel;
     juce::Slider postOutputLevelSlider;
 
+    // Each tap gets its own Left and Right bar, with an "L" / "R" tag beside it.
     juce::Label inputMeterLabel;
-    LevelMeter inputMeter;
+    juce::Label inputMeterLabelL;
+    LevelMeter inputMeterL;
+    juce::Label inputMeterLabelR;
+    LevelMeter inputMeterR;
     juce::Label wetMeterLabel;
-    LevelMeter wetMeter;
+    juce::Label wetMeterLabelL;
+    LevelMeter wetMeterL;
+    juce::Label wetMeterLabelR;
+    LevelMeter wetMeterR;
     juce::Label outputMeterLabel;
-    LevelMeter outputMeter;
+    juce::Label outputMeterLabelL;
+    LevelMeter outputMeterL;
+    juce::Label outputMeterLabelR;
+    LevelMeter outputMeterR;
+
+    // Lives in the BYOIRs section: plugin-only, no equivalent on the board.
+    juce::Label railOversamplingLabel;
+    juce::ComboBox railOversamplingComboBox;
 
     juce::GroupComponent leftTankGroup;
     juce::Label leftTankLabel;
@@ -390,6 +498,7 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> postOutputLevelAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> preHpfCutoffAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> postLpfCutoffAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> railOversamplingAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> extTankMixAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> feedbackAmountAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> wetDryAttachment;

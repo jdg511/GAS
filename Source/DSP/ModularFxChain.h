@@ -5,7 +5,8 @@
 #include "TankIRBlock.h"
 #include "WetDryMixerBlock.h"
 
-/** Rev C chain: input Vol (Tube) -> tanks -> Gain (Dirt) + Comp/Off/Limit -> feedback -> mix -> Output (Tube, Tape). */
+/** Rev C chain: input Vol (Tube) -> tanks -> Gain (Dirt) -> feedback -> mix -> Output (Tube, Tape),
+    with Comp / Off / Limit sitting in the feedback RETURN leg rather than the wet path. */
 struct ModularFxChain
 {
     void prepare (double sampleRate, int maximumBlockSize)
@@ -17,6 +18,7 @@ struct ModularFxChain
         rightTankSecondary.prepare (sampleRate, maximumBlockSize);
         dirtDynamics.prepare (sampleRate, maximumBlockSize);
         feedback.prepare (sampleRate, maximumBlockSize);
+        feedbackDynamics.prepare (sampleRate, maximumBlockSize);
         wetDryMixer.prepare (sampleRate, maximumBlockSize);
         outputStage.prepare (sampleRate, maximumBlockSize);
     }
@@ -30,6 +32,7 @@ struct ModularFxChain
         rightTankSecondary.reset();
         dirtDynamics.reset();
         feedback.reset();
+        feedbackDynamics.reset();
         wetDryMixer.reset();
         outputStage.reset();
     }
@@ -39,8 +42,9 @@ struct ModularFxChain
     TankIRBlock leftTankSecondary;
     TankIRBlock rightTank;
     TankIRBlock rightTankSecondary;
-    DirtDynamicsBlock dirtDynamics; // Gain knob (pull for Dirt) + Comp / Off / Limit
+    DirtDynamicsBlock dirtDynamics; // Gain knob (pull for Dirt); dynamics stay Off here
     FeedbackBlock feedback;
+    FeedbackDynamicsBlock feedbackDynamics; // Comp / Off / Limit, in the feedback return leg
     WetDryMixerBlock wetDryMixer;
     TubeTapeStage outputStage;     // Output knob, pull for Tape (tube too when Vol is pulled)
 };

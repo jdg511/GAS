@@ -5229,7 +5229,7 @@
 		)
 		(uuid "54d370dc-0d66-581c-a6a1-dda2c1c17f2e")
 	)
-	(text "Main path L: Ext Mix sum, Gain, HPF, LPF"
+	(text "Main path L: Ext Mix sum, HPF, Gain, LPF"
 		(exclude_from_sim no)
 		(at 20.32 187.96 0)
 		(effects
@@ -5239,7 +5239,7 @@
 			)
 			(justify left)
 		)
-		(uuid "d53ab253-ef44-521d-b2a7-3709207548b3")
+		(uuid "98e704de-f499-5865-be5a-e2d1c6a8071c")
 	)
 	(text "Output, feedback, make-ups L"
 		(exclude_from_sim no)
@@ -5265,7 +5265,7 @@
 		)
 		(uuid "49631eef-fa00-564a-9e49-3deb5dd9ccbd")
 	)
-	(text "Main path R: Ext Mix sum, Gain, HPF, LPF"
+	(text "Main path R: Ext Mix sum, HPF, Gain, LPF"
 		(exclude_from_sim no)
 		(at 20.32 368.3 0)
 		(effects
@@ -5275,7 +5275,7 @@
 			)
 			(justify left)
 		)
-		(uuid "cd0f8e26-aa9f-5ae3-8a03-2944784d2a5b")
+		(uuid "11b7f004-a166-5c49-a51c-cf26b6338f83")
 	)
 	(text "Output, feedback, make-ups R"
 		(exclude_from_sim no)
@@ -12120,688 +12120,8 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
+		(lib_id "Device:C")
 		(at 236.22 207.01 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "7b33e098-66c2-5ca4-a1bc-b13ae346c2c4")
-		(property "Reference" "R201"
-			(at 236.22 199.39 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "1.43k"
-			(at 236.22 201.93 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 236.22 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 236.22 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 236.22 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "RC0603FR-071K43L"
-			(at 236.22 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "Yageo"
-			(at 236.22 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "2ced5477-ba1c-5924-a9f3-697a9b12792c")
-		)
-		(pin "2"
-			(uuid "cd12ed0d-b708-5451-88f7-20c5000a3573")
-		)
-		(instances
-			(project "circuit-board"
-				(path "/f02ecd67-bc1a-5b74-83db-8105b6387c4e"
-					(reference "R201")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 236.22 203.2)
-			(xy 236.22 200.66)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "64b449e3-6311-5853-b3fb-207501508f2a")
-	)
-	(global_label "TANK_MIX_L"
-		(shape passive)
-		(at 236.22 200.66 90)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "b1ef40ec-2a0c-566e-859f-931106587331")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 236.22 200.66 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 236.22 210.82)
-			(xy 236.22 213.36)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "83269a3b-f754-5fe2-a704-3859720354b2")
-	)
-	(global_label "GAIN_L_HI"
-		(shape passive)
-		(at 236.22 213.36 270)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "80c1aab3-eddd-58b2-a5a5-5f1e7f6cf31d")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 236.22 213.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 269.24 207.01 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "0163ff87-8435-5cc3-a984-0363eaa25ec5")
-		(property "Reference" "R202"
-			(at 269.24 199.39 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "1.43k"
-			(at 269.24 201.93 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 269.24 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 269.24 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 269.24 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "RC0603FR-071K43L"
-			(at 269.24 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "Yageo"
-			(at 269.24 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "e28e21bb-74d6-5ffa-9610-0d989cc249fc")
-		)
-		(pin "2"
-			(uuid "39c5574b-2e5e-5e52-b8fa-b098261991c9")
-		)
-		(instances
-			(project "circuit-board"
-				(path "/f02ecd67-bc1a-5b74-83db-8105b6387c4e"
-					(reference "R202")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 269.24 203.2)
-			(xy 269.24 200.66)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "819c1280-7bca-5b0e-a013-cbb3c61e3490")
-	)
-	(global_label "GAIN_L_LO"
-		(shape passive)
-		(at 269.24 200.66 90)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "4969677f-77e3-5d80-b055-8ed4a3bb73bf")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 269.24 200.66 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 269.24 210.82)
-			(xy 269.24 213.36)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b1cf0a15-aca8-5962-83a6-69c2beaa83ec")
-	)
-	(global_label "GAIN_OUT_L"
-		(shape passive)
-		(at 269.24 213.36 270)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "19324af0-0803-5e63-bf75-addad1f45c6f")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 269.24 213.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 302.26 207.01 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "7355d6dc-3a16-5ae1-b43d-24cf124b6b83")
-		(property "Reference" "R203"
-			(at 302.26 199.39 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "1M"
-			(at 302.26 201.93 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 302.26 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 302.26 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "keeps the loop closed if the pot is unplugged"
-			(at 302.26 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "RC0603FR-071ML"
-			(at 302.26 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "Yageo"
-			(at 302.26 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "f2fd448d-7c37-5c16-9254-7e66b6bdf2eb")
-		)
-		(pin "2"
-			(uuid "1e822466-efd1-58d5-8c1b-10a81be344d7")
-		)
-		(instances
-			(project "circuit-board"
-				(path "/f02ecd67-bc1a-5b74-83db-8105b6387c4e"
-					(reference "R203")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 302.26 203.2)
-			(xy 302.26 200.66)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "82a1240d-d5b6-5100-bbc8-7d50d7f3c654")
-	)
-	(global_label "GAIN_L_W"
-		(shape passive)
-		(at 302.26 200.66 90)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "f6f5ab35-28a6-52db-9079-87905b0d776d")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 302.26 200.66 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 302.26 210.82)
-			(xy 302.26 213.36)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e6d6e2fb-dd7b-53c0-957f-0ea58bd0f5ce")
-	)
-	(global_label "GAIN_OUT_L"
-		(shape passive)
-		(at 302.26 213.36 270)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "806f0dcc-d045-597e-b744-c6a7444da4cc")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 302.26 213.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 335.28 207.01 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "2592f06e-a609-55b7-8e63-df65697ec1d3")
-		(property "Reference" "C201"
-			(at 335.28 199.39 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "22pF"
-			(at 335.28 201.93 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-			(at 335.28 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 335.28 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 335.28 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "CL10C220JB8NNNC"
-			(at 335.28 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "Samsung"
-			(at 335.28 207.01 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "516f297b-1123-505b-9449-cf66ada80729")
-		)
-		(pin "2"
-			(uuid "a07a1f55-4277-53ee-83f2-9279e1bd987b")
-		)
-		(instances
-			(project "circuit-board"
-				(path "/f02ecd67-bc1a-5b74-83db-8105b6387c4e"
-					(reference "C201")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 335.28 203.2)
-			(xy 335.28 200.66)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "18f1cdf5-8d67-572a-88bc-7e976ecbfae0")
-	)
-	(global_label "GAIN_L_W"
-		(shape passive)
-		(at 335.28 200.66 90)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "a88029f4-74f3-5479-a9a9-9f16e95d4555")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 335.28 200.66 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 335.28 210.82)
-			(xy 335.28 213.36)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3d85c3b2-f1e3-5000-9682-05e233043875")
-	)
-	(global_label "GAIN_OUT_L"
-		(shape passive)
-		(at 335.28 213.36 270)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "2f104afc-baa9-51d6-9c33-c9a2bf71749c")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 335.28 213.36 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 369.57 207.01 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -12812,7 +12132,7 @@
 		(fields_autoplaced yes)
 		(uuid "1e9f5c97-47ce-53dc-b4b5-69f1c8fd3325")
 		(property "Reference" "C202"
-			(at 369.57 199.39 0)
+			(at 236.22 199.39 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -12822,7 +12142,7 @@
 			)
 		)
 		(property "Value" "68nF film"
-			(at 369.57 201.93 0)
+			(at 236.22 201.93 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -12832,7 +12152,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_1210_3225Metric"
-			(at 369.57 207.01 0)
+			(at 236.22 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -12843,7 +12163,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 369.57 207.01 0)
+			(at 236.22 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -12854,7 +12174,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 369.57 207.01 0)
+			(at 236.22 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -12865,7 +12185,7 @@
 			)
 		)
 		(property "MPN" "ECH-U1H683JX5"
-			(at 369.57 207.01 0)
+			(at 236.22 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -12876,7 +12196,7 @@
 			)
 		)
 		(property "Manufacturer" "Panasonic"
-			(at 369.57 207.01 0)
+			(at 236.22 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -12903,8 +12223,8 @@
 	)
 	(wire
 		(pts
-			(xy 369.57 203.2)
-			(xy 369.57 200.66)
+			(xy 236.22 203.2)
+			(xy 236.22 200.66)
 		)
 		(stroke
 			(width 0)
@@ -12912,9 +12232,9 @@
 		)
 		(uuid "ab2e9023-cdaa-5a1c-9342-e995a1105ebf")
 	)
-	(global_label "GAIN_OUT_L"
+	(global_label "TANK_MIX_L"
 		(shape passive)
-		(at 369.57 200.66 90)
+		(at 236.22 200.66 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -12924,7 +12244,7 @@
 		)
 		(uuid "c1ab0b33-9ac1-5a99-b584-177f664cd019")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 369.57 200.66 0)
+			(at 236.22 200.66 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -12937,8 +12257,8 @@
 	)
 	(wire
 		(pts
-			(xy 369.57 210.82)
-			(xy 369.57 213.36)
+			(xy 236.22 210.82)
+			(xy 236.22 213.36)
 		)
 		(stroke
 			(width 0)
@@ -12948,7 +12268,7 @@
 	)
 	(global_label "HPF_N1_L"
 		(shape passive)
-		(at 369.57 213.36 270)
+		(at 236.22 213.36 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -12958,7 +12278,7 @@
 		)
 		(uuid "c71f55f3-4419-584f-bc4d-9ca1579c3d73")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 369.57 213.36 0)
+			(at 236.22 213.36 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -12971,7 +12291,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 403.86 207.01 0)
+		(at 270.51 207.01 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -12982,7 +12302,7 @@
 		(fields_autoplaced yes)
 		(uuid "2665aac9-404c-50a4-b60a-0e216b258427")
 		(property "Reference" "C212"
-			(at 403.86 199.39 0)
+			(at 270.51 199.39 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -12992,7 +12312,7 @@
 			)
 		)
 		(property "Value" "68nF film"
-			(at 403.86 201.93 0)
+			(at 270.51 201.93 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13002,7 +12322,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_1210_3225Metric"
-			(at 403.86 207.01 0)
+			(at 270.51 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13013,7 +12333,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 403.86 207.01 0)
+			(at 270.51 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13024,7 +12344,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 403.86 207.01 0)
+			(at 270.51 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13035,7 +12355,7 @@
 			)
 		)
 		(property "MPN" "ECH-U1H683JX5"
-			(at 403.86 207.01 0)
+			(at 270.51 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13046,7 +12366,7 @@
 			)
 		)
 		(property "Manufacturer" "Panasonic"
-			(at 403.86 207.01 0)
+			(at 270.51 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13073,8 +12393,8 @@
 	)
 	(wire
 		(pts
-			(xy 403.86 203.2)
-			(xy 403.86 200.66)
+			(xy 270.51 203.2)
+			(xy 270.51 200.66)
 		)
 		(stroke
 			(width 0)
@@ -13082,9 +12402,9 @@
 		)
 		(uuid "39705765-68cd-5147-8b61-918d56fe29b1")
 	)
-	(global_label "GAIN_OUT_L"
+	(global_label "TANK_MIX_L"
 		(shape passive)
-		(at 403.86 200.66 90)
+		(at 270.51 200.66 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -13094,7 +12414,7 @@
 		)
 		(uuid "5e8f631d-a7d2-5d22-b889-7dfe3c4850dc")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 403.86 200.66 0)
+			(at 270.51 200.66 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13107,8 +12427,8 @@
 	)
 	(wire
 		(pts
-			(xy 403.86 210.82)
-			(xy 403.86 213.36)
+			(xy 270.51 210.82)
+			(xy 270.51 213.36)
 		)
 		(stroke
 			(width 0)
@@ -13118,7 +12438,7 @@
 	)
 	(global_label "HPF_N1_L"
 		(shape passive)
-		(at 403.86 213.36 270)
+		(at 270.51 213.36 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -13128,7 +12448,7 @@
 		)
 		(uuid "d079cd41-e6d1-556f-b5aa-62ee26ac7b35")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 403.86 213.36 0)
+			(at 270.51 213.36 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13141,7 +12461,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 438.15 207.01 0)
+		(at 304.8 207.01 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -13152,7 +12472,7 @@
 		(fields_autoplaced yes)
 		(uuid "c95fa969-23c2-5dee-a03a-92681806824f")
 		(property "Reference" "C203"
-			(at 438.15 199.39 0)
+			(at 304.8 199.39 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13162,7 +12482,7 @@
 			)
 		)
 		(property "Value" "68nF film"
-			(at 438.15 201.93 0)
+			(at 304.8 201.93 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13172,7 +12492,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_1210_3225Metric"
-			(at 438.15 207.01 0)
+			(at 304.8 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13183,7 +12503,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 438.15 207.01 0)
+			(at 304.8 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13194,7 +12514,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 438.15 207.01 0)
+			(at 304.8 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13205,7 +12525,7 @@
 			)
 		)
 		(property "MPN" "ECH-U1H683JX5"
-			(at 438.15 207.01 0)
+			(at 304.8 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13216,7 +12536,7 @@
 			)
 		)
 		(property "Manufacturer" "Panasonic"
-			(at 438.15 207.01 0)
+			(at 304.8 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13243,8 +12563,8 @@
 	)
 	(wire
 		(pts
-			(xy 438.15 203.2)
-			(xy 438.15 200.66)
+			(xy 304.8 203.2)
+			(xy 304.8 200.66)
 		)
 		(stroke
 			(width 0)
@@ -13254,7 +12574,7 @@
 	)
 	(global_label "HPF_N1_L"
 		(shape passive)
-		(at 438.15 200.66 90)
+		(at 304.8 200.66 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -13264,7 +12584,7 @@
 		)
 		(uuid "3a63a4b5-6191-587f-b37b-9b81ee4be224")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 438.15 200.66 0)
+			(at 304.8 200.66 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13277,8 +12597,8 @@
 	)
 	(wire
 		(pts
-			(xy 438.15 210.82)
-			(xy 438.15 213.36)
+			(xy 304.8 210.82)
+			(xy 304.8 213.36)
 		)
 		(stroke
 			(width 0)
@@ -13288,7 +12608,7 @@
 	)
 	(global_label "HPF_P_L"
 		(shape passive)
-		(at 438.15 213.36 270)
+		(at 304.8 213.36 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -13298,7 +12618,7 @@
 		)
 		(uuid "7aa7886d-840d-5de8-bee6-d2e47ebd9269")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 438.15 213.36 0)
+			(at 304.8 213.36 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13311,7 +12631,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 472.44 207.01 0)
+		(at 339.09 207.01 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -13322,7 +12642,7 @@
 		(fields_autoplaced yes)
 		(uuid "195df764-c861-524a-a71a-95f34d442501")
 		(property "Reference" "C213"
-			(at 472.44 199.39 0)
+			(at 339.09 199.39 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13332,7 +12652,7 @@
 			)
 		)
 		(property "Value" "68nF film"
-			(at 472.44 201.93 0)
+			(at 339.09 201.93 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13342,7 +12662,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_1210_3225Metric"
-			(at 472.44 207.01 0)
+			(at 339.09 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13353,7 +12673,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 472.44 207.01 0)
+			(at 339.09 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13364,7 +12684,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 472.44 207.01 0)
+			(at 339.09 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13375,7 +12695,7 @@
 			)
 		)
 		(property "MPN" "ECH-U1H683JX5"
-			(at 472.44 207.01 0)
+			(at 339.09 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13386,7 +12706,7 @@
 			)
 		)
 		(property "Manufacturer" "Panasonic"
-			(at 472.44 207.01 0)
+			(at 339.09 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13413,8 +12733,8 @@
 	)
 	(wire
 		(pts
-			(xy 472.44 203.2)
-			(xy 472.44 200.66)
+			(xy 339.09 203.2)
+			(xy 339.09 200.66)
 		)
 		(stroke
 			(width 0)
@@ -13424,7 +12744,7 @@
 	)
 	(global_label "HPF_N1_L"
 		(shape passive)
-		(at 472.44 200.66 90)
+		(at 339.09 200.66 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -13434,7 +12754,7 @@
 		)
 		(uuid "9d35a0a2-b0ef-5df5-a9ad-947a183ae2e0")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 472.44 200.66 0)
+			(at 339.09 200.66 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13447,8 +12767,8 @@
 	)
 	(wire
 		(pts
-			(xy 472.44 210.82)
-			(xy 472.44 213.36)
+			(xy 339.09 210.82)
+			(xy 339.09 213.36)
 		)
 		(stroke
 			(width 0)
@@ -13458,7 +12778,7 @@
 	)
 	(global_label "HPF_P_L"
 		(shape passive)
-		(at 472.44 213.36 270)
+		(at 339.09 213.36 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -13468,7 +12788,7 @@
 		)
 		(uuid "50e366c6-e45e-5779-a366-1e7955468847")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 472.44 213.36 0)
+			(at 339.09 213.36 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13481,7 +12801,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 506.73 207.01 0)
+		(at 373.38 207.01 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -13492,7 +12812,7 @@
 		(fields_autoplaced yes)
 		(uuid "1b7e93c2-13f7-53a2-8021-da38081a52e0")
 		(property "Reference" "R204"
-			(at 506.73 199.39 0)
+			(at 373.38 199.39 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13502,7 +12822,7 @@
 			)
 		)
 		(property "Value" "499R"
-			(at 506.73 201.93 0)
+			(at 373.38 201.93 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13512,7 +12832,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 506.73 207.01 0)
+			(at 373.38 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13523,7 +12843,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 506.73 207.01 0)
+			(at 373.38 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13534,7 +12854,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 506.73 207.01 0)
+			(at 373.38 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13545,7 +12865,7 @@
 			)
 		)
 		(property "MPN" "RC0603FR-07499RL"
-			(at 506.73 207.01 0)
+			(at 373.38 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13556,7 +12876,7 @@
 			)
 		)
 		(property "Manufacturer" "Yageo"
-			(at 506.73 207.01 0)
+			(at 373.38 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13583,8 +12903,8 @@
 	)
 	(wire
 		(pts
-			(xy 506.73 203.2)
-			(xy 506.73 200.66)
+			(xy 373.38 203.2)
+			(xy 373.38 200.66)
 		)
 		(stroke
 			(width 0)
@@ -13594,7 +12914,7 @@
 	)
 	(global_label "HPF_N1_L"
 		(shape passive)
-		(at 506.73 200.66 90)
+		(at 373.38 200.66 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -13604,7 +12924,7 @@
 		)
 		(uuid "484db773-a7e6-5331-be39-8ed9db316216")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 506.73 200.66 0)
+			(at 373.38 200.66 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13617,8 +12937,8 @@
 	)
 	(wire
 		(pts
-			(xy 506.73 210.82)
-			(xy 506.73 213.36)
+			(xy 373.38 210.82)
+			(xy 373.38 213.36)
 		)
 		(stroke
 			(width 0)
@@ -13628,7 +12948,7 @@
 	)
 	(global_label "HPF_L1_W"
 		(shape passive)
-		(at 506.73 213.36 270)
+		(at 373.38 213.36 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -13638,7 +12958,7 @@
 		)
 		(uuid "cb672e80-9369-5de0-9090-beb35d29fb9e")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 506.73 213.36 0)
+			(at 373.38 213.36 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13651,7 +12971,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 539.75 207.01 0)
+		(at 406.4 207.01 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -13662,7 +12982,7 @@
 		(fields_autoplaced yes)
 		(uuid "651a3593-5acd-5df3-aea7-40b2ef8ac995")
 		(property "Reference" "R205"
-			(at 539.75 199.39 0)
+			(at 406.4 199.39 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13672,7 +12992,7 @@
 			)
 		)
 		(property "Value" "499R"
-			(at 539.75 201.93 0)
+			(at 406.4 201.93 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13682,7 +13002,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 539.75 207.01 0)
+			(at 406.4 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13693,7 +13013,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 539.75 207.01 0)
+			(at 406.4 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13704,7 +13024,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 539.75 207.01 0)
+			(at 406.4 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13715,7 +13035,7 @@
 			)
 		)
 		(property "MPN" "RC0603FR-07499RL"
-			(at 539.75 207.01 0)
+			(at 406.4 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13726,7 +13046,7 @@
 			)
 		)
 		(property "Manufacturer" "Yageo"
-			(at 539.75 207.01 0)
+			(at 406.4 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13753,8 +13073,8 @@
 	)
 	(wire
 		(pts
-			(xy 539.75 203.2)
-			(xy 539.75 200.66)
+			(xy 406.4 203.2)
+			(xy 406.4 200.66)
 		)
 		(stroke
 			(width 0)
@@ -13764,7 +13084,7 @@
 	)
 	(global_label "HPF_P_L"
 		(shape passive)
-		(at 539.75 200.66 90)
+		(at 406.4 200.66 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -13774,7 +13094,7 @@
 		)
 		(uuid "346b281d-efb4-5b52-ab2e-af1a05bcc18f")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 539.75 200.66 0)
+			(at 406.4 200.66 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13787,8 +13107,8 @@
 	)
 	(wire
 		(pts
-			(xy 539.75 210.82)
-			(xy 539.75 213.36)
+			(xy 406.4 210.82)
+			(xy 406.4 213.36)
 		)
 		(stroke
 			(width 0)
@@ -13798,7 +13118,7 @@
 	)
 	(global_label "HPF_L2_W"
 		(shape passive)
-		(at 539.75 213.36 270)
+		(at 406.4 213.36 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -13808,7 +13128,7 @@
 		)
 		(uuid "36d553cc-4ae3-548a-be67-55616e507bd2")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 539.75 213.36 0)
+			(at 406.4 213.36 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13821,7 +13141,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 572.77 207.01 0)
+		(at 439.42 207.01 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -13832,7 +13152,7 @@
 		(fields_autoplaced yes)
 		(uuid "22426f25-1b19-513b-99ce-6dac88388265")
 		(property "Reference" "R206"
-			(at 572.77 199.39 0)
+			(at 439.42 199.39 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13842,7 +13162,7 @@
 			)
 		)
 		(property "Value" "5.9k"
-			(at 572.77 201.93 0)
+			(at 439.42 201.93 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -13852,7 +13172,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 572.77 207.01 0)
+			(at 439.42 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13863,7 +13183,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 572.77 207.01 0)
+			(at 439.42 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13874,7 +13194,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 572.77 207.01 0)
+			(at 439.42 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13885,7 +13205,7 @@
 			)
 		)
 		(property "MPN" "RC0603FR-075K9L"
-			(at 572.77 207.01 0)
+			(at 439.42 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13896,7 +13216,7 @@
 			)
 		)
 		(property "Manufacturer" "Yageo"
-			(at 572.77 207.01 0)
+			(at 439.42 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13923,8 +13243,8 @@
 	)
 	(wire
 		(pts
-			(xy 572.77 203.2)
-			(xy 572.77 200.66)
+			(xy 439.42 203.2)
+			(xy 439.42 200.66)
 		)
 		(stroke
 			(width 0)
@@ -13934,7 +13254,7 @@
 	)
 	(global_label "HPF_OUT_L"
 		(shape passive)
-		(at 572.77 200.66 90)
+		(at 439.42 200.66 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -13944,7 +13264,7 @@
 		)
 		(uuid "3f0504fb-8a1e-5874-a005-e087cb5bd22d")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 572.77 200.66 0)
+			(at 439.42 200.66 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13957,8 +13277,8 @@
 	)
 	(wire
 		(pts
-			(xy 572.77 210.82)
-			(xy 572.77 213.36)
+			(xy 439.42 210.82)
+			(xy 439.42 213.36)
 		)
 		(stroke
 			(width 0)
@@ -13968,7 +13288,7 @@
 	)
 	(global_label "HPF_FB_L"
 		(shape passive)
-		(at 572.77 213.36 270)
+		(at 439.42 213.36 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -13978,7 +13298,7 @@
 		)
 		(uuid "dabbe9f5-a946-5775-b4fb-f6f2cf2623d3")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 572.77 213.36 0)
+			(at 439.42 213.36 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -13991,7 +13311,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 605.79 207.01 0)
+		(at 472.44 207.01 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -14002,7 +13322,7 @@
 		(fields_autoplaced yes)
 		(uuid "7f3d8d69-ed5c-5245-848f-a1347fde2c51")
 		(property "Reference" "R207"
-			(at 605.79 199.39 0)
+			(at 472.44 199.39 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14012,7 +13332,7 @@
 			)
 		)
 		(property "Value" "10k"
-			(at 605.79 201.93 0)
+			(at 472.44 201.93 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14022,7 +13342,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 605.79 207.01 0)
+			(at 472.44 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -14033,7 +13353,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 605.79 207.01 0)
+			(at 472.44 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -14044,7 +13364,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 605.79 207.01 0)
+			(at 472.44 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -14055,7 +13375,7 @@
 			)
 		)
 		(property "MPN" "RC0603FR-0710KL"
-			(at 605.79 207.01 0)
+			(at 472.44 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -14066,7 +13386,7 @@
 			)
 		)
 		(property "Manufacturer" "Yageo"
-			(at 605.79 207.01 0)
+			(at 472.44 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -14093,8 +13413,8 @@
 	)
 	(wire
 		(pts
-			(xy 605.79 203.2)
-			(xy 605.79 200.66)
+			(xy 472.44 203.2)
+			(xy 472.44 200.66)
 		)
 		(stroke
 			(width 0)
@@ -14104,7 +13424,7 @@
 	)
 	(global_label "HPF_FB_L"
 		(shape passive)
-		(at 605.79 200.66 90)
+		(at 472.44 200.66 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -14114,7 +13434,7 @@
 		)
 		(uuid "3a46cc05-9d76-5117-999e-be2074b4e91e")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 605.79 200.66 0)
+			(at 472.44 200.66 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -14127,8 +13447,8 @@
 	)
 	(wire
 		(pts
-			(xy 605.79 210.82)
-			(xy 605.79 213.36)
+			(xy 472.44 210.82)
+			(xy 472.44 213.36)
 		)
 		(stroke
 			(width 0)
@@ -14138,7 +13458,7 @@
 	)
 	(global_label "AGND"
 		(shape passive)
-		(at 605.79 213.36 270)
+		(at 472.44 213.36 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -14148,7 +13468,7 @@
 		)
 		(uuid "fbf0324c-f010-5a99-a241-a654fb27da08")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 605.79 213.36 0)
+			(at 472.44 213.36 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -14161,7 +13481,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 638.81 207.01 0)
+		(at 505.46 207.01 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -14172,7 +13492,7 @@
 		(fields_autoplaced yes)
 		(uuid "b3143f68-4b45-5a8b-b768-5451349fd4bc")
 		(property "Reference" "R208"
-			(at 638.81 199.39 0)
+			(at 505.46 199.39 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14182,7 +13502,7 @@
 			)
 		)
 		(property "Value" "1M"
-			(at 638.81 201.93 0)
+			(at 505.46 201.93 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -14192,7 +13512,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 638.81 207.01 0)
+			(at 505.46 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -14203,7 +13523,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 638.81 207.01 0)
+			(at 505.46 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -14214,7 +13534,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 638.81 207.01 0)
+			(at 505.46 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -14225,7 +13545,7 @@
 			)
 		)
 		(property "MPN" "RC0603FR-071ML"
-			(at 638.81 207.01 0)
+			(at 505.46 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -14236,7 +13556,7 @@
 			)
 		)
 		(property "Manufacturer" "Yageo"
-			(at 638.81 207.01 0)
+			(at 505.46 207.01 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -14263,8 +13583,8 @@
 	)
 	(wire
 		(pts
-			(xy 638.81 203.2)
-			(xy 638.81 200.66)
+			(xy 505.46 203.2)
+			(xy 505.46 200.66)
 		)
 		(stroke
 			(width 0)
@@ -14274,7 +13594,7 @@
 	)
 	(global_label "HPF_P_L"
 		(shape passive)
-		(at 638.81 200.66 90)
+		(at 505.46 200.66 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -14284,7 +13604,7 @@
 		)
 		(uuid "8ed71d0b-98c1-5018-b0a5-6fb13cbd5759")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 638.81 200.66 0)
+			(at 505.46 200.66 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -14297,8 +13617,8 @@
 	)
 	(wire
 		(pts
-			(xy 638.81 210.82)
-			(xy 638.81 213.36)
+			(xy 505.46 210.82)
+			(xy 505.46 213.36)
 		)
 		(stroke
 			(width 0)
@@ -14308,7 +13628,7 @@
 	)
 	(global_label "AGND"
 		(shape passive)
-		(at 638.81 213.36 270)
+		(at 505.46 213.36 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -14318,7 +13638,687 @@
 		)
 		(uuid "660b1e9e-bf1f-5353-bdd1-962b7eba4d1c")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 638.81 213.36 0)
+			(at 505.46 213.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 538.48 207.01 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "7b33e098-66c2-5ca4-a1bc-b13ae346c2c4")
+		(property "Reference" "R201"
+			(at 538.48 199.39 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1.43k"
+			(at 538.48 201.93 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 538.48 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 538.48 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 538.48 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "RC0603FR-071K43L"
+			(at 538.48 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Yageo"
+			(at 538.48 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "2ced5477-ba1c-5924-a9f3-697a9b12792c")
+		)
+		(pin "2"
+			(uuid "cd12ed0d-b708-5451-88f7-20c5000a3573")
+		)
+		(instances
+			(project "circuit-board"
+				(path "/f02ecd67-bc1a-5b74-83db-8105b6387c4e"
+					(reference "R201")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 538.48 203.2)
+			(xy 538.48 200.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "64b449e3-6311-5853-b3fb-207501508f2a")
+	)
+	(global_label "HPF_OUT_L"
+		(shape passive)
+		(at 538.48 200.66 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "b1ef40ec-2a0c-566e-859f-931106587331")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 538.48 200.66 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 538.48 210.82)
+			(xy 538.48 213.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "83269a3b-f754-5fe2-a704-3859720354b2")
+	)
+	(global_label "GAIN_L_HI"
+		(shape passive)
+		(at 538.48 213.36 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "80c1aab3-eddd-58b2-a5a5-5f1e7f6cf31d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 538.48 213.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 571.5 207.01 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "0163ff87-8435-5cc3-a984-0363eaa25ec5")
+		(property "Reference" "R202"
+			(at 571.5 199.39 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1.43k"
+			(at 571.5 201.93 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 571.5 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 571.5 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 571.5 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "RC0603FR-071K43L"
+			(at 571.5 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Yageo"
+			(at 571.5 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "e28e21bb-74d6-5ffa-9610-0d989cc249fc")
+		)
+		(pin "2"
+			(uuid "39c5574b-2e5e-5e52-b8fa-b098261991c9")
+		)
+		(instances
+			(project "circuit-board"
+				(path "/f02ecd67-bc1a-5b74-83db-8105b6387c4e"
+					(reference "R202")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 571.5 203.2)
+			(xy 571.5 200.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "819c1280-7bca-5b0e-a013-cbb3c61e3490")
+	)
+	(global_label "GAIN_L_LO"
+		(shape passive)
+		(at 571.5 200.66 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "4969677f-77e3-5d80-b055-8ed4a3bb73bf")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 571.5 200.66 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 571.5 210.82)
+			(xy 571.5 213.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b1cf0a15-aca8-5962-83a6-69c2beaa83ec")
+	)
+	(global_label "GAIN_OUT_L"
+		(shape passive)
+		(at 571.5 213.36 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "19324af0-0803-5e63-bf75-addad1f45c6f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 571.5 213.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 604.52 207.01 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "7355d6dc-3a16-5ae1-b43d-24cf124b6b83")
+		(property "Reference" "R203"
+			(at 604.52 199.39 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1M"
+			(at 604.52 201.93 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 604.52 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 604.52 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "keeps the loop closed if the pot is unplugged"
+			(at 604.52 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "RC0603FR-071ML"
+			(at 604.52 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Yageo"
+			(at 604.52 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "f2fd448d-7c37-5c16-9254-7e66b6bdf2eb")
+		)
+		(pin "2"
+			(uuid "1e822466-efd1-58d5-8c1b-10a81be344d7")
+		)
+		(instances
+			(project "circuit-board"
+				(path "/f02ecd67-bc1a-5b74-83db-8105b6387c4e"
+					(reference "R203")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 604.52 203.2)
+			(xy 604.52 200.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "82a1240d-d5b6-5100-bbc8-7d50d7f3c654")
+	)
+	(global_label "GAIN_L_W"
+		(shape passive)
+		(at 604.52 200.66 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "f6f5ab35-28a6-52db-9079-87905b0d776d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 604.52 200.66 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 604.52 210.82)
+			(xy 604.52 213.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e6d6e2fb-dd7b-53c0-957f-0ea58bd0f5ce")
+	)
+	(global_label "GAIN_OUT_L"
+		(shape passive)
+		(at 604.52 213.36 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "806f0dcc-d045-597e-b744-c6a7444da4cc")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 604.52 213.36 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 637.54 207.01 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "2592f06e-a609-55b7-8e63-df65697ec1d3")
+		(property "Reference" "C201"
+			(at 637.54 199.39 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "22pF"
+			(at 637.54 201.93 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 637.54 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 637.54 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 637.54 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CL10C220JB8NNNC"
+			(at 637.54 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Samsung"
+			(at 637.54 207.01 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "516f297b-1123-505b-9449-cf66ada80729")
+		)
+		(pin "2"
+			(uuid "a07a1f55-4277-53ee-83f2-9279e1bd987b")
+		)
+		(instances
+			(project "circuit-board"
+				(path "/f02ecd67-bc1a-5b74-83db-8105b6387c4e"
+					(reference "C201")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 637.54 203.2)
+			(xy 637.54 200.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "18f1cdf5-8d67-572a-88bc-7e976ecbfae0")
+	)
+	(global_label "GAIN_L_W"
+		(shape passive)
+		(at 637.54 200.66 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "a88029f4-74f3-5479-a9a9-9f16e95d4555")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 637.54 200.66 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 637.54 210.82)
+			(xy 637.54 213.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3d85c3b2-f1e3-5000-9682-05e233043875")
+	)
+	(global_label "GAIN_OUT_L"
+		(shape passive)
+		(at 637.54 213.36 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "2f104afc-baa9-51d6-9c33-c9a2bf71749c")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 637.54 213.36 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -14442,7 +14442,7 @@
 		)
 		(uuid "f119eb90-a060-5474-ace2-50b698e05242")
 	)
-	(global_label "HPF_OUT_L"
+	(global_label "GAIN_OUT_L"
 		(shape passive)
 		(at 671.83 200.66 90)
 		(fields_autoplaced yes)
@@ -16182,7 +16182,7 @@
 		)
 		(uuid "8d3072a3-50cb-5274-9f01-38bee2cfa1f7")
 	)
-	(global_label "AGND"
+	(global_label "HPF_P_L"
 		(shape passive)
 		(at 1016 205.74 180)
 		(fields_autoplaced yes)
@@ -16216,7 +16216,7 @@
 		)
 		(uuid "3f68ab3d-86ca-57db-9765-33635b21c112")
 	)
-	(global_label "GAIN_L_W"
+	(global_label "HPF_FB_L"
 		(shape passive)
 		(at 1016 210.82 180)
 		(fields_autoplaced yes)
@@ -16250,7 +16250,7 @@
 		)
 		(uuid "f63a9f97-567d-51a6-8dcc-c353ee275cb3")
 	)
-	(global_label "GAIN_OUT_L"
+	(global_label "HPF_OUT_L"
 		(shape passive)
 		(at 1036.32 208.28 0)
 		(fields_autoplaced yes)
@@ -16389,7 +16389,7 @@
 		)
 		(uuid "f05c9430-cac5-56de-bb45-2d94a1a51ee7")
 	)
-	(global_label "HPF_OUT_L"
+	(global_label "GAIN_OUT_L"
 		(shape passive)
 		(at 1082.04 208.28 0)
 		(fields_autoplaced yes)
@@ -16423,7 +16423,7 @@
 		)
 		(uuid "fccdbca8-6646-5a19-9b3b-c6a4f99d7e63")
 	)
-	(global_label "HPF_FB_L"
+	(global_label "GAIN_L_W"
 		(shape passive)
 		(at 1061.72 210.82 180)
 		(fields_autoplaced yes)
@@ -16457,7 +16457,7 @@
 		)
 		(uuid "be29079d-67d9-5d01-894b-6a94967c5d2a")
 	)
-	(global_label "HPF_P_L"
+	(global_label "AGND"
 		(shape passive)
 		(at 1061.72 205.74 180)
 		(fields_autoplaced yes)
@@ -23710,688 +23710,8 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
+		(lib_id "Device:C")
 		(at 236.22 387.35 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "486d9bc9-8faf-5a3a-9a6b-65c4bb4fbbf3")
-		(property "Reference" "R301"
-			(at 236.22 379.73 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "1.43k"
-			(at 236.22 382.27 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 236.22 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 236.22 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 236.22 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "RC0603FR-071K43L"
-			(at 236.22 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "Yageo"
-			(at 236.22 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "b625730e-71af-550a-8aea-19f62c8a7ca8")
-		)
-		(pin "2"
-			(uuid "d858a646-a6dc-5602-b9f7-38f456927b98")
-		)
-		(instances
-			(project "circuit-board"
-				(path "/f02ecd67-bc1a-5b74-83db-8105b6387c4e"
-					(reference "R301")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 236.22 383.54)
-			(xy 236.22 381)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0e496063-5546-5b26-9e30-0db0c66cfa8a")
-	)
-	(global_label "TANK_MIX_R"
-		(shape passive)
-		(at 236.22 381 90)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "7be65093-39e8-55d6-8932-01a457c424ec")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 236.22 381 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 236.22 391.16)
-			(xy 236.22 393.7)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "97a52434-96d9-5c62-95d4-ecfef42d2bbc")
-	)
-	(global_label "GAIN_R_HI"
-		(shape passive)
-		(at 236.22 393.7 270)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "af5dba42-f5d5-529c-a740-dd2e115c9285")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 236.22 393.7 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 269.24 387.35 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "640c8a73-a5b7-5440-a5e8-e2e68dd87ff4")
-		(property "Reference" "R302"
-			(at 269.24 379.73 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "1.43k"
-			(at 269.24 382.27 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 269.24 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 269.24 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 269.24 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "RC0603FR-071K43L"
-			(at 269.24 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "Yageo"
-			(at 269.24 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "cd782b3e-3edd-5b9a-8e9f-facaa074165e")
-		)
-		(pin "2"
-			(uuid "eae54243-2308-582c-b844-9955916c2a4a")
-		)
-		(instances
-			(project "circuit-board"
-				(path "/f02ecd67-bc1a-5b74-83db-8105b6387c4e"
-					(reference "R302")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 269.24 383.54)
-			(xy 269.24 381)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f2a62e01-9609-563c-83bc-dffe27aebcad")
-	)
-	(global_label "GAIN_R_LO"
-		(shape passive)
-		(at 269.24 381 90)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "67f8ed34-481d-54a0-9f3d-05d8344fa6d4")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 269.24 381 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 269.24 391.16)
-			(xy 269.24 393.7)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "1daa9e47-33f8-57bb-8706-d1fc3a2b57b8")
-	)
-	(global_label "GAIN_OUT_R"
-		(shape passive)
-		(at 269.24 393.7 270)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "f6255a6e-4567-5eb5-a6bd-c3ed7389ddee")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 269.24 393.7 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 302.26 387.35 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "1b68ebe4-8096-5732-92c1-e7b386ca359e")
-		(property "Reference" "R303"
-			(at 302.26 379.73 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "1M"
-			(at 302.26 382.27 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 302.26 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 302.26 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "keeps the loop closed if the pot is unplugged"
-			(at 302.26 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "RC0603FR-071ML"
-			(at 302.26 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "Yageo"
-			(at 302.26 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "d07fd04c-3400-586e-9c0a-57afc95483ea")
-		)
-		(pin "2"
-			(uuid "69d995e0-f91b-5f70-a089-c6970f8e3d5c")
-		)
-		(instances
-			(project "circuit-board"
-				(path "/f02ecd67-bc1a-5b74-83db-8105b6387c4e"
-					(reference "R303")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 302.26 383.54)
-			(xy 302.26 381)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "75fed82d-fd66-59fe-a101-169b8438177f")
-	)
-	(global_label "GAIN_R_W"
-		(shape passive)
-		(at 302.26 381 90)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "f7c19e9d-b8b7-5c8d-96b7-e20362007f2f")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 302.26 381 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 302.26 391.16)
-			(xy 302.26 393.7)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "4be41652-add1-5259-8e69-b8a0b81d7fc6")
-	)
-	(global_label "GAIN_OUT_R"
-		(shape passive)
-		(at 302.26 393.7 270)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "d9ef1c12-0e9a-54b4-b126-2d2362f1a466")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 302.26 393.7 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 335.28 387.35 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "0dbd407f-d501-54d8-97bd-32d91c0a8c8a")
-		(property "Reference" "C301"
-			(at 335.28 379.73 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "22pF"
-			(at 335.28 382.27 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-			(at 335.28 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 335.28 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 335.28 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "MPN" "CL10C220JB8NNNC"
-			(at 335.28 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Manufacturer" "Samsung"
-			(at 335.28 387.35 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "52e5981b-f7f6-577f-837c-8ff8aa5dc154")
-		)
-		(pin "2"
-			(uuid "ad560ed5-a1a7-56ca-b44c-42d8756f9eb5")
-		)
-		(instances
-			(project "circuit-board"
-				(path "/f02ecd67-bc1a-5b74-83db-8105b6387c4e"
-					(reference "C301")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 335.28 383.54)
-			(xy 335.28 381)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b0913258-0792-5c96-afb5-4384f80aefc9")
-	)
-	(global_label "GAIN_R_W"
-		(shape passive)
-		(at 335.28 381 90)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "2edbb4d3-5f98-5467-9d05-efdc1c5b7aea")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 335.28 381 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 335.28 391.16)
-			(xy 335.28 393.7)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0f8eebbd-9f60-5cf9-910f-d39117260c6a")
-	)
-	(global_label "GAIN_OUT_R"
-		(shape passive)
-		(at 335.28 393.7 270)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "ce0305ea-884b-569d-a95d-ae04d8b3d08d")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 335.28 393.7 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 369.57 387.35 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -24402,7 +23722,7 @@
 		(fields_autoplaced yes)
 		(uuid "d7ac540e-2083-5538-8ca7-f619ad1ab040")
 		(property "Reference" "C302"
-			(at 369.57 379.73 0)
+			(at 236.22 379.73 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -24412,7 +23732,7 @@
 			)
 		)
 		(property "Value" "68nF film"
-			(at 369.57 382.27 0)
+			(at 236.22 382.27 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -24422,7 +23742,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_1210_3225Metric"
-			(at 369.57 387.35 0)
+			(at 236.22 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24433,7 +23753,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 369.57 387.35 0)
+			(at 236.22 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24444,7 +23764,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 369.57 387.35 0)
+			(at 236.22 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24455,7 +23775,7 @@
 			)
 		)
 		(property "MPN" "ECH-U1H683JX5"
-			(at 369.57 387.35 0)
+			(at 236.22 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24466,7 +23786,7 @@
 			)
 		)
 		(property "Manufacturer" "Panasonic"
-			(at 369.57 387.35 0)
+			(at 236.22 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24493,8 +23813,8 @@
 	)
 	(wire
 		(pts
-			(xy 369.57 383.54)
-			(xy 369.57 381)
+			(xy 236.22 383.54)
+			(xy 236.22 381)
 		)
 		(stroke
 			(width 0)
@@ -24502,9 +23822,9 @@
 		)
 		(uuid "bd18ab99-8096-57cd-a465-f0e63eb3ed0b")
 	)
-	(global_label "GAIN_OUT_R"
+	(global_label "TANK_MIX_R"
 		(shape passive)
-		(at 369.57 381 90)
+		(at 236.22 381 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -24514,7 +23834,7 @@
 		)
 		(uuid "7ed631bc-0c4e-5589-9079-046f70626a62")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 369.57 381 0)
+			(at 236.22 381 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24527,8 +23847,8 @@
 	)
 	(wire
 		(pts
-			(xy 369.57 391.16)
-			(xy 369.57 393.7)
+			(xy 236.22 391.16)
+			(xy 236.22 393.7)
 		)
 		(stroke
 			(width 0)
@@ -24538,7 +23858,7 @@
 	)
 	(global_label "HPF_N1_R"
 		(shape passive)
-		(at 369.57 393.7 270)
+		(at 236.22 393.7 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -24548,7 +23868,7 @@
 		)
 		(uuid "28e551b3-078b-5750-94ff-883ff5b4b598")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 369.57 393.7 0)
+			(at 236.22 393.7 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24561,7 +23881,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 403.86 387.35 0)
+		(at 270.51 387.35 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -24572,7 +23892,7 @@
 		(fields_autoplaced yes)
 		(uuid "ab0ecaec-90ef-57e4-aef7-de48e2d2e437")
 		(property "Reference" "C312"
-			(at 403.86 379.73 0)
+			(at 270.51 379.73 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -24582,7 +23902,7 @@
 			)
 		)
 		(property "Value" "68nF film"
-			(at 403.86 382.27 0)
+			(at 270.51 382.27 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -24592,7 +23912,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_1210_3225Metric"
-			(at 403.86 387.35 0)
+			(at 270.51 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24603,7 +23923,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 403.86 387.35 0)
+			(at 270.51 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24614,7 +23934,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 403.86 387.35 0)
+			(at 270.51 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24625,7 +23945,7 @@
 			)
 		)
 		(property "MPN" "ECH-U1H683JX5"
-			(at 403.86 387.35 0)
+			(at 270.51 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24636,7 +23956,7 @@
 			)
 		)
 		(property "Manufacturer" "Panasonic"
-			(at 403.86 387.35 0)
+			(at 270.51 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24663,8 +23983,8 @@
 	)
 	(wire
 		(pts
-			(xy 403.86 383.54)
-			(xy 403.86 381)
+			(xy 270.51 383.54)
+			(xy 270.51 381)
 		)
 		(stroke
 			(width 0)
@@ -24672,9 +23992,9 @@
 		)
 		(uuid "3344f2b3-a15b-52ef-af42-df0aab8d3c93")
 	)
-	(global_label "GAIN_OUT_R"
+	(global_label "TANK_MIX_R"
 		(shape passive)
-		(at 403.86 381 90)
+		(at 270.51 381 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -24684,7 +24004,7 @@
 		)
 		(uuid "0f16a7ae-2476-56db-9951-a7eb4d310ad1")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 403.86 381 0)
+			(at 270.51 381 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24697,8 +24017,8 @@
 	)
 	(wire
 		(pts
-			(xy 403.86 391.16)
-			(xy 403.86 393.7)
+			(xy 270.51 391.16)
+			(xy 270.51 393.7)
 		)
 		(stroke
 			(width 0)
@@ -24708,7 +24028,7 @@
 	)
 	(global_label "HPF_N1_R"
 		(shape passive)
-		(at 403.86 393.7 270)
+		(at 270.51 393.7 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -24718,7 +24038,7 @@
 		)
 		(uuid "dc72da44-8d63-51b0-b470-f96171f93ed2")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 403.86 393.7 0)
+			(at 270.51 393.7 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24731,7 +24051,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 438.15 387.35 0)
+		(at 304.8 387.35 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -24742,7 +24062,7 @@
 		(fields_autoplaced yes)
 		(uuid "eb066993-8f60-5906-8ad0-085fc43ad2d4")
 		(property "Reference" "C303"
-			(at 438.15 379.73 0)
+			(at 304.8 379.73 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -24752,7 +24072,7 @@
 			)
 		)
 		(property "Value" "68nF film"
-			(at 438.15 382.27 0)
+			(at 304.8 382.27 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -24762,7 +24082,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_1210_3225Metric"
-			(at 438.15 387.35 0)
+			(at 304.8 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24773,7 +24093,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 438.15 387.35 0)
+			(at 304.8 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24784,7 +24104,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 438.15 387.35 0)
+			(at 304.8 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24795,7 +24115,7 @@
 			)
 		)
 		(property "MPN" "ECH-U1H683JX5"
-			(at 438.15 387.35 0)
+			(at 304.8 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24806,7 +24126,7 @@
 			)
 		)
 		(property "Manufacturer" "Panasonic"
-			(at 438.15 387.35 0)
+			(at 304.8 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24833,8 +24153,8 @@
 	)
 	(wire
 		(pts
-			(xy 438.15 383.54)
-			(xy 438.15 381)
+			(xy 304.8 383.54)
+			(xy 304.8 381)
 		)
 		(stroke
 			(width 0)
@@ -24844,7 +24164,7 @@
 	)
 	(global_label "HPF_N1_R"
 		(shape passive)
-		(at 438.15 381 90)
+		(at 304.8 381 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -24854,7 +24174,7 @@
 		)
 		(uuid "11796ac4-8673-5a44-9843-fb426794dd70")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 438.15 381 0)
+			(at 304.8 381 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24867,8 +24187,8 @@
 	)
 	(wire
 		(pts
-			(xy 438.15 391.16)
-			(xy 438.15 393.7)
+			(xy 304.8 391.16)
+			(xy 304.8 393.7)
 		)
 		(stroke
 			(width 0)
@@ -24878,7 +24198,7 @@
 	)
 	(global_label "HPF_P_R"
 		(shape passive)
-		(at 438.15 393.7 270)
+		(at 304.8 393.7 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -24888,7 +24208,7 @@
 		)
 		(uuid "318bbe4f-8462-583a-9616-69948888e726")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 438.15 393.7 0)
+			(at 304.8 393.7 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24901,7 +24221,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 472.44 387.35 0)
+		(at 339.09 387.35 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -24912,7 +24232,7 @@
 		(fields_autoplaced yes)
 		(uuid "a36efb55-811d-5c14-b3c6-84453ad826b5")
 		(property "Reference" "C313"
-			(at 472.44 379.73 0)
+			(at 339.09 379.73 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -24922,7 +24242,7 @@
 			)
 		)
 		(property "Value" "68nF film"
-			(at 472.44 382.27 0)
+			(at 339.09 382.27 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -24932,7 +24252,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_1210_3225Metric"
-			(at 472.44 387.35 0)
+			(at 339.09 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24943,7 +24263,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 472.44 387.35 0)
+			(at 339.09 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24954,7 +24274,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 472.44 387.35 0)
+			(at 339.09 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24965,7 +24285,7 @@
 			)
 		)
 		(property "MPN" "ECH-U1H683JX5"
-			(at 472.44 387.35 0)
+			(at 339.09 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -24976,7 +24296,7 @@
 			)
 		)
 		(property "Manufacturer" "Panasonic"
-			(at 472.44 387.35 0)
+			(at 339.09 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25003,8 +24323,8 @@
 	)
 	(wire
 		(pts
-			(xy 472.44 383.54)
-			(xy 472.44 381)
+			(xy 339.09 383.54)
+			(xy 339.09 381)
 		)
 		(stroke
 			(width 0)
@@ -25014,7 +24334,7 @@
 	)
 	(global_label "HPF_N1_R"
 		(shape passive)
-		(at 472.44 381 90)
+		(at 339.09 381 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -25024,7 +24344,7 @@
 		)
 		(uuid "a02a13e6-c6b0-58c0-a544-c7a7f36e4487")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 472.44 381 0)
+			(at 339.09 381 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25037,8 +24357,8 @@
 	)
 	(wire
 		(pts
-			(xy 472.44 391.16)
-			(xy 472.44 393.7)
+			(xy 339.09 391.16)
+			(xy 339.09 393.7)
 		)
 		(stroke
 			(width 0)
@@ -25048,7 +24368,7 @@
 	)
 	(global_label "HPF_P_R"
 		(shape passive)
-		(at 472.44 393.7 270)
+		(at 339.09 393.7 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -25058,7 +24378,7 @@
 		)
 		(uuid "3f87c3e8-ca34-54fe-a86f-4bb644687dd1")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 472.44 393.7 0)
+			(at 339.09 393.7 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25071,7 +24391,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 506.73 387.35 0)
+		(at 373.38 387.35 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -25082,7 +24402,7 @@
 		(fields_autoplaced yes)
 		(uuid "cfc4bb46-17bc-5f20-8aa7-b6b3a5f453b3")
 		(property "Reference" "R304"
-			(at 506.73 379.73 0)
+			(at 373.38 379.73 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -25092,7 +24412,7 @@
 			)
 		)
 		(property "Value" "499R"
-			(at 506.73 382.27 0)
+			(at 373.38 382.27 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -25102,7 +24422,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 506.73 387.35 0)
+			(at 373.38 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25113,7 +24433,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 506.73 387.35 0)
+			(at 373.38 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25124,7 +24444,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 506.73 387.35 0)
+			(at 373.38 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25135,7 +24455,7 @@
 			)
 		)
 		(property "MPN" "RC0603FR-07499RL"
-			(at 506.73 387.35 0)
+			(at 373.38 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25146,7 +24466,7 @@
 			)
 		)
 		(property "Manufacturer" "Yageo"
-			(at 506.73 387.35 0)
+			(at 373.38 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25173,8 +24493,8 @@
 	)
 	(wire
 		(pts
-			(xy 506.73 383.54)
-			(xy 506.73 381)
+			(xy 373.38 383.54)
+			(xy 373.38 381)
 		)
 		(stroke
 			(width 0)
@@ -25184,7 +24504,7 @@
 	)
 	(global_label "HPF_N1_R"
 		(shape passive)
-		(at 506.73 381 90)
+		(at 373.38 381 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -25194,7 +24514,7 @@
 		)
 		(uuid "08b42c05-b1d6-5b3f-8843-4ed4d9300dcc")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 506.73 381 0)
+			(at 373.38 381 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25207,8 +24527,8 @@
 	)
 	(wire
 		(pts
-			(xy 506.73 391.16)
-			(xy 506.73 393.7)
+			(xy 373.38 391.16)
+			(xy 373.38 393.7)
 		)
 		(stroke
 			(width 0)
@@ -25218,7 +24538,7 @@
 	)
 	(global_label "HPF_R1_W"
 		(shape passive)
-		(at 506.73 393.7 270)
+		(at 373.38 393.7 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -25228,7 +24548,7 @@
 		)
 		(uuid "84e9c251-60b5-57f5-98ed-1a7d9b78be1f")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 506.73 393.7 0)
+			(at 373.38 393.7 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25241,7 +24561,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 539.75 387.35 0)
+		(at 406.4 387.35 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -25252,7 +24572,7 @@
 		(fields_autoplaced yes)
 		(uuid "8bcb2eda-d0d2-5332-966d-6332f2a793eb")
 		(property "Reference" "R305"
-			(at 539.75 379.73 0)
+			(at 406.4 379.73 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -25262,7 +24582,7 @@
 			)
 		)
 		(property "Value" "499R"
-			(at 539.75 382.27 0)
+			(at 406.4 382.27 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -25272,7 +24592,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 539.75 387.35 0)
+			(at 406.4 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25283,7 +24603,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 539.75 387.35 0)
+			(at 406.4 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25294,7 +24614,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 539.75 387.35 0)
+			(at 406.4 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25305,7 +24625,7 @@
 			)
 		)
 		(property "MPN" "RC0603FR-07499RL"
-			(at 539.75 387.35 0)
+			(at 406.4 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25316,7 +24636,7 @@
 			)
 		)
 		(property "Manufacturer" "Yageo"
-			(at 539.75 387.35 0)
+			(at 406.4 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25343,8 +24663,8 @@
 	)
 	(wire
 		(pts
-			(xy 539.75 383.54)
-			(xy 539.75 381)
+			(xy 406.4 383.54)
+			(xy 406.4 381)
 		)
 		(stroke
 			(width 0)
@@ -25354,7 +24674,7 @@
 	)
 	(global_label "HPF_P_R"
 		(shape passive)
-		(at 539.75 381 90)
+		(at 406.4 381 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -25364,7 +24684,7 @@
 		)
 		(uuid "1749ec96-af99-55de-a5db-26d627af1ccf")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 539.75 381 0)
+			(at 406.4 381 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25377,8 +24697,8 @@
 	)
 	(wire
 		(pts
-			(xy 539.75 391.16)
-			(xy 539.75 393.7)
+			(xy 406.4 391.16)
+			(xy 406.4 393.7)
 		)
 		(stroke
 			(width 0)
@@ -25388,7 +24708,7 @@
 	)
 	(global_label "HPF_R2_W"
 		(shape passive)
-		(at 539.75 393.7 270)
+		(at 406.4 393.7 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -25398,7 +24718,7 @@
 		)
 		(uuid "75a7ed92-500b-57c3-a497-8f7fad7e4bb9")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 539.75 393.7 0)
+			(at 406.4 393.7 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25411,7 +24731,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 572.77 387.35 0)
+		(at 439.42 387.35 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -25422,7 +24742,7 @@
 		(fields_autoplaced yes)
 		(uuid "9734d595-ba45-561b-b076-124ce5b2fa22")
 		(property "Reference" "R306"
-			(at 572.77 379.73 0)
+			(at 439.42 379.73 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -25432,7 +24752,7 @@
 			)
 		)
 		(property "Value" "5.9k"
-			(at 572.77 382.27 0)
+			(at 439.42 382.27 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -25442,7 +24762,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 572.77 387.35 0)
+			(at 439.42 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25453,7 +24773,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 572.77 387.35 0)
+			(at 439.42 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25464,7 +24784,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 572.77 387.35 0)
+			(at 439.42 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25475,7 +24795,7 @@
 			)
 		)
 		(property "MPN" "RC0603FR-075K9L"
-			(at 572.77 387.35 0)
+			(at 439.42 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25486,7 +24806,7 @@
 			)
 		)
 		(property "Manufacturer" "Yageo"
-			(at 572.77 387.35 0)
+			(at 439.42 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25513,8 +24833,8 @@
 	)
 	(wire
 		(pts
-			(xy 572.77 383.54)
-			(xy 572.77 381)
+			(xy 439.42 383.54)
+			(xy 439.42 381)
 		)
 		(stroke
 			(width 0)
@@ -25524,7 +24844,7 @@
 	)
 	(global_label "HPF_OUT_R"
 		(shape passive)
-		(at 572.77 381 90)
+		(at 439.42 381 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -25534,7 +24854,7 @@
 		)
 		(uuid "c8392908-4808-53cf-8e5e-c157e1270688")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 572.77 381 0)
+			(at 439.42 381 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25547,8 +24867,8 @@
 	)
 	(wire
 		(pts
-			(xy 572.77 391.16)
-			(xy 572.77 393.7)
+			(xy 439.42 391.16)
+			(xy 439.42 393.7)
 		)
 		(stroke
 			(width 0)
@@ -25558,7 +24878,7 @@
 	)
 	(global_label "HPF_FB_R"
 		(shape passive)
-		(at 572.77 393.7 270)
+		(at 439.42 393.7 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -25568,7 +24888,7 @@
 		)
 		(uuid "69669583-29e0-532b-b8c9-c8ff1a337070")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 572.77 393.7 0)
+			(at 439.42 393.7 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25581,7 +24901,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 605.79 387.35 0)
+		(at 472.44 387.35 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -25592,7 +24912,7 @@
 		(fields_autoplaced yes)
 		(uuid "85ff0dc6-b796-5106-9f5e-c06facd5d725")
 		(property "Reference" "R307"
-			(at 605.79 379.73 0)
+			(at 472.44 379.73 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -25602,7 +24922,7 @@
 			)
 		)
 		(property "Value" "10k"
-			(at 605.79 382.27 0)
+			(at 472.44 382.27 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -25612,7 +24932,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 605.79 387.35 0)
+			(at 472.44 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25623,7 +24943,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 605.79 387.35 0)
+			(at 472.44 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25634,7 +24954,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 605.79 387.35 0)
+			(at 472.44 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25645,7 +24965,7 @@
 			)
 		)
 		(property "MPN" "RC0603FR-0710KL"
-			(at 605.79 387.35 0)
+			(at 472.44 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25656,7 +24976,7 @@
 			)
 		)
 		(property "Manufacturer" "Yageo"
-			(at 605.79 387.35 0)
+			(at 472.44 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25683,8 +25003,8 @@
 	)
 	(wire
 		(pts
-			(xy 605.79 383.54)
-			(xy 605.79 381)
+			(xy 472.44 383.54)
+			(xy 472.44 381)
 		)
 		(stroke
 			(width 0)
@@ -25694,7 +25014,7 @@
 	)
 	(global_label "HPF_FB_R"
 		(shape passive)
-		(at 605.79 381 90)
+		(at 472.44 381 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -25704,7 +25024,7 @@
 		)
 		(uuid "0bc06e82-b855-5e75-8419-22eebb5ebac0")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 605.79 381 0)
+			(at 472.44 381 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25717,8 +25037,8 @@
 	)
 	(wire
 		(pts
-			(xy 605.79 391.16)
-			(xy 605.79 393.7)
+			(xy 472.44 391.16)
+			(xy 472.44 393.7)
 		)
 		(stroke
 			(width 0)
@@ -25728,7 +25048,7 @@
 	)
 	(global_label "AGND"
 		(shape passive)
-		(at 605.79 393.7 270)
+		(at 472.44 393.7 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -25738,7 +25058,7 @@
 		)
 		(uuid "03d7a9c9-14e5-53d9-8557-ff37ee9bd826")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 605.79 393.7 0)
+			(at 472.44 393.7 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25751,7 +25071,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 638.81 387.35 0)
+		(at 505.46 387.35 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -25762,7 +25082,7 @@
 		(fields_autoplaced yes)
 		(uuid "3ce63733-ec4b-5505-81de-37a31ab2e7ca")
 		(property "Reference" "R308"
-			(at 638.81 379.73 0)
+			(at 505.46 379.73 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -25772,7 +25092,7 @@
 			)
 		)
 		(property "Value" "1M"
-			(at 638.81 382.27 0)
+			(at 505.46 382.27 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -25782,7 +25102,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-			(at 638.81 387.35 0)
+			(at 505.46 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25793,7 +25113,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 638.81 387.35 0)
+			(at 505.46 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25804,7 +25124,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 638.81 387.35 0)
+			(at 505.46 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25815,7 +25135,7 @@
 			)
 		)
 		(property "MPN" "RC0603FR-071ML"
-			(at 638.81 387.35 0)
+			(at 505.46 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25826,7 +25146,7 @@
 			)
 		)
 		(property "Manufacturer" "Yageo"
-			(at 638.81 387.35 0)
+			(at 505.46 387.35 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25853,8 +25173,8 @@
 	)
 	(wire
 		(pts
-			(xy 638.81 383.54)
-			(xy 638.81 381)
+			(xy 505.46 383.54)
+			(xy 505.46 381)
 		)
 		(stroke
 			(width 0)
@@ -25864,7 +25184,7 @@
 	)
 	(global_label "HPF_P_R"
 		(shape passive)
-		(at 638.81 381 90)
+		(at 505.46 381 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -25874,7 +25194,7 @@
 		)
 		(uuid "ce7cd51f-b5fb-57ab-935c-c7e47863ce51")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 638.81 381 0)
+			(at 505.46 381 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -25887,8 +25207,8 @@
 	)
 	(wire
 		(pts
-			(xy 638.81 391.16)
-			(xy 638.81 393.7)
+			(xy 505.46 391.16)
+			(xy 505.46 393.7)
 		)
 		(stroke
 			(width 0)
@@ -25898,7 +25218,7 @@
 	)
 	(global_label "AGND"
 		(shape passive)
-		(at 638.81 393.7 270)
+		(at 505.46 393.7 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -25908,7 +25228,687 @@
 		)
 		(uuid "a21e9d40-9553-5f8c-9e56-4d45364b9186")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 638.81 393.7 0)
+			(at 505.46 393.7 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 538.48 387.35 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "486d9bc9-8faf-5a3a-9a6b-65c4bb4fbbf3")
+		(property "Reference" "R301"
+			(at 538.48 379.73 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1.43k"
+			(at 538.48 382.27 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 538.48 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 538.48 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 538.48 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "RC0603FR-071K43L"
+			(at 538.48 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Yageo"
+			(at 538.48 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "b625730e-71af-550a-8aea-19f62c8a7ca8")
+		)
+		(pin "2"
+			(uuid "d858a646-a6dc-5602-b9f7-38f456927b98")
+		)
+		(instances
+			(project "circuit-board"
+				(path "/f02ecd67-bc1a-5b74-83db-8105b6387c4e"
+					(reference "R301")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 538.48 383.54)
+			(xy 538.48 381)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0e496063-5546-5b26-9e30-0db0c66cfa8a")
+	)
+	(global_label "HPF_OUT_R"
+		(shape passive)
+		(at 538.48 381 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "7be65093-39e8-55d6-8932-01a457c424ec")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 538.48 381 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 538.48 391.16)
+			(xy 538.48 393.7)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "97a52434-96d9-5c62-95d4-ecfef42d2bbc")
+	)
+	(global_label "GAIN_R_HI"
+		(shape passive)
+		(at 538.48 393.7 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "af5dba42-f5d5-529c-a740-dd2e115c9285")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 538.48 393.7 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 571.5 387.35 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "640c8a73-a5b7-5440-a5e8-e2e68dd87ff4")
+		(property "Reference" "R302"
+			(at 571.5 379.73 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1.43k"
+			(at 571.5 382.27 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 571.5 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 571.5 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 571.5 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "RC0603FR-071K43L"
+			(at 571.5 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Yageo"
+			(at 571.5 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "cd782b3e-3edd-5b9a-8e9f-facaa074165e")
+		)
+		(pin "2"
+			(uuid "eae54243-2308-582c-b844-9955916c2a4a")
+		)
+		(instances
+			(project "circuit-board"
+				(path "/f02ecd67-bc1a-5b74-83db-8105b6387c4e"
+					(reference "R302")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 571.5 383.54)
+			(xy 571.5 381)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f2a62e01-9609-563c-83bc-dffe27aebcad")
+	)
+	(global_label "GAIN_R_LO"
+		(shape passive)
+		(at 571.5 381 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "67f8ed34-481d-54a0-9f3d-05d8344fa6d4")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 571.5 381 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 571.5 391.16)
+			(xy 571.5 393.7)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1daa9e47-33f8-57bb-8706-d1fc3a2b57b8")
+	)
+	(global_label "GAIN_OUT_R"
+		(shape passive)
+		(at 571.5 393.7 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "f6255a6e-4567-5eb5-a6bd-c3ed7389ddee")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 571.5 393.7 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 604.52 387.35 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "1b68ebe4-8096-5732-92c1-e7b386ca359e")
+		(property "Reference" "R303"
+			(at 604.52 379.73 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1M"
+			(at 604.52 382.27 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 604.52 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 604.52 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "keeps the loop closed if the pot is unplugged"
+			(at 604.52 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "RC0603FR-071ML"
+			(at 604.52 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Yageo"
+			(at 604.52 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "d07fd04c-3400-586e-9c0a-57afc95483ea")
+		)
+		(pin "2"
+			(uuid "69d995e0-f91b-5f70-a089-c6970f8e3d5c")
+		)
+		(instances
+			(project "circuit-board"
+				(path "/f02ecd67-bc1a-5b74-83db-8105b6387c4e"
+					(reference "R303")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 604.52 383.54)
+			(xy 604.52 381)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "75fed82d-fd66-59fe-a101-169b8438177f")
+	)
+	(global_label "GAIN_R_W"
+		(shape passive)
+		(at 604.52 381 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "f7c19e9d-b8b7-5c8d-96b7-e20362007f2f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 604.52 381 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 604.52 391.16)
+			(xy 604.52 393.7)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4be41652-add1-5259-8e69-b8a0b81d7fc6")
+	)
+	(global_label "GAIN_OUT_R"
+		(shape passive)
+		(at 604.52 393.7 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "d9ef1c12-0e9a-54b4-b126-2d2362f1a466")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 604.52 393.7 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 637.54 387.35 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "0dbd407f-d501-54d8-97bd-32d91c0a8c8a")
+		(property "Reference" "C301"
+			(at 637.54 379.73 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "22pF"
+			(at 637.54 382.27 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 637.54 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 637.54 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 637.54 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CL10C220JB8NNNC"
+			(at 637.54 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Samsung"
+			(at 637.54 387.35 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "52e5981b-f7f6-577f-837c-8ff8aa5dc154")
+		)
+		(pin "2"
+			(uuid "ad560ed5-a1a7-56ca-b44c-42d8756f9eb5")
+		)
+		(instances
+			(project "circuit-board"
+				(path "/f02ecd67-bc1a-5b74-83db-8105b6387c4e"
+					(reference "C301")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 637.54 383.54)
+			(xy 637.54 381)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b0913258-0792-5c96-afb5-4384f80aefc9")
+	)
+	(global_label "GAIN_R_W"
+		(shape passive)
+		(at 637.54 381 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "2edbb4d3-5f98-5467-9d05-efdc1c5b7aea")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 637.54 381 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 637.54 391.16)
+			(xy 637.54 393.7)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0f8eebbd-9f60-5cf9-910f-d39117260c6a")
+	)
+	(global_label "GAIN_OUT_R"
+		(shape passive)
+		(at 637.54 393.7 270)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "ce0305ea-884b-569d-a95d-ae04d8b3d08d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 637.54 393.7 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -26032,7 +26032,7 @@
 		)
 		(uuid "8571d512-a6f6-5d35-9b21-fee6855346e7")
 	)
-	(global_label "HPF_OUT_R"
+	(global_label "GAIN_OUT_R"
 		(shape passive)
 		(at 671.83 381 90)
 		(fields_autoplaced yes)
@@ -27772,7 +27772,7 @@
 		)
 		(uuid "955ace54-d423-5221-a925-4a2983d37164")
 	)
-	(global_label "AGND"
+	(global_label "HPF_P_R"
 		(shape passive)
 		(at 1016 386.08 180)
 		(fields_autoplaced yes)
@@ -27806,7 +27806,7 @@
 		)
 		(uuid "bcf01c9e-281e-5094-8095-eab9a787fc3d")
 	)
-	(global_label "GAIN_R_W"
+	(global_label "HPF_FB_R"
 		(shape passive)
 		(at 1016 391.16 180)
 		(fields_autoplaced yes)
@@ -27840,7 +27840,7 @@
 		)
 		(uuid "057aa034-fb55-5b30-b2bf-ef245ab11be6")
 	)
-	(global_label "GAIN_OUT_R"
+	(global_label "HPF_OUT_R"
 		(shape passive)
 		(at 1036.32 388.62 0)
 		(fields_autoplaced yes)
@@ -27979,7 +27979,7 @@
 		)
 		(uuid "a2a53d87-525d-593f-93ba-a9b17c8b1abc")
 	)
-	(global_label "HPF_OUT_R"
+	(global_label "GAIN_OUT_R"
 		(shape passive)
 		(at 1082.04 388.62 0)
 		(fields_autoplaced yes)
@@ -28013,7 +28013,7 @@
 		)
 		(uuid "e8b55ead-1359-5368-94da-ce9a1fafa250")
 	)
-	(global_label "HPF_FB_R"
+	(global_label "GAIN_R_W"
 		(shape passive)
 		(at 1061.72 391.16 180)
 		(fields_autoplaced yes)
@@ -28047,7 +28047,7 @@
 		)
 		(uuid "8f6d9232-429c-525e-b57c-f430f8d9bae1")
 	)
-	(global_label "HPF_P_R"
+	(global_label "AGND"
 		(shape passive)
 		(at 1061.72 386.08 180)
 		(fields_autoplaced yes)
@@ -53552,7 +53552,7 @@
 		)
 		(uuid "ec02113a-f2c6-50f3-95d9-de876c1bb97c")
 	)
-	(global_label "HPF_OUT_L"
+	(global_label "GAIN_OUT_L"
 		(shape passive)
 		(at 48.26 767.08 90)
 		(fields_autoplaced yes)
@@ -53722,7 +53722,7 @@
 		)
 		(uuid "71ab13b4-518e-58d1-9c31-c8812cb9a3b9")
 	)
-	(global_label "HPF_OUT_R"
+	(global_label "GAIN_OUT_R"
 		(shape passive)
 		(at 58.42 767.08 90)
 		(fields_autoplaced yes)

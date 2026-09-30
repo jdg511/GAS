@@ -458,14 +458,14 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     content.addAndMakeVisible (feedbackPhaseLabel);
 
     dynamicsLabel.setText ("FB Dyn", juce::dontSendNotification);
-    dynamicsLabel.setTooltip ("Three-way switch at the head of the feedback path: Comp (VTL5C3 vactrol compressor), Off, Limit (THAT2180 VCA limiter, 10:1). The Gain knob sets the level into whichever is selected.");
+    dynamicsLabel.setTooltip ("Three-way switch in the feedback RETURN leg, between the Feedback tap and the Fb In summer: Comp (MMBF5457 FET, 1176 territory), Off, Limit (Coolaudio V2181 VCA, 10:1). Both start at -24 dBFS. It holds down what recirculates, so turning Feedback up stops running away; the wet signal going to the output is untouched by it.");
     content.addAndMakeVisible (dynamicsLabel);
 
-    stereoModeLabel.setText ("Source", juce::dontSendNotification);
+    stereoModeLabel.setText ("Setting", juce::dontSendNotification);
     content.addAndMakeVisible (stereoModeLabel);
 
     tubeSwitchLabel.setText ("Tube", juce::dontSendNotification);
-    tubeSwitchLabel.setTooltip ("Rev C mini toggle beside the Vol knob: Off = solid state, On = the J201 tube stage (which also puts the tube on the output).");
+    tubeSwitchLabel.setTooltip ("Rev C mini toggle beside the In knob: Off = solid state, On = the J201 tube stage (which also puts the tube on the output).");
     content.addAndMakeVisible (tubeSwitchLabel);
 
     dirtSwitchLabel.setText ("Dirt", juce::dontSendNotification);
@@ -473,7 +473,7 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     content.addAndMakeVisible (dirtSwitchLabel);
 
     tapeSwitchLabel.setText ("Tape", juce::dontSendNotification);
-    tapeSwitchLabel.setTooltip ("Rev C mini toggle beside the Output knob: Off = solid state, On = the 2N3904 differential pair tape stage. The tube runs first when Tube is on.");
+    tapeSwitchLabel.setTooltip ("Rev C mini toggle beside the Out knob: Off = solid state, On = the 2N3904 differential pair tape stage. The tube runs first when Tube is on.");
     content.addAndMakeVisible (tapeSwitchLabel);
 
     themeLabel.setText ("Art", juce::dontSendNotification);
@@ -524,9 +524,9 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     };
 
     using P = TheGreatAmericanSpringAudioProcessor;
-    configureChoiceButton (dynamicsCompButton,  "Comp",  3001, P::dynamicsParameterID, 0.0f, "Vactrol (VTL5C3) opto compressor on the wet signal, feed-forward, stereo linked. Threshold -18 dBFS.");
-    configureChoiceButton (dynamicsOffButton,   "Off",   3001, P::dynamicsParameterID, 1.0f, "No dynamics circuit.");
-    configureChoiceButton (dynamicsLimitButton, "Limit", 3001, P::dynamicsParameterID, 2.0f, "THAT2180 VCA limiter with a log-average detector, feedback, 10:1, stereo linked. Threshold -18 dBFS.");
+    configureChoiceButton (dynamicsCompButton,  "Comp",  3001, P::dynamicsParameterID, 0.0f, "MMBF5457 FET compressor (1176 territory) in the feedback RETURN leg, feedback sidechain, stereo linked. Threshold -24 dBFS. It tames what goes back round the loop, so the wet signal you hear keeps its own dynamics.");
+    configureChoiceButton (dynamicsOffButton,   "Off",   3001, P::dynamicsParameterID, 1.0f, "Nothing in the feedback return leg. The loop is held only by the Feedback amount itself.");
+    configureChoiceButton (dynamicsLimitButton, "Limit", 3001, P::dynamicsParameterID, 2.0f, "Coolaudio V2181 VCA limiter with a log-average detector, 10:1, stereo linked, in the feedback RETURN leg. Threshold -24 dBFS. The harder stop of the two when the loop starts running away.");
 
     configureChoiceButton (stereoButton,       "Stereo",        4001, P::stereoModeParameterID, 0.0f, "L and R each run their own tank path; feedback stays in its own channel.");
     configureChoiceButton (monoToStereoButton, "Mono > Stereo", 4001, P::stereoModeParameterID, 1.0f, "A mono source is copied to both channels first, then runs as Stereo.");
@@ -534,28 +534,48 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
 
     // Rev C: the Vol / Gain / Output pulls are now three separate mini toggles on the control deck,
     // so they get the same two-position switch treatment here as FB Phase.
-    configureChoiceButton (tubeOffButton, "Off", 5001, P::inputTubeParameterID,  0.0f, "Vol stage stays solid state.");
-    configureChoiceButton (tubeOnButton,  "On",  5001, P::inputTubeParameterID,  1.0f, "J201 tube stage in the Vol section, and the tube also runs on the output.");
+    configureChoiceButton (tubeOffButton, "Off", 5001, P::inputTubeParameterID,  0.0f, "In stage stays solid state.");
+    configureChoiceButton (tubeOnButton,  "On",  5001, P::inputTubeParameterID,  1.0f, "J201 tube stage in the In section, and the tube also runs on the output.");
     configureChoiceButton (dirtOffButton, "Off", 5002, P::dirtParameterID,       0.0f, "Gain stage stays clean.");
     configureChoiceButton (dirtOnButton,  "On",  5002, P::dirtParameterID,       1.0f, "Tube Screamer clipper (2x 1N4148) in the Gain section.");
-    configureChoiceButton (tapeOffButton, "Off", 5003, P::outputTapeParameterID, 0.0f, "Output stage stays solid state.");
+    configureChoiceButton (tapeOffButton, "Off", 5003, P::outputTapeParameterID, 0.0f, "Out stage stays solid state.");
     configureChoiceButton (tapeOnButton,  "On",  5003, P::outputTapeParameterID, 1.0f, "2N3904 differential pair tape stage on the output.");
 
-    inputMeterLabel.setText ("In", juce::dontSendNotification);
-    wetMeterLabel.setText ("Wet", juce::dontSendNotification);
-    outputMeterLabel.setText ("Out", juce::dontSendNotification);
-    inputMeterLabel.setJustificationType (juce::Justification::centredRight);
-    wetMeterLabel.setJustificationType (juce::Justification::centredRight);
-    outputMeterLabel.setJustificationType (juce::Justification::centredRight);
-    inputMeter.setTooltip ("Peak level straight after the Vol (Solid State / Tube) knob. Plugin only. 0 to -48 dBFS.");
-    wetMeter.setTooltip ("Peak level straight after the Gain / Dirt / Comp-Limit circuit, just before the feedback path. Plugin only. 0 to -48 dBFS.");
-    outputMeter.setTooltip ("Peak level at the very end, after Post Output. Plugin only. 0 to -48 dBFS.");
-    content.addAndMakeVisible (inputMeterLabel);
-    content.addAndMakeVisible (inputMeter);
-    content.addAndMakeVisible (wetMeterLabel);
-    content.addAndMakeVisible (wetMeter);
-    content.addAndMakeVisible (outputMeterLabel);
-    content.addAndMakeVisible (outputMeter);
+    // Each metering point shows Left and Right separately, so a lopsided tank
+    // or a one-sided feedback build-up is visible rather than averaged away.
+    const auto configureMeterPair = [this] (juce::Label& groupLabel, const juce::String& groupText,
+                                            juce::Label& labelL, LevelMeter& meterL,
+                                            juce::Label& labelR, LevelMeter& meterR,
+                                            const juce::String& tip)
+    {
+        groupLabel.setText (groupText, juce::dontSendNotification);
+        groupLabel.setJustificationType (juce::Justification::centredRight);
+        content.addAndMakeVisible (groupLabel);
+
+        labelL.setText ("L", juce::dontSendNotification);
+        labelR.setText ("R", juce::dontSendNotification);
+
+        for (auto* channelLabel : { &labelL, &labelR })
+        {
+            channelLabel->setJustificationType (juce::Justification::centredRight);
+            content.addAndMakeVisible (*channelLabel);
+        }
+
+        meterL.setTooltip ("Left. " + tip);
+        meterR.setTooltip ("Right. " + tip);
+        content.addAndMakeVisible (meterL);
+        content.addAndMakeVisible (meterR);
+    };
+
+    configureMeterPair (inputMeterLabel, "In",
+                        inputMeterLabelL, inputMeterL, inputMeterLabelR, inputMeterR,
+                        "Peak level straight after the In (Solid State / Tube) knob. Plugin only. 0 to -48 dBFS.");
+    configureMeterPair (wetMeterLabel, "Wet",
+                        wetMeterLabelL, wetMeterL, wetMeterLabelR, wetMeterR,
+                        "Peak level straight after the Gain / Dirt / Comp-Limit circuit, just before the feedback path. Plugin only. 0 to -48 dBFS.");
+    configureMeterPair (outputMeterLabel, "Out",
+                        outputMeterLabelL, outputMeterL, outputMeterLabelR, outputMeterR,
+                        "Peak level at the very end, after Post Output. Plugin only. 0 to -48 dBFS.");
 
     solarThemeButton.onClick = [this] { introThemeStep = 3; applyTheme (Theme::solar); };
     petalThemeButton.onClick = [this] { introThemeStep = 3; applyTheme (Theme::petal); };
@@ -565,9 +585,7 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     content.addAndMakeVisible (petalThemeButton);
     content.addAndMakeVisible (cosmicThemeButton);
 
-    chainDescriptionLabel.setJustificationType (juce::Justification::centred);
-    chainDescriptionLabel.setMinimumHorizontalScale (0.7f);
-    content.addAndMakeVisible (chainDescriptionLabel);
+    content.addAndMakeVisible (chainDescriptionDisplay);
 
     ir2RoutingComboBox.addItem ("Off", 1);
     ir2RoutingComboBox.addItem ("Series", 2);
@@ -579,29 +597,56 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     ir2RoutingAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (
         audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::x2TanksParameterID, ir2RoutingComboBox);
 
-    configureRotarySlider (preInputLevelSlider, preInputLevelLabel, "Pre Input (plugin)", " dB");
-    configureRotarySlider (inputLevelSlider, inputLevelLabel, "Vol", " dB");
+    railOversamplingLabel.setText ("Oversampling", juce::dontSendNotification);
+    railOversamplingLabel.setJustificationType (juce::Justification::centredRight);
+    content.addAndMakeVisible (railOversamplingLabel);
+
+    railOversamplingComboBox.addItem ("Off", 1);
+    railOversamplingComboBox.addItem ("2x", 2);
+    railOversamplingComboBox.addItem ("4x", 3);
+    railOversamplingComboBox.addItem ("8x", 4);
+    railOversamplingComboBox.setTooltip ("Plugin only. Clipping at the op-amp rails makes harmonics, and at the plain sample rate the "
+                                         "ones above Nyquist fold back down as aliasing, which the real circuit never does. Running the "
+                                         "rail saturation faster moves them out of the way first. 4x matches the tube, tape and Tube "
+                                         "Screamer stages and is the default. 8x rejects a little more at more CPU; Off is cheapest and "
+                                         "only matters when you drive the board nodes past about +5.5 dBFS.");
+    content.addAndMakeVisible (railOversamplingComboBox);
+
+    railOversamplingAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (
+        audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::railOversamplingParameterID, railOversamplingComboBox);
+
+    configureRotarySlider (preInputLevelSlider, preInputLevelLabel, "Pre Input", " dB");
+    configureRotarySlider (inputLevelSlider, inputLevelLabel, "In", " dB");
     configureRotarySlider (gainSlider, gainLabel, "Gain", " dB");
     configureRotarySlider (preHpfCutoffSlider, preHpfCutoffLabel, "HPF Cutoff", " Hz");
     configureRotarySlider (postLpfCutoffSlider, postLpfCutoffLabel, "LPF Cutoff", " Hz");
-    configureRotarySlider (extTankMixSlider, extTankMixLabel, "Ext Tanks", " %");
-    configureRotarySlider (feedbackAmountSlider, feedbackAmountLabel, "Feedback", " %");
-    configureRotarySlider (wetDrySlider, wetDryLabel, "Wet/Dry", " %");
-    configureRotarySlider (outputLevelSlider, outputLevelLabel, "Output", " dB");
-    configureRotarySlider (postOutputLevelSlider, postOutputLevelLabel, "Post Output (plugin)", " dB");
+    // No suffix, and no fixed label or text: refreshX2VisualState sets both to match the
+    // routing, because the knob does a different job in each of the three positions.
+    configureRotarySlider (extTankMixSlider, extTankMixLabel, "Short / Long Tank Mix", "");
+    // Read-only: the Parallel reading is two numbers, which cannot be typed back in
+    // sensibly, and an edit would parse as the first one.
+    extTankMixSlider.setTextBoxStyle (juce::Slider::TextBoxBelow, true, 112, 20);
+    // Longest knob label in either row, so let it squeeze rather than clip.
+    extTankMixLabel.setMinimumHorizontalScale (0.6f);
+    // No suffix on these two either: the parameters now print "50%" themselves, and a
+    // slider suffix would make it "50% %".
+    configureRotarySlider (feedbackAmountSlider, feedbackAmountLabel, "Feedback", "");
+    configureRotarySlider (wetDrySlider, wetDryLabel, "Wet/Dry", "");
+    configureRotarySlider (outputLevelSlider, outputLevelLabel, "Out", " dB");
+    configureRotarySlider (postOutputLevelSlider, postOutputLevelLabel, "Post Output", " dB");
 
     for (auto* slider : std::initializer_list<juce::Slider*> { &preInputLevelSlider, &inputLevelSlider, &gainSlider,
                                                                &outputLevelSlider, &postOutputLevelSlider })
         slider->setNumDecimalPlacesToDisplay (1);
 
-    preInputLevelSlider.setTooltip ("Plugin-only trim ahead of everything, -18 to +18 dB. Not on the PCB.");
-    postOutputLevelSlider.setTooltip ("Plugin-only trim after everything, -18 to +18 dB. Not on the PCB.");
+    preInputLevelSlider.setTooltip ("Plugin-only trim ahead of everything, -48 to +18 dB. Not on the PCB.");
+    postOutputLevelSlider.setTooltip ("Plugin-only trim after everything, -48 to +18 dB. Not on the PCB.");
 
     // Rev C: no more pull knobs. Tube, Dirt and Tape are the panel's own mini toggles, so these are
-    // plain level knobs and the switch row below the Source row does the switching.
-    inputLevelSlider.setTooltip ("Vol, -18 to +18 dB, first knob on the wet path. Solid State or Tube is set by the TUBE switch.");
+    // plain level knobs and the switch row below the Setting row does the switching.
+    inputLevelSlider.setTooltip ("In, -18 to +18 dB, first knob on the wet path. Solid State or Tube is set by the TUBE switch.");
     gainSlider.setTooltip ("Gain, -18 to +18 dB, into the Dirt and Comp / Limit circuits. Clean or Dirt is set by the DIRT switch.");
-    outputLevelSlider.setTooltip ("Output, -18 to +18 dB, after the Wet/Dry mix. Solid State or Tape is set by the TAPE switch. The tube runs first when TUBE is on.");
+    outputLevelSlider.setTooltip ("Out, -18 to +18 dB, after the Wet/Dry mix. Solid State or Tape is set by the TAPE switch. The tube runs first when TUBE is on.");
 
     gainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
         audioProcessor.parameters, TheGreatAmericanSpringAudioProcessor::gainParameterID, gainSlider);
@@ -715,7 +760,7 @@ TheGreatAmericanSpringAudioProcessorEditor::TheGreatAmericanSpringAudioProcessor
     content.addAndMakeVisible (presetComboBox);
     refreshPresetOptions();
 
-    showUnavailableTankControlsButton.setButtonText ("Options not available in real life");
+    showUnavailableTankControlsButton.setButtonText ("BYOIRs (Bring your own impulse responses)");
     showUnavailableTankControlsButton.onClick = [this]
     {
         targetEditorHeight = showUnavailableTankControlsButton.getToggleState() ? baseExpandedHeight : baseCollapsedHeight;
@@ -775,9 +820,17 @@ void TheGreatAmericanSpringAudioProcessorEditor::refreshPullStates()
     gainSlider.setPulled (dirt);
     outputLevelSlider.setPulled (tape);
 
-    inputLevelLabel.setText (tube ? "Vol: TUBE" : "Vol: Solid State", juce::dontSendNotification);
+    inputLevelLabel.setText (tube ? "In: TUBE" : "In: Solid State", juce::dontSendNotification);
     gainLabel.setText (dirt ? "Gain: DIRT" : "Gain: Clean", juce::dontSendNotification);
-    outputLevelLabel.setText (tape ? "Output: TAPE" : "Output: Solid State", juce::dontSendNotification);
+
+    // The Out knob drives BOTH output circuits, and the tube there follows the In pull
+    // rather than a switch of its own. The label only looked at Tape, so with Tube on
+    // and Tape off it read "Out: Solid State" while the J201 was in fact in circuit.
+    outputLevelLabel.setText (tube && tape ? "Out: TUBE & TAPE"
+                            : tube         ? "Out: TUBE"
+                            : tape         ? "Out: TAPE"
+                                           : "Out: Solid State",
+                              juce::dontSendNotification);
 
     tubeOffButton.setToggleState (! tube, juce::dontSendNotification);
     tubeOnButton.setToggleState  (tube,   juce::dontSendNotification);
@@ -789,7 +842,7 @@ void TheGreatAmericanSpringAudioProcessorEditor::refreshPullStates()
 
 void TheGreatAmericanSpringAudioProcessorEditor::refreshChainReadout()
 {
-    chainDescriptionLabel.setText (audioProcessor.getSignalChainDescription(), juce::dontSendNotification);
+    chainDescriptionDisplay.setRows (audioProcessor.getSignalChainLines());
 }
 
 TheGreatAmericanSpringAudioProcessorEditor::~TheGreatAmericanSpringAudioProcessorEditor()
@@ -958,16 +1011,29 @@ void TheGreatAmericanSpringAudioProcessorEditor::layoutContent()
 
     header.removeFromTop (halfPad);
 
-    // "Options not available in real life" toggle – centred within content column.
+    // "BYOIRs" toggle – centred within content column.
     // Our LookAndFeel draws a 38 px switch to the LEFT of the text, so the text
     // centre sits 19 px right of the button-bounds centre.  Shift the whole button
     // 19 px left so the TEXT (the dominant visual) lands at the column centre.
     {
         auto optRow = centreRow (header.removeFromTop (26), contentWidth);
-        auto optBounds = centreRow (optRow, 340);
+        // 420 rather than 340: the BYOIRs wording is longer than the old label.
+        auto optBounds = centreRow (optRow, 420);
         // -19 accounts for the 38 px switch on the left (centres the text),
         // then +25+30 = +55 total shift right as requested.
         showUnavailableTankControlsButton.setBounds (optBounds.withX (optBounds.getX() + 36));
+    }
+
+    header.removeFromTop (halfPad);
+
+    // Oversampling, centred in the space under the BYOIRs toggle. Always visible: it
+    // applies whether or not the BYOIRs controls are showing.
+    {
+        auto osRow = centreRow (header.removeFromTop (26), contentWidth);
+        auto os = centreRow (osRow, 200);
+        railOversamplingLabel.setBounds (os.removeFromLeft (104));
+        os.removeFromLeft (pad);
+        railOversamplingComboBox.setBounds (os.removeFromLeft (88));
     }
 
     area.removeFromTop (pad);
@@ -1048,28 +1114,47 @@ void TheGreatAmericanSpringAudioProcessorEditor::layoutContent()
 
     area.removeFromTop (6);
 
-    // ── The three level meters ───────────────────────────────────────────────
+    // ── The three level meters, Left over Right at each point ────────────────
     {
-        constexpr int meterLabelW  = 30;
-        constexpr int meterW       = 120;
-        constexpr int rowW = (meterLabelW + meterW) * 3 + 20;
+        constexpr int meterLabelW   = 30;   // "In" / "Wet" / "Out", spans both bars
+        constexpr int chanLabelW    = 12;   // the "L" / "R" tag
+        constexpr int meterW        = 120;
+        constexpr int meterGroupW   = meterLabelW + chanLabelW + meterW;
+        constexpr int rowW = meterGroupW * 3 + 20;
 
-        auto row = centreRow (area.removeFromTop (20), rowW);
+        auto block = centreRow (area.removeFromTop (34), rowW);
 
-        inputMeterLabel.setBounds (row.removeFromLeft (meterLabelW));
-        inputMeter.setBounds (row.removeFromLeft (meterW).reduced (2, 3));
-        row.removeFromLeft (10);
-        wetMeterLabel.setBounds (row.removeFromLeft (meterLabelW));
-        wetMeter.setBounds (row.removeFromLeft (meterW).reduced (2, 3));
-        row.removeFromLeft (10);
-        outputMeterLabel.setBounds (row.removeFromLeft (meterLabelW));
-        outputMeter.setBounds (row.removeFromLeft (meterW).reduced (2, 3));
+        const auto layoutMeterPair = [&] (juce::Rectangle<int> b, juce::Label& groupLabel,
+                                          juce::Label& labelL, LevelMeter& meterL,
+                                          juce::Label& labelR, LevelMeter& meterR)
+        {
+            // The group name sits centred against both bars.
+            groupLabel.setBounds (b.removeFromLeft (meterLabelW));
+
+            auto top = b.removeFromTop (b.getHeight() / 2);
+            labelL.setBounds (top.removeFromLeft (chanLabelW));
+            meterL.setBounds (top.reduced (2, 2));
+
+            labelR.setBounds (b.removeFromLeft (chanLabelW));
+            meterR.setBounds (b.reduced (2, 2));
+        };
+
+        layoutMeterPair (block.removeFromLeft (meterGroupW), inputMeterLabel,
+                         inputMeterLabelL, inputMeterL, inputMeterLabelR, inputMeterR);
+        block.removeFromLeft (10);
+        layoutMeterPair (block.removeFromLeft (meterGroupW), wetMeterLabel,
+                         wetMeterLabelL, wetMeterL, wetMeterLabelR, wetMeterR);
+        block.removeFromLeft (10);
+        layoutMeterPair (block.removeFromLeft (meterGroupW), outputMeterLabel,
+                         outputMeterLabelL, outputMeterL, outputMeterLabelR, outputMeterR);
     }
 
     area.removeFromTop (pad);
 
     // ── The engaged signal chain, in words ───────────────────────────────────
-    chainDescriptionLabel.setBounds (centreRow (area.removeFromTop (18), 860));
+    // Three rows' worth, reserved whether or not Parallel is showing its second tank
+    // row, so switching routing never shifts everything below it.
+    chainDescriptionDisplay.setBounds (centreRow (area.removeFromTop (38), 900));
 
     area.removeFromTop (6);
 
@@ -1087,9 +1172,9 @@ void TheGreatAmericanSpringAudioProcessorEditor::layoutContent()
             sl.setBounds  (b.removeFromTop (kh));
         };
 
-        // Rows read left to right in signal order (Rev C): Pre Input (plugin),
-        // Vol (pull for Tube), Gain (pull for Dirt), HPF, LPF; then Ext Tanks,
-        // Feedback, Wet/Dry, Output (pull for Tape), Post Output (plugin).
+        // Rows read left to right in signal order (Rev C): Pre Input, In, Gain, LPF,
+        // HPF; then Short/Long mix, Feedback, Wet/Dry, Out, Post Output. Pre Input and
+        // Post Output are the plugin-only trims.
         constexpr int kwWide = 124;   // the pull knobs carry longer labels
         auto row1 = centreRow (knobs.removeFromTop (kh + 22), kwWide * 5 + kg * 4);
         knobs.removeFromTop (4);
@@ -1099,8 +1184,8 @@ void TheGreatAmericanSpringAudioProcessorEditor::layoutContent()
         layoutKnob (row1.removeFromLeft (kwWide), preInputLevelLabel,   preInputLevelSlider);   row1.removeFromLeft (kg);
         layoutKnob (row1.removeFromLeft (kwWide), inputLevelLabel,      inputLevelSlider);      row1.removeFromLeft (kg);
         layoutKnob (row1.removeFromLeft (kwWide), gainLabel,            gainSlider);            row1.removeFromLeft (kg);
-        layoutKnob (row1.removeFromLeft (kwWide), preHpfCutoffLabel,    preHpfCutoffSlider);    row1.removeFromLeft (kg);
-        layoutKnob (row1.removeFromLeft (kwWide), postLpfCutoffLabel,   postLpfCutoffSlider);
+        layoutKnob (row1.removeFromLeft (kwWide), postLpfCutoffLabel,   postLpfCutoffSlider);   row1.removeFromLeft (kg);
+        layoutKnob (row1.removeFromLeft (kwWide), preHpfCutoffLabel,    preHpfCutoffSlider);
 
         layoutKnob (row2.removeFromLeft (kwWide), extTankMixLabel,      extTankMixSlider);      row2.removeFromLeft (kg);
         layoutKnob (row2.removeFromLeft (kwWide), feedbackAmountLabel,  feedbackAmountSlider);  row2.removeFromLeft (kg);
@@ -1117,7 +1202,7 @@ void TheGreatAmericanSpringAudioProcessorEditor::layoutContent()
         auto ta = centreRow (area.removeFromTop (show ? 204 : 0), 880);
         auto top = ta.removeFromTop (98);
         ta.removeFromTop (pad);
-        auto bot = ta;
+        auto bot = ta.removeFromTop (98);
 
         auto la  = top.removeFromLeft ((top.getWidth() - 16) / 2);  top.removeFromLeft (16);
         auto ra  = top;
@@ -1266,6 +1351,7 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
     styleComboBox (ir2RoutingComboBox);
     styleComboBox (playbackSourceComboBox);
     styleComboBox (presetComboBox);
+    styleComboBox (railOversamplingComboBox);
 
     const auto styleControlLabel = [&style] (juce::Label& label)
     {
@@ -1276,7 +1362,10 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
     for (auto* label : { &gainLabel, &preHpfCutoffLabel, &postLpfCutoffLabel,
                          &extTankMixLabel, &feedbackAmountLabel, &wetDryLabel,
                          &preInputLevelLabel, &inputLevelLabel, &outputLevelLabel, &postOutputLevelLabel,
-                         &inputMeterLabel, &wetMeterLabel, &outputMeterLabel,
+                         &inputMeterLabel, &wetMeterLabel, &outputMeterLabel, &railOversamplingLabel,
+                         &inputMeterLabelL, &inputMeterLabelR,
+                         &wetMeterLabelL, &wetMeterLabelR,
+                         &outputMeterLabelL, &outputMeterLabelR,
                          &leftTankLabel, &rightTankLabel, &leftTank2Label, &rightTank2Label, &playbackLabel })
     {
         styleControlLabel (*label);
@@ -1297,8 +1386,9 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
         slider.setColour (juce::Slider::thumbColourId, style.radioFill);
     };
 
-    chainDescriptionLabel.setFont (makeFont (11.5f, juce::Font::plain, style.bodyTypeface));
-    chainDescriptionLabel.setColour (juce::Label::textColourId, style.textSecondary);
+    // Its face is fixed monospace so the columns keep lining up; only the colour
+    // follows the theme.
+    chainDescriptionDisplay.setTextColour (style.textSecondary);
 
     // Plugin-only knobs are labelled in the secondary colour so they read as
     // "not on the board" at a glance.
@@ -1312,7 +1402,8 @@ void TheGreatAmericanSpringAudioProcessorEditor::applyTheme (Theme newTheme)
         styleSlider (*slider);
     }
 
-    for (auto* meter : { &inputMeter, &wetMeter, &outputMeter })
+    for (auto* meter : { &inputMeterL, &inputMeterR, &wetMeterL, &wetMeterR,
+                         &outputMeterL, &outputMeterR })
     {
         meter->setTrackColours (style.panelBottom.withAlpha (0.85f),
                                 style.knobStart,
@@ -1469,9 +1560,12 @@ void TheGreatAmericanSpringAudioProcessorEditor::timerCallback()
 {
     // Meters are polled here rather than pushed from the audio thread, so the
     // ballistics cost nothing in processBlock.
-    inputMeter.setLevelDb (audioProcessor.getInputMeterDb());
-    wetMeter.setLevelDb (audioProcessor.getWetMeterDb());
-    outputMeter.setLevelDb (audioProcessor.getOutputMeterDb());
+    inputMeterL.setLevelDb (audioProcessor.getInputMeterDb (0));
+    inputMeterR.setLevelDb (audioProcessor.getInputMeterDb (1));
+    wetMeterL.setLevelDb (audioProcessor.getWetMeterDb (0));
+    wetMeterR.setLevelDb (audioProcessor.getWetMeterDb (1));
+    outputMeterL.setLevelDb (audioProcessor.getOutputMeterDb (0));
+    outputMeterR.setLevelDb (audioProcessor.getOutputMeterDb (1));
 
     // Pull states and the chain readout follow the parameters, so host
     // automation and presets move the knobs in and out too.
@@ -1555,6 +1649,61 @@ void TheGreatAmericanSpringAudioProcessorEditor::refreshX2VisualState()
     leftTank2LoadButton.setAlpha (x2Enabled ? 1.0f : 0.5f);
     rightTank2LoadButton.setAlpha (x2Enabled ? 1.0f : 0.5f);
     ir2RoutingComboBox.setAlpha (x2Enabled ? 1.0f : 0.86f);
+
+    // The blend knob does a different job in each routing, so its name, its reading and
+    // whether it does anything at all follow the Ext Reverb Tanks selector.
+    //
+    //   Off       nothing to blend, so the knob reads N/A and is greyed out
+    //   Series    "+ %Long Tank", 0% to 100% of long tank added in
+    //   Parallel  "Short / Long Tank Mix", reading "x% Short / 100-x% Long"
+    //
+    // The slider's own textFromValueFunction is set here rather than the parameter's,
+    // because the slider's wins for what is drawn on screen. The processor keeps the
+    // matching law for the host's automation readout.
+    using Routing = TheGreatAmericanSpringAudioProcessor::Ir2RoutingMode;
+    const auto routing = audioProcessor.getIr2RoutingMode();
+
+    switch (routing)
+    {
+        case Routing::series:
+            extTankMixLabel.setText ("+ %Long Tank", juce::dontSendNotification);
+            extTankMixSlider.textFromValueFunction = [] (double value)
+            {
+                return juce::String (juce::roundToInt (juce::jlimit (0.0, 1.0, value) * 100.0)) + "%";
+            };
+            extTankMixSlider.setTooltip ("How much of the long (Ext) tank gets added in. 0% is the short (Main) tank "
+                                         "and the Gain / Dirt / Comp block on their own, 100% is all of it through the "
+                                         "long tank, and it is a straight line across the whole sweep.");
+            break;
+
+        case Routing::parallel:
+            extTankMixLabel.setText ("Short / Long Tank Mix", juce::dontSendNotification);
+            extTankMixSlider.textFromValueFunction = [] (double value)
+            {
+                const auto longPercent = juce::roundToInt (juce::jlimit (0.0, 1.0, value) * 100.0);
+                return juce::String (100 - longPercent) + "% Short / " + juce::String (longPercent) + "% Long";
+            };
+            extTankMixSlider.setTooltip ("Crossfade between the two tank pairs running side by side. Hard left is the "
+                                         "short (Main) tanks alone, noon is half and half, hard right is the long (Ext) "
+                                         "tanks alone. The two always add up to 100%.");
+            break;
+
+        case Routing::off:
+        default:
+            extTankMixLabel.setText ("N/A", juce::dontSendNotification);
+            extTankMixSlider.textFromValueFunction = [] (double) { return juce::String ("N/A"); };
+            extTankMixSlider.setTooltip ("Nothing to blend with the Ext Reverb Tanks set to Off. Pick Series or Parallel "
+                                         "to bring this knob in.");
+            break;
+    }
+
+    const auto blendActive = routing != Routing::off;
+    extTankMixLabel.setColour (juce::Label::textColourId,
+                               blendActive ? style.textPrimary : style.textSecondary.withMultipliedAlpha (0.55f));
+    extTankMixSlider.setEnabled (blendActive);
+    extTankMixSlider.setAlpha (blendActive ? 1.0f : 0.45f);
+    extTankMixSlider.updateText();
+    extTankMixSlider.repaint();
 }
 
 void TheGreatAmericanSpringAudioProcessorEditor::choosePlaybackFile()

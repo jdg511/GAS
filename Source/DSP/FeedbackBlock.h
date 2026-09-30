@@ -49,6 +49,13 @@ public:
         crossCoupled = shouldCross;
     }
 
+    /** True if a cross-coupled channel also feeds a share back into itself. The swap
+        below is outright, so it is false: in MEGAVERB the Left path's feedback lands
+        only in the Right. The signal-path readout reads this to decide between
+        labelling a tap "%Fb to R" and "%Fb to L & R", so if the swap ever becomes a
+        blend, flip this and the readout follows. */
+    static constexpr bool crossCoupledAlsoFeedsOwnChannel = false;
+
     void process (const juce::AudioBuffer<float>& inputWet,
                   juce::AudioBuffer<float>& outputWet,
                   juce::AudioBuffer<float>& feedbackReturn,

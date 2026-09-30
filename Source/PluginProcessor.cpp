@@ -15,17 +15,86 @@ namespace
 constexpr auto projectSpringIrDirectoryPath = R"(C:\Users\Jason\source\repos\GAS\Spring IRs)";
 constexpr double predelayLfoFrequencyHz = 0.3;
 constexpr double predelaySmoothingSeconds = 1.25;
-// Each tank gets its own predelay, wandering independently within these ranges.
-constexpr double primaryPredelayMinMs = 20.0;   // primary tanks: 20-30 ms
-constexpr double primaryPredelayMaxMs = 30.0;
-constexpr double secondaryPredelayMinMs = 30.0; // 2nd (Ext) tanks: 30-42 ms
-constexpr double secondaryPredelayMaxMs = 42.0;
+// Each tank gets its own predelay, wandering independently inside its OWN window.
+// 2026-09-30: L and R used to share one window per pair (both short lanes 20-30, both
+// long lanes 30-42). Giving every lane its own window decorrelates L from R as well as
+// short from long, which widens the image instead of just varying it.
+//
+// Lane order is primary L, primary R, secondary L, secondary R, and matches the four
+// predelays named on the signal-path diagram:
+//   lane 0 = Predelay 1, short L, 20 to 30 ms
+//   lane 1 = Predelay 3, short R, 22 to 35 ms
+//   lane 2 = Predelay 2, long  L, 30 to 42 ms
+//   lane 3 = Predelay 4, long  R, 25 to 40 ms
+constexpr std::array<double, 4> predelayLaneMinMs { { 20.0, 22.0, 30.0, 25.0 } };
+constexpr std::array<double, 4> predelayLaneMaxMs { { 30.0, 35.0, 42.0, 40.0 } };
 constexpr float fallbackImpulse = 1.0f;
 constexpr auto defaultLeftTank1IrFileName = "GBS-L.wav";
 constexpr auto defaultRightTank1IrFileName = "GBS-R.wav";
 constexpr auto defaultLeftTank2IrFileName = "GAS-L.wav";
 constexpr auto defaultRightTank2IrFileName = "GAS-R.wav";
 constexpr auto presetNameProperty = "presetName";
+
+// ── The tank blend knob ──────────────────────────────────────────────────────
+// 2026-09-30: the knob means different things in the two routings, so the law is
+// per mode rather than one shared curve. In Off it does nothing at all.
+//
+// PARALLEL, "Short / Long Tank Mix": a true crossfade. Hard left is the short tanks
+// alone, hard right the long tanks alone, and the two always sum to 100%.
+//
+// SERIES, "+ %Long Tank": one control, how much long tank gets added. 0% is the short
+// tank and the dirt block on their own, 100% is all of it through the long tank. This
+// is linear across the whole sweep. The old curve hit 100% at noon and did nothing
+// above it, which was fine while a second Short% blend used the top half, but that
+// blend is gone, so the top half would have been dead travel.
+inline float parallelShortGainFor (float mix) noexcept
+{
+    return 1.0f - juce::jlimit (0.0f, 1.0f, mix);
+}
+
+inline float parallelLongGainFor (float mix) noexcept
+{
+    return juce::jlimit (0.0f, 1.0f, mix);
+}
+
+inline float seriesLongGainFor (float mix) noexcept
+{
+    return juce::jlimit (0.0f, 1.0f, mix);
+}
+
+// The routing the knob text should describe. processBlock and the routing parameter
+// listener both keep this current, so the host's automation display matches the UI.
+std::atomic<int> currentRoutingForText { 0 };   // 0 off, 1 series, 2 parallel
+
+// The plain 0..1 mix controls read as whole percentages, so 0.5 shows as "50%" rather
+// than the bare "0.50" the default formatter produced.
+juce::String percentText (float normalised)
+{
+    return juce::String (juce::roundToInt (normalised * 100.0f)) + "%";
+}
+
+// ...and back again, so typing "50" or "50%" into the box lands on 0.5.
+float percentValue (const juce::String& text)
+{
+    return juce::jlimit (0.0f, 1.0f, text.getFloatValue() / 100.0f);
+}
+
+// What the knob reads as, which depends on the routing it is sitting in. Off has no
+// blend to make, Series shows how much long tank is being added, and Parallel shows
+// the crossfade as the two halves that always add up to 100%.
+juce::String shortLongMixText (float mix)
+{
+    const auto clamped = juce::jlimit (0.0f, 1.0f, mix);
+    const auto longPercent = juce::roundToInt (clamped * 100.0f);
+
+    switch (currentRoutingForText.load (std::memory_order_relaxed))
+    {
+        case 1:  return juce::String (longPercent) + "%";
+        case 2:  return juce::String (100 - longPercent) + "% Short / "
+                      + juce::String (longPercent) + "% Long";
+        default: return "N/A";
+    }
+}
 
 struct EmbeddedPlaybackSource
 {
@@ -97,9 +166,41 @@ TheGreatAmericanSpringAudioProcessor::TheGreatAmericanSpringAudioProcessor()
     applyDefaultGasSettings();
     playbackFilePath = getEmbeddedPlaybackSources().front().displayPath;
     playbackActive = false;
+
+    parameters.addParameterListener (railOversamplingParameterID, this);
+    parameters.addParameterListener (x2TanksParameterID, this);
+
+    // So the knob's text law is right before the first block of audio ever runs.
+    currentRoutingForText.store (static_cast<int> (getIr2RoutingMode()), std::memory_order_relaxed);
 }
 
-TheGreatAmericanSpringAudioProcessor::~TheGreatAmericanSpringAudioProcessor() = default;
+TheGreatAmericanSpringAudioProcessor::~TheGreatAmericanSpringAudioProcessor()
+{
+    parameters.removeParameterListener (railOversamplingParameterID, this);
+    parameters.removeParameterListener (x2TanksParameterID, this);
+    cancelPendingUpdate();
+}
+
+void TheGreatAmericanSpringAudioProcessor::parameterChanged (const juce::String& parameterID, float newValue)
+{
+    // May arrive on the audio thread, so only flag it here.
+    if (parameterID == railOversamplingParameterID)
+        triggerAsyncUpdate();
+
+    // Keeps the host's readout for the blend knob honest even with the transport
+    // stopped, when processBlock is not running to do it.
+    if (parameterID == x2TanksParameterID)
+        currentRoutingForText.store (juce::jlimit (0, 2, juce::roundToInt (newValue)), std::memory_order_relaxed);
+}
+
+void TheGreatAmericanSpringAudioProcessor::handleAsyncUpdate()
+{
+    // Message thread. Suspending takes the callback lock, so the audio thread is not
+    // inside processBlock while the oversamplers are torn down and rebuilt.
+    suspendProcessing (true);
+    rebuildRailSaturators();
+    suspendProcessing (false);
+}
 
 const juce::String TheGreatAmericanSpringAudioProcessor::getName() const
 {
@@ -159,8 +260,8 @@ void TheGreatAmericanSpringAudioProcessor::prepareToPlay (double sampleRate, int
     predelayLfoPhase = 0.0;
     for (int lane = 0; lane < 4; ++lane)
     {
-        const auto minMs = (lane < 2) ? primaryPredelayMinMs : secondaryPredelayMinMs;
-        const auto maxMs = (lane < 2) ? primaryPredelayMaxMs : secondaryPredelayMaxMs;
+        const auto minMs = predelayLaneMinMs[static_cast<size_t> (lane)];
+        const auto maxMs = predelayLaneMaxMs[static_cast<size_t> (lane)];
         predelayTargetMs[lane] = juce::jmap (predelayRandom.nextFloat(),
                                              static_cast<float> (minMs),
                                              static_cast<float> (maxMs));
@@ -169,6 +270,12 @@ void TheGreatAmericanSpringAudioProcessor::prepareToPlay (double sampleRate, int
     }
 
     resizeProcessingBuffers (currentMaximumBlockSize);
+
+    // Remembered so a change to the oversampling choice can re-prepare without waiting
+    // for the host to call prepareToPlay again.
+    preparedSampleRate = sampleRate;
+    preparedBlockSize = currentMaximumBlockSize;
+    rebuildRailSaturators();
 
     // 30 ms ramp: fast enough to feel immediate on the knob, slow enough that
     // a full-range jump stays click-free.
@@ -189,6 +296,10 @@ void TheGreatAmericanSpringAudioProcessor::prepareToPlay (double sampleRate, int
 
     chain.prepare (sampleRate, currentMaximumBlockSize);
     reset();
+
+    // After chain.prepare, since the output stage only knows its delay once its own
+    // oversampler exists.
+    updateReportedLatency();
 
     loadTankIRFromCurrentPath (TankSlot::left1);
     loadTankIRFromCurrentPath (TankSlot::right1);
@@ -230,6 +341,11 @@ void TheGreatAmericanSpringAudioProcessor::reset()
     monoRightBuffer.clear();
     monoLeftSecondaryBuffer.clear();
     monoRightSecondaryBuffer.clear();
+    monoLeftSeriesBypassBuffer.clear();
+    monoRightSeriesBypassBuffer.clear();
+
+    for (auto* saturator : { &wetInputRail, &wetStereoRail, &wetAfterFeedbackRail, &feedbackReturnRail, &outputRail })
+        saturator->reset();
 
     playbackReadPosition = 0.0;
 }
@@ -294,13 +410,33 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
 
     chain.inputStage.setEnabled (inputTube, false);
     chain.inputStage.process (wetInputBaseBuffer, numSamples);
-    sanitizeBuffer (wetInputBaseBuffer, numSamples);
+    scrubBuffer (wetInputBaseBuffer, numSamples, 0.0f);
+    wetInputRail.process (wetInputBaseBuffer, numSamples, opAmpRailGain);
+
+    // MEGAVERB joins the crossed feedback to each channel BEFORE that channel's
+    // In meter, so what leaves the Left path lands in the Right just ahead of the
+    // R In meter and vice versa, and the meters show the sound ping-ponging
+    // L > R > L. In Stereo and Mono > Stereo the feedback still returns after the
+    // tap, so In reads only the fresh wet input. Addition is commutative and
+    // nothing else sits between these two points, so this changes what the meters
+    // read, not the audio.
+    const auto showCrossedFeedbackOnInMeters = stereoMode == StereoMode::megaverb;
+
+    if (showCrossedFeedbackOnInMeters)
+    {
+        wetInputBaseBuffer.addFrom (0, 0, feedbackReturnBuffer, 0, 0, numSamples);
+        wetInputBaseBuffer.addFrom (1, 0, feedbackReturnBuffer, 1, 0, numSamples);
+    }
 
     // Input meter: straight after the Solid State / Tube knob.
-    inputMeterPeak.store (wetInputBaseBuffer.getMagnitude (0, numSamples), std::memory_order_relaxed);
+    inputMeterPeakL.store (wetInputBaseBuffer.getMagnitude (0, 0, numSamples), std::memory_order_relaxed);
+    inputMeterPeakR.store (wetInputBaseBuffer.getMagnitude (1, 0, numSamples), std::memory_order_relaxed);
 
-    wetInputBaseBuffer.addFrom (0, 0, feedbackReturnBuffer, 0, 0, numSamples);
-    wetInputBaseBuffer.addFrom (1, 0, feedbackReturnBuffer, 1, 0, numSamples);
+    if (! showCrossedFeedbackOnInMeters)
+    {
+        wetInputBaseBuffer.addFrom (0, 0, feedbackReturnBuffer, 0, 0, numSamples);
+        wetInputBaseBuffer.addFrom (1, 0, feedbackReturnBuffer, 1, 0, numSamples);
+    }
 
     chain.dirtDynamics.setParameters (getDirtDynamicsParameters());
 
@@ -315,12 +451,18 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
     const auto ir2Parallel = ir2RoutingMode == Ir2RoutingMode::parallel;
     const auto extTankMix = parameters.getRawParameterValue (extTankMixParameterID)->load();
 
+    // Keep the knob's text law in step with the routing it is sitting in, so the host's
+    // automation readout says the same thing the on-screen knob does.
+    currentRoutingForText.store (ir2Series ? 1 : (ir2Parallel ? 2 : 0), std::memory_order_relaxed);
+
     if (ir2RoutingMode != lastIr2RoutingMode)
     {
         secondaryLeftTankPredelay.reset();
         secondaryRightTankPredelay.reset();
         monoLeftSecondaryBuffer.clear();
         monoRightSecondaryBuffer.clear();
+        monoLeftSeriesBypassBuffer.clear();
+        monoRightSeriesBypassBuffer.clear();
         lastIr2RoutingMode = ir2RoutingMode;
     }
 
@@ -336,6 +478,10 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
         applySecondaryTankPredelay (monoRightSecondaryBuffer, secondaryRightTankPredelay, predelayModulationBuffer.getReadPointer (4), numSamples);
     }
 
+    // 2026-09-30 (signal-path diagram v3): Series no longer blends the short tank
+    // against a bypass, so there is nothing to hold here any more. The short tank is
+    // always fully in circuit and the one knob is Long% only.
+
     chain.leftTank.process (monoLeftBuffer, numSamples);
     chain.rightTank.process (monoRightBuffer, numSamples);
 
@@ -344,17 +490,45 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
         chain.leftTankSecondary.process (monoLeftSecondaryBuffer, numSamples);
         chain.rightTankSecondary.process (monoRightSecondaryBuffer, numSamples);
 
-        // Parallel blend = additive "amount of 2nd tank": the primary stays at
-        // full level and the 2nd tank is summed on top, scaled from silent
-        // (Mix 0) to full (Mix 100%). Mirrors a single pot that just dials in
-        // how much 2nd tank you hear, the same meaning as in Series.
-        monoLeftBuffer.addFrom (0, 0, monoLeftSecondaryBuffer, 0, 0, numSamples, extTankMix);
-        monoRightBuffer.addFrom (0, 0, monoRightSecondaryBuffer, 0, 0, numSamples, extTankMix);
+        // "Short / Long Tank Mix": the two tanks run side by side and the knob
+        // crossfades between them. Hard left is the short tanks alone, noon is half
+        // and half, hard right is the long tanks alone. The two always sum to 100%.
+        const auto parallelShortGain = parallelShortGainFor (extTankMix);
+        const auto parallelLongGain  = parallelLongGainFor  (extTankMix);
+        monoLeftBuffer.applyGain  (0, 0, numSamples, parallelShortGain);
+        monoRightBuffer.applyGain (0, 0, numSamples, parallelShortGain);
+        monoLeftBuffer.addFrom  (0, 0, monoLeftSecondaryBuffer,  0, 0, numSamples, parallelLongGain);
+        monoRightBuffer.addFrom (0, 0, monoRightSecondaryBuffer, 0, 0, numSamples, parallelLongGain);
     }
     else if (ir2Series)
     {
+        // Series, per signal-path diagram v3 (2026-09-30).
+        //
+        // The Gain / Dirt / Comp-Limit block sits HERE, right after the short tank and
+        // BEFORE the Long% split, so both the long branch and the bypass go through it.
+        // It used to sit after both tanks, which meant that with the knob hard left the
+        // signal never reached the dirt or the compressor at all.
+        //
+        // Off and Parallel still run that block after their tanks, so it happens further
+        // down for those two. That is why the call below is guarded on ir2Series.
+        wetStereoBuffer.copyFrom (0, 0, monoLeftBuffer, 0, 0, numSamples);
+        wetStereoBuffer.copyFrom (1, 0, monoRightBuffer, 0, 0, numSamples);
+
+        chain.dirtDynamics.process (wetStereoBuffer, numSamples);
+        scrubBuffer (wetStereoBuffer, numSamples, 0.0f);
+        wetStereoRail.process (wetStereoBuffer, numSamples, opAmpRailGain);
+
+        wetMeterPeakL.store (wetStereoBuffer.getMagnitude (0, 0, numSamples), std::memory_order_relaxed);
+        wetMeterPeakR.store (wetStereoBuffer.getMagnitude (1, 0, numSamples), std::memory_order_relaxed);
+
+        monoLeftBuffer.copyFrom  (0, 0, wetStereoBuffer, 0, 0, numSamples);
+        monoRightBuffer.copyFrom (0, 0, wetStereoBuffer, 1, 0, numSamples);
+
+        // The Long % split point: hold what arrives here so it can be blended against
+        // the long-tank branch further down.
         monoLeftSecondaryBuffer.copyFrom (0, 0, monoLeftBuffer, 0, 0, numSamples);
         monoRightSecondaryBuffer.copyFrom (0, 0, monoRightBuffer, 0, 0, numSamples);
+
         applySecondaryTankPredelay (monoLeftBuffer, secondaryLeftTankPredelay, predelayModulationBuffer.getReadPointer (3), numSamples);
         applySecondaryTankPredelay (monoRightBuffer, secondaryRightTankPredelay, predelayModulationBuffer.getReadPointer (4), numSamples);
 
@@ -367,14 +541,14 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
         chain.leftTankSecondary.process (monoLeftBuffer, numSamples);
         chain.rightTankSecondary.process (monoRightBuffer, numSamples);
 
-        // Additive blend, identical pot meaning to Parallel: the primary tank
-        // stays at full level and the cascaded 2nd-tank signal is summed on top,
-        // scaled from silent (Mix 0) to full (Mix 100%). monoLeft/RightSecondary
-        // hold the full-level primary; monoLeft/Right hold the cascade.
-        monoLeftBuffer.applyGain (0, 0, numSamples, extTankMix);
-        monoRightBuffer.applyGain (0, 0, numSamples, extTankMix);
-        monoLeftBuffer.addFrom (0, 0, monoLeftSecondaryBuffer, 0, 0, numSamples, 1.0f);
-        monoRightBuffer.addFrom (0, 0, monoRightSecondaryBuffer, 0, 0, numSamples, 1.0f);
+        // "+ %Long Tank": Long% of the long tank against (100 - Long%) of what was
+        // held at the split. 0% is the short tank and the dirt block on their own,
+        // 100% is all of it through the long tank, linear the whole way across.
+        const auto seriesLongGain = seriesLongGainFor (extTankMix);
+        monoLeftBuffer.applyGain  (0, 0, numSamples, seriesLongGain);
+        monoRightBuffer.applyGain (0, 0, numSamples, seriesLongGain);
+        monoLeftBuffer.addFrom  (0, 0, monoLeftSecondaryBuffer,  0, 0, numSamples, 1.0f - seriesLongGain);
+        monoRightBuffer.addFrom (0, 0, monoRightSecondaryBuffer, 0, 0, numSamples, 1.0f - seriesLongGain);
     }
 
     wetStereoBuffer.copyFrom (0, 0, monoLeftBuffer, 0, 0, numSamples);
@@ -382,11 +556,19 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
 
     // Gain (pull for Dirt) + Comp / Off / Limit: wet path only, after the tanks
     // and before the feedback block, where the Rev B mode circuit sat.
-    chain.dirtDynamics.process (wetStereoBuffer, numSamples);
-    sanitizeBuffer (wetStereoBuffer, numSamples);
+    //
+    // Series has already run this further up, between the short tank and the Long%
+    // split, so it is skipped here for that mode. Off and Parallel run it now.
+    if (! ir2Series)
+    {
+        chain.dirtDynamics.process (wetStereoBuffer, numSamples);
+        scrubBuffer (wetStereoBuffer, numSamples, 0.0f);
+        wetStereoRail.process (wetStereoBuffer, numSamples, opAmpRailGain);
 
-    // Wet meter: straight after the circuit, just before the feedback path.
-    wetMeterPeak.store (wetStereoBuffer.getMagnitude (0, numSamples), std::memory_order_relaxed);
+        // Wet meter: straight after the circuit, just before the feedback path.
+        wetMeterPeakL.store (wetStereoBuffer.getMagnitude (0, 0, numSamples), std::memory_order_relaxed);
+        wetMeterPeakR.store (wetStereoBuffer.getMagnitude (1, 0, numSamples), std::memory_order_relaxed);
+    }
 
     chain.feedback.setFeedbackAmount (
         parameters.getRawParameterValue (feedbackAmountParameterID)->load());
@@ -398,8 +580,21 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
                             feedbackReturnBuffer,
                             predelayModulationBuffer.getReadPointer (1),
                             numSamples);
-    sanitizeBuffer (wetAfterFeedbackBuffer, numSamples);
-    sanitizeBuffer (feedbackReturnBuffer, numSamples);
+    scrubBuffer (wetAfterFeedbackBuffer, numSamples, 0.0f);
+    wetAfterFeedbackRail.process (wetAfterFeedbackBuffer, numSamples, opAmpRailGain);
+
+    // Comp / Off / Limit, per signal-path diagram v4 (2026-09-30). It sits HERE, in the
+    // feedback return leg between the Feedback block and the Fb In summer, so what it
+    // holds down is the signal going back round the loop. Turn Fb up and the circuit
+    // stops the recirculation running away, while the wet signal heading for the output
+    // keeps whatever dynamics the tanks and the Dirt stage gave it. Both circuits now
+    // start 6 dB earlier as well (kThresholdDbfs, -24 dBFS), so there is something to
+    // grab with before the loop is already loud.
+    chain.feedbackDynamics.setDynamics (getDynamics());
+    chain.feedbackDynamics.process (feedbackReturnBuffer, numSamples);
+
+    scrubBuffer (feedbackReturnBuffer, numSamples, 0.0f);
+    feedbackReturnRail.process (feedbackReturnBuffer, numSamples, opAmpRailGain);
 
     chain.wetDryMixer.setWetAmount (
         parameters.getRawParameterValue (wetDryParameterID)->load());
@@ -430,15 +625,24 @@ void TheGreatAmericanSpringAudioProcessor::processBlock (juce::AudioBuffer<float
         buffer.copyFrom (0, 0, wetAfterFeedbackBuffer, 0, 0, numSamples);
     }
 
+    // The board's output node, so it runs out of rail like every other one. Nothing
+    // clamped here before, which let the output tube and tape stages overshoot past
+    // what the real circuit could swing.
+    scrubBuffer (buffer, numSamples, 0.0f);
+    outputRail.process (buffer, numSamples, opAmpRailGain);
+
     // Post Output (plugin only, not on the PCB).
     postOutputGainSmoothed.setTargetValue (
         juce::Decibels::decibelsToGain (parameters.getRawParameterValue (postOutputLevelParameterID)->load()));
     applySmoothedGain (buffer, postOutputGainSmoothed, numSamples);
 
-    sanitizeBuffer (buffer, numSamples);
+    scrubBuffer (buffer, numSamples, outputCeilingGain);
 
     // Output meter: the absolute last thing before audio leaves the plugin.
-    outputMeterPeak.store (buffer.getMagnitude (0, numSamples), std::memory_order_relaxed);
+    // A mono host bus has no right channel, so it reads the left twice.
+    const auto outRightChannel = buffer.getNumChannels() > 1 ? 1 : 0;
+    outputMeterPeakL.store (buffer.getMagnitude (0, 0, numSamples), std::memory_order_relaxed);
+    outputMeterPeakR.store (buffer.getMagnitude (outRightChannel, 0, numSamples), std::memory_order_relaxed);
 }
 
 void TheGreatAmericanSpringAudioProcessor::resetLevelSmoothers()
@@ -643,28 +847,165 @@ TheGreatAmericanSpringAudioProcessor::Dynamics TheGreatAmericanSpringAudioProces
     return toDynamics (parameters.getRawParameterValue (dynamicsParameterID)->load());
 }
 
-juce::String TheGreatAmericanSpringAudioProcessor::getSignalChainDescription() const
+juce::StringArray TheGreatAmericanSpringAudioProcessor::getSignalChainLines() const
 {
-    juce::StringArray stages;
-    stages.add (isInputTubeEngaged() ? "Vol: J201 tube stage" : "Vol: solid state");
-    stages.add (isMegaverbEngaged() ? "tanks (MEGAVERB: L>R>L feedback)"
-              : shouldConvertMonoSourceToStereo() ? "tanks (mono > stereo)" : "tanks (stereo)");
-    stages.add (isDirtEngaged() ? "Gain: TS808 2x 1N4148" : "Gain: clean");
+    // The Left channel's path only, since Right mirrors it. Returned as rows meant
+    // to be drawn in a monospace font: the row above the path carries the feedback
+    // arrows (and, in Parallel, the short tank), the row below carries the long
+    // tank, so the two tank pairs read one above the other.
+    const auto megaverb = isMegaverbEngaged();
+    const auto routing = getIr2RoutingMode();
+    const auto parallel = routing == Ir2RoutingMode::parallel;
+    const auto extTanksEngaged = routing != Ir2RoutingMode::off;
 
-    switch (getDynamics())
+    juce::String path;
+    int feedbackInCentre = -1;
+    int feedbackOutCentre = -1;
+    int tankCentre = -1;
+
+    // Appends a stage and hands back the column its text starts at.
+    const auto add = [&path] (const juce::String& stage)
     {
-        case Dynamics::comp:  stages.add ("Comp: VTL5C3 vactrol"); break;
-        case Dynamics::limit: stages.add ("Limit: THAT2180 10:1"); break;
-        case Dynamics::off:
-        default:              stages.add ("dynamics off"); break;
+        if (path.isNotEmpty() && ! path.endsWithChar (' '))
+            path << " > ";
+
+        const auto column = path.length();
+        path << stage;
+        return column;
+    };
+
+    const auto centreOf = [] (int column, const juce::String& text)
+    {
+        return column + (text.length() - 1) / 2;
+    };
+
+    path << "L: ";
+
+    // Same shape as the Out token further down, so both ends read alike: the knob names
+    // whichever circuit it is driving rather than the circuit trailing after an arrow.
+    add (isInputTubeEngaged() ? "In: Tube" : "In");
+
+    // Square brackets are reserved for the meters, so the feedback taps go bare.
+    // MEGAVERB names the other channel instead of saying In and Out, since "from R"
+    // and "to R" already say which end of the loop you are looking at. The cross is
+    // an outright swap, so the Left path's feedback goes only to the Right; the
+    // "L & R" wording covers a future blend that also feeds its own channel.
+    const juce::String crossedWith = FeedbackBlock::crossCoupledAlsoFeedsOwnChannel ? "L & R" : "R";
+    const auto feedbackInToken  = megaverb ? "%Fb from " + crossedWith : juce::String ("Fb In");
+    const auto feedbackOutToken = megaverb ? "%Fb to "   + crossedWith : juce::String ("Fb Out");
+
+    const auto addFeedbackIn = [&]
+    {
+        feedbackInCentre = centreOf (add (feedbackInToken), feedbackInToken);
+    };
+
+    // MEGAVERB sums the crossed feedback before the In meter, so the meter shows the
+    // ping-pong; every other mode meters the fresh input first.
+    if (megaverb)
+    {
+        addFeedbackIn();
+        add ("[L In]");
+    }
+    else
+    {
+        add ("[L In]");
+        addFeedbackIn();
     }
 
-    juce::StringArray output;
-    if (isInputTubeEngaged()) output.add ("tube");
-    if (isOutputTapeEngaged()) output.add ("2N3904 tape");
-    stages.add ("Output: " + (output.isEmpty() ? juce::String ("solid state") : output.joinIntoString (" > ")));
+    if (! extTanksEngaged)
+    {
+        add ("Short");
+    }
+    else if (parallel)
+    {
+        // The two pairs run side by side, so the path shows only the summing point
+        // and the tank names sit on the rows above and below it.
+        const juce::String token ("+");
+        tankCentre = centreOf (add (token), token);
+    }
+    else
+    {
+        add ("Short");
+        add ("Long");
+    }
 
-    return stages.joinIntoString ("  >  ");
+    add (isDirtEngaged() ? "Gain > Dirt" : "Gain");
+
+    add ("[L Wet]");
+
+    // Comp / Limit hangs off the feedback RETURN leg (signal-path diagram v4), not the
+    // wet path, so it is named on the Fb Out token instead of sitting inline above. The
+    // arrow above still centres on "Fb Out" alone, so it points at the tap, not the
+    // circuit the tap feeds.
+    const auto dynamicsToken = getDynamics() == Dynamics::comp  ? juce::String (" + Comp")
+                             : getDynamics() == Dynamics::limit ? juce::String (" + Lim")
+                                                                : juce::String();
+
+    feedbackOutCentre = centreOf (add (feedbackOutToken + dynamicsToken), feedbackOutToken);
+
+    add ("Wet/Dry");
+
+    // The Out knob drives whichever output circuits are switched in, so they are named
+    // ON the knob rather than strung out after it: "Out: Tube & Tape" with both in,
+    // "Out: Tube" or "Out: Tape" with one, plain "Out" with neither.
+    //
+    // The tube at this end follows the In pull, not a switch of its own: pulling In puts
+    // the J201 on BOTH ends (chain.outputStage.setEnabled (inputTube, outputTape)). The
+    // audio has always done that; the readout used to name the tube only at the input,
+    // which read as though the output tube had been dropped.
+    const auto outTube = isInputTubeEngaged();
+    const auto outTape = isOutputTapeEngaged();
+    juce::String outputToken ("Out");
+
+    if (outTube || outTape)
+    {
+        outputToken << ": ";
+
+        if (outTube)
+            outputToken << "Tube";
+
+        if (outTube && outTape)
+            outputToken << " & ";
+
+        if (outTape)
+            outputToken << "Tape";
+    }
+
+    add (outputToken);
+
+    add ("[L Out]");
+
+    // Centres text on a column. Placements run left to right, so truncating at the
+    // start column never clips something already placed.
+    const auto placeAt = [] (juce::String& row, int column, const juce::String& text)
+    {
+        if (column < 0)
+            return;
+
+        const auto start = juce::jmax (0, column - (text.length() - 1) / 2);
+        row = row.paddedRight (' ', start).substring (0, start) + text;
+    };
+
+    juce::String above;
+    placeAt (above, feedbackInCentre, juce::String::charToString (juce::juce_wchar (0x2193)));   // down into the path
+
+    if (parallel)
+        placeAt (above, tankCentre, "Short");
+
+    placeAt (above, feedbackOutCentre, juce::String::charToString (juce::juce_wchar (0x2191))); // up out of the path
+
+    juce::StringArray lines;
+    lines.add (above);
+    lines.add (path);
+
+    if (parallel)
+    {
+        juce::String below;
+        placeAt (below, tankCentre, "Long");
+        lines.add (below);
+    }
+
+    return lines;
 }
 
 bool TheGreatAmericanSpringAudioProcessor::shouldShowUnavailableTankControls() const
@@ -825,16 +1166,19 @@ juce::AudioProcessorValueTreeState::ParameterLayout TheGreatAmericanSpringAudioP
     // Every level knob is the same +/-18 dB pot stage, linear in dB, unity at centre.
     const auto levelRange = juce::NormalisableRange<float> (levelMinDb, levelMaxDb, 0.1f);
 
+    // The two plugin-only trims are not board pots, so they run down to -48 dB.
+    const auto pluginTrimRange = juce::NormalisableRange<float> (pluginTrimMinDb, levelMaxDb, 0.1f);
+
     // Plugin only (not on the PCB): the very first gain stage.
     layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { preInputLevelParameterID, 1 },
                                                               "Pre Input",
-                                                              levelRange,
+                                                              pluginTrimRange,
                                                               0.0f));
 
-    // Vol (Solid State / Tube): first knob on the wet path. Rev C moved the pull onto its own
+    // In (Solid State / Tube): first knob on the wet path. Rev C moved the pull onto its own
     // TUBE mini toggle in the panel's switch row, so this is a plain knob plus a separate switch.
     layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { inputLevelParameterID, 2 },
-                                                              "Vol",
+                                                              "In",
                                                               levelRange,
                                                               0.0f));
 
@@ -872,15 +1216,23 @@ juce::AudioProcessorValueTreeState::ParameterLayout TheGreatAmericanSpringAudioP
                                                                juce::StringArray { "Off", "Series", "Parallel" },
                                                                2));
 
+    // Default sits at noon: half and half in Parallel, 50% long added in Series. The
+    // name here is the generic one the host sees; the on-screen label changes per mode.
     layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { extTankMixParameterID, 1 },
-                                                              "Ext Reverb Tanks Amount",
+                                                              "Short/Long Reverb Mix",
                                                               juce::NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
-                                                              1.0f));
+                                                              0.5f,
+                                                              juce::AudioParameterFloatAttributes()
+                                                                  .withStringFromValueFunction ([] (float value, int)
+                                                                                                { return shortLongMixText (value); })));
 
     layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { feedbackAmountParameterID, 1 },
                                                               "Feedback",
                                                               juce::NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
-                                                              0.2f));
+                                                              0.2f,
+                                                              juce::AudioParameterFloatAttributes()
+                                                                  .withStringFromValueFunction ([] (float value, int) { return percentText (value); })
+                                                                  .withValueFromStringFunction ([] (const juce::String& text) { return percentValue (text); })));
 
     layout.add (std::make_unique<juce::AudioParameterBool> (juce::ParameterID { feedbackPhaseInvertParameterID, 1 },
                                                             "Feedback Phase Invert",
@@ -889,11 +1241,14 @@ juce::AudioProcessorValueTreeState::ParameterLayout TheGreatAmericanSpringAudioP
     layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { wetDryParameterID, 1 },
                                                               "Wet/Dry",
                                                               juce::NormalisableRange<float> (0.0f, 1.0f, 0.0001f),
-                                                              0.5f));
+                                                              0.5f,
+                                                              juce::AudioParameterFloatAttributes()
+                                                                  .withStringFromValueFunction ([] (float value, int) { return percentText (value); })
+                                                                  .withValueFromStringFunction ([] (const juce::String& text) { return percentValue (text); })));
 
-    // Output: the board's last knob, after the Wet/Dry mix. Rev C: TAPE is its own toggle.
+    // Out: the board's last knob, after the Wet/Dry mix. Rev C: TAPE is its own toggle.
     layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { outputLevelParameterID, 2 },
-                                                              "Output",
+                                                              "Out",
                                                               levelRange,
                                                               0.0f));
 
@@ -904,17 +1259,24 @@ juce::AudioProcessorValueTreeState::ParameterLayout TheGreatAmericanSpringAudioP
     // Plugin only (not on the PCB): the very last gain stage.
     layout.add (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID { postOutputLevelParameterID, 1 },
                                                               "Post Output",
-                                                              levelRange,
+                                                              pluginTrimRange,
                                                               0.0f));
 
     layout.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { stereoModeParameterID, 1 },
-                                                               "Source",
+                                                               "Setting",
                                                                juce::StringArray { "Stereo", "Mono > Stereo", "MEGAVERB" },
                                                                0));
 
     layout.add (std::make_unique<juce::AudioParameterBool> (juce::ParameterID { showUnavailableTankControlsParameterID, 1 },
-                                                            "Will not be available in real life",
+                                                            "BYOIRs (Bring your own impulse responses)",
                                                             false));
+
+    // Plugin only. 4x matches what the tube, tape and Tube Screamer stages already run
+    // at, and is the default; the rest is there to trade CPU against alias rejection.
+    layout.add (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID { railOversamplingParameterID, 1 },
+                                                               "Oversampling",
+                                                               juce::StringArray { "Off", "2x", "4x", "8x" },
+                                                               RailSaturator::defaultChoiceIndex));
 
     return layout;
 }
@@ -1009,7 +1371,7 @@ void TheGreatAmericanSpringAudioProcessor::applyDefaultGasSettings()
     setParameterPlainValue (preHpfCutoffParameterID, 100.0f);       // 100 Hz
     setParameterPlainValue (postLpfCutoffParameterID, 12000.0f);    // 12 kHz
     setParameterPlainValue (x2TanksParameterID, 0.0f);              // Ext Reverb Tanks: Off
-    setParameterPlainValue (extTankMixParameterID, 1.0f);           // 100%
+    setParameterPlainValue (extTankMixParameterID, 0.5f);           // 100% short / 100% long
     setParameterPlainValue (feedbackAmountParameterID, 0.1f);       // 10%
     setParameterPlainValue (feedbackPhaseInvertParameterID, 0.0f);  // Normal
     setParameterPlainValue (wetDryParameterID, 0.5f);               // 50%
@@ -1033,7 +1395,7 @@ void TheGreatAmericanSpringAudioProcessor::applyGasPresetSettings()
     setParameterPlainValue (preHpfCutoffParameterID, 250.0f);       // 250 Hz
     setParameterPlainValue (postLpfCutoffParameterID, 8000.0f);     // 8 kHz
     setParameterPlainValue (x2TanksParameterID, 1.0f);              // Series
-    setParameterPlainValue (extTankMixParameterID, 1.0f);           // 100%
+    setParameterPlainValue (extTankMixParameterID, 0.5f);           // 100% short / 100% long
     setParameterPlainValue (feedbackAmountParameterID, 0.25f);      // 25%
     setParameterPlainValue (feedbackPhaseInvertParameterID, 0.0f);  // Normal
     setParameterPlainValue (wetDryParameterID, 0.5f);               // 50%
@@ -1456,6 +1818,8 @@ void TheGreatAmericanSpringAudioProcessor::resizeProcessingBuffers (int samplesP
     monoRightBuffer.setSize (1, samplesPerBlock);
     monoLeftSecondaryBuffer.setSize (1, samplesPerBlock);
     monoRightSecondaryBuffer.setSize (1, samplesPerBlock);
+    monoLeftSeriesBypassBuffer.setSize (1, samplesPerBlock);
+    monoRightSeriesBypassBuffer.setSize (1, samplesPerBlock);
 
     externalInputBuffer.clear();
     dryTapBuffer.clear();
@@ -1468,6 +1832,8 @@ void TheGreatAmericanSpringAudioProcessor::resizeProcessingBuffers (int samplesP
     monoRightBuffer.clear();
     monoLeftSecondaryBuffer.clear();
     monoRightSecondaryBuffer.clear();
+    monoLeftSeriesBypassBuffer.clear();
+    monoRightSeriesBypassBuffer.clear();
 }
 
 void TheGreatAmericanSpringAudioProcessor::loadPlaybackIntoBuffer (juce::AudioBuffer<float>& targetBuffer, int numSamples)
@@ -1672,8 +2038,8 @@ void TheGreatAmericanSpringAudioProcessor::updatePredelayModulation (int numSamp
             // Pick a fresh, independent random target for each of the four lanes.
             for (int lane = 0; lane < 4; ++lane)
             {
-                const auto minMs = (lane < 2) ? primaryPredelayMinMs : secondaryPredelayMinMs;
-                const auto maxMs = (lane < 2) ? primaryPredelayMaxMs : secondaryPredelayMaxMs;
+                const auto minMs = predelayLaneMinMs[static_cast<size_t> (lane)];
+                const auto maxMs = predelayLaneMaxMs[static_cast<size_t> (lane)];
                 predelayTargetMs[lane] = juce::jmap (predelayRandom.nextFloat(),
                                                      static_cast<float> (minMs),
                                                      static_cast<float> (maxMs));
@@ -1694,8 +2060,10 @@ void TheGreatAmericanSpringAudioProcessor::updatePredelayModulation (int numSamp
     }
 }
 
-void TheGreatAmericanSpringAudioProcessor::sanitizeBuffer (juce::AudioBuffer<float>& buffer, int numSamples) const
+void TheGreatAmericanSpringAudioProcessor::scrubBuffer (juce::AudioBuffer<float>& buffer, int numSamples, float hardCeiling) const
 {
+    const auto clamping = hardCeiling > 0.0f;
+
     for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
     {
         auto* samples = buffer.getWritePointer (channel);
@@ -1707,9 +2075,34 @@ void TheGreatAmericanSpringAudioProcessor::sanitizeBuffer (juce::AudioBuffer<flo
             if (! std::isfinite (value))
                 value = 0.0f;
 
-            samples[sample] = juce::jlimit (-sanitizeClampGain, sanitizeClampGain, value);
+            samples[sample] = clamping ? juce::jlimit (-hardCeiling, hardCeiling, value) : value;
         }
     }
+}
+
+void TheGreatAmericanSpringAudioProcessor::rebuildRailSaturators()
+{
+    const auto choice = static_cast<int> (parameters.getRawParameterValue (railOversamplingParameterID)->load());
+    const auto order = RailSaturator::factorOrderForChoice (choice);
+    const auto outputChannels = juce::jmax (1, getTotalNumOutputChannels());
+
+    // The four internal nodes are always stereo; the output node follows the host bus.
+    for (auto* saturator : { &wetInputRail, &wetStereoRail, &wetAfterFeedbackRail, &feedbackReturnRail })
+        saturator->prepare (preparedSampleRate, preparedBlockSize, 2, order);
+
+    outputRail.prepare (preparedSampleRate, preparedBlockSize, outputChannels, order);
+
+    updateReportedLatency();
+}
+
+void TheGreatAmericanSpringAudioProcessor::updateReportedLatency()
+{
+    // Both stages ask their oversamplers for integer latency, so this sum is already a
+    // whole number and the rounding below only guards against float drift.
+    const auto samples = chain.outputStage.getLatencyInSamples()
+                       + outputRail.getLatencyInSamples();
+
+    setLatencySamples (juce::roundToInt (samples));
 }
 
 void TheGreatAmericanSpringAudioProcessor::applySecondaryTankPredelay (
@@ -1732,7 +2125,10 @@ DirtDynamicsBlock::Parameters TheGreatAmericanSpringAudioProcessor::getDirtDynam
     DirtDynamicsBlock::Parameters p;
     p.gainDb = parameters.getRawParameterValue (gainParameterID)->load();
     p.dirt = isDirtEngaged();
-    p.dynamics = getDynamics();
+    // Always Off in the wet path. Signal-path diagram v4 (2026-09-30) moved the
+    // Comp / Off / Limit circuit into the feedback return leg, so the switch now
+    // drives chain.feedbackDynamics instead of this block.
+    p.dynamics = DirtDynamicsBlock::Dynamics::off;
     p.preHpfCutoffHz = parameters.getRawParameterValue (preHpfCutoffParameterID)->load();
     p.postLpfCutoffHz = parameters.getRawParameterValue (postLpfCutoffParameterID)->load();
     p.filterQ = filterQ;

@@ -20,3 +20,20 @@ out/
 **/.history/
 __pycache__/
 *_drc_violations.json
+
+# CMake build trees (cmake-out-win alone is ~600 MB)
+cmake-out*/
+build-linux*/
+dist/
+
+# Scratch scripts and working files left behind by agent sessions
+hardware/_*
+
+# Editor / tool backups
+**/*.bak
+**/*.bak-*
+**/*.bak2
+**/.mcp-backups/
+hardware/kicad/_scratch-revb/
+hardware/kicad/revc/gen/logs/
+*.lck
